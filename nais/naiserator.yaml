@@ -6,9 +6,6 @@ metadata:
   labels:
     team: teamdokumenthandtering
 spec:
-  env:
-    - name: skanmotovrig_DOKARKIVJOURNALPOSTURL
-      value: {{ skanmotovrig_DOKARKIVJOURNALPOSTURL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
