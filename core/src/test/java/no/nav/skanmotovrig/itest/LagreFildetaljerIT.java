@@ -2,7 +2,7 @@ package no.nav.skanmotovrig.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
+import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerRequest;
@@ -77,7 +77,7 @@ public class LagreFildetaljerIT {
     @Test
     public void shoulfFailIfInvalidRequest() {
         LagreFildetaljerRequest request = createLagreFildetaljerRequest();
-        assertThrows(MottaDokumentUtgaaendeSkanningFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
+        assertThrows(SkanmotovrigFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
     }
 
     private LagreFildetaljerRequest createLagreFildetaljerRequest() {

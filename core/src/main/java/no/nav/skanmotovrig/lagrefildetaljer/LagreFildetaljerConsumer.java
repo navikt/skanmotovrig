@@ -1,10 +1,10 @@
 package no.nav.skanmotovrig.lagrefildetaljer;
 
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException;
-import no.nav.skanmotovrig.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
-import no.nav.skanmotovrig.exceptions.functional.MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException;
-import no.nav.skanmotovrig.exceptions.technical.MottaDokumentUtgaaendeSkanningTechnicalException;
+import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFinnesIkkeFunctionalException;
+import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
+import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigTillaterIkkeTilknyttingFunctionalException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
@@ -62,17 +62,17 @@ public class LagreFildetaljerConsumer {
 
         } catch (HttpClientErrorException e) {
             if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
-                throw new MottaDokumentUtgaaendeSkanningFinnesIkkeFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                throw new SkanmotovrigFinnesIkkeFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
-                throw new MottaDokumentUtgaaendeSkanningTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                throw new SkanmotovrigTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             } else {
-                throw new MottaDokumentUtgaaendeSkanningFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                throw new SkanmotovrigFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                         .getStatusCode(), e.getMessage()), e);
             }
         } catch (HttpServerErrorException e) {
-            throw new MottaDokumentUtgaaendeSkanningTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
+            throw new SkanmotovrigTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
                     .getStatusCode(), e.getMessage()), e);
         }
     }

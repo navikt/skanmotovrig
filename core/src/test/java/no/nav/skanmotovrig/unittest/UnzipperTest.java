@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
 

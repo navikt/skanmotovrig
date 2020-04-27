@@ -9,6 +9,10 @@ spec:
   env:
     - name: skanmotovrig_DOKARKIVJOURNALPOSTURL
       value: {{ skanmotovrig_DOKARKIVJOURNALPOSTURL }}
+    - name: skanmotovrig_sftp_privatekey
+      value: /var/run/secrets/nais.io/keys/privatekey
+    - name: skanmotovrig_sftp_hostkey
+      value: /var/run/secrets/nais.io/keys/hostkey
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -38,3 +42,7 @@ spec:
     paths:
       - kvPath: {{ SRVskanmotovrig }}
         mountPath: /var/run/secrets/nais.io/srvskanmotovrig
+      - kvPath: {{ VAULT }}
+        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: {{ SFTP_KEYS }}
+        mountPath: /var/run/secrets/nais.io/keys

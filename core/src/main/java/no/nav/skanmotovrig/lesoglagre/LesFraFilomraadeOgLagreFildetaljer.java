@@ -11,10 +11,13 @@ import no.nav.skanmotovrig.utils.Unzipper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 @Component
@@ -33,7 +36,31 @@ public class LesFraFilomraadeOgLagreFildetaljer {
 
     @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
     public void scheduledJob() {
-        lesOgLagre();
+        tryToConnect();
+    }
+
+    public void tryToConnect(){
+        try {
+            List<byte[]> zipFiles = lesZipfilService.getZipFiles();
+            zipFiles.stream()
+                    .map(zipFile -> new ZipInputStream(new ByteArrayInputStream(zipFile)))
+                    .forEach(this::logZipEntries);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void logZipEntries(ZipInputStream inputStream) {
+        ZipEntry entry;
+        try {
+            while ((entry = inputStream.getNextEntry()) != null){
+                log.info("ZipEntry = " + entry.getName());
+            }
+        } catch( Exception e ) {
+            log.error("//TODO");
+        }
+
     }
 
     public List<LagreFildetaljerResponse> lesOgLagre() {

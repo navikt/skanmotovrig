@@ -1,36 +1,25 @@
 package no.nav.skanmotovrig.leszipfil;
 
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.ChannelSftp.LsEntry;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.sftp.Sftp;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.Vector;
-import java.util.stream.Collectors;
-import java.util.zip.ZipInputStream;
 
+@Slf4j
 @Component
 public class LesZipfilConsumer {
-    /*@Value("${skanmotovrig.sftp.host}")
-    private String sftpHost;
-    @Value("${skanmotovrig.sftp.directory}")
-    private String sftpDirectory;
-    @Value("${skanmotovrig.sftp.username}")
-    private String sftpUsername;
-    @Value("${skanmotovrig.sftp.password}")
-    private String sftpPassword;
-    @Value("${skanmotovrig.sftp.port}")
-    private String sftpPort;*/
+    private Sftp sftp;
 
+    @Autowired
+    LesZipfilConsumer(Sftp sftp){
+        this.sftp = sftp;
+    }
 
     public File hentZipfil() {
 
@@ -39,16 +28,25 @@ public class LesZipfilConsumer {
         return new File("core/src/main/resources/tmp/__files/SKAN_NETS.zip");
     }
 
-    @Inject
-    public List<String> listZipFiles(Sftp sftp) throws Exception {
+    public List<String> listZipFiles() throws Exception {
         try{
             sftp.connect();
-            List<String> files = sftp.listFiles();
+            sftp.changeDirectory("/inbound/SKANMOTOVRIG");
+            log.info(sftp.getHomePath());
+            List<String> files = sftp.listFiles("*.zip");
             sftp.disconnect();
             return files;
         } catch(Exception e) {
             throw e;
         }
+    }
+
+    public byte[] getFile(String filename) throws SftpException, IOException {
+        sftp.connect();
+        InputStream fileStream = sftp.getFile("/inbound/SKANMOTOVRIG/" + filename);
+        byte[] file = fileStream.readAllBytes();
+        sftp.disconnect();
+        return file;
     }
 
 }

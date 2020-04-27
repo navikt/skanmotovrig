@@ -1,7 +1,6 @@
 package no.nav.skanmotovrig;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import no.nav.skanmotovrig.config.properties.ServiceUserProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.metrics.DokTimedAspect;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

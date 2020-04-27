@@ -1,6 +1,8 @@
 {
   "NAMESPACE": "q1",
-  "SRVskanmotovrig": "/serviceuser/data/dev/srvskanmotovrig"
+  "SRVskanmotovrig": "/serviceuser/data/dev/srvskanmotovrig",
+  "VAULT": "kv/preprod/fss/skanmotovrig/q1",
+  "SFTP_KEYS": "kv/preprod/fss/skanmotovrig/keys",
   "skanmotovrig_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/intern/journalpostapi/v1/journalpost",
   "INGRESSES": [
     "https://skanmotovrig-q1.nais.preprod.local"

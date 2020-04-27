@@ -1,6 +1,6 @@
 package no.nav.skanmotovrig.sftp;
 
-import com.jcraft.jsch.SftpException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -45,7 +45,7 @@ public class SftpITest {
     @BeforeAll
     void startSftpServer() throws IOException {
         sshd.setPort(PORT);
-        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/hostkey.ser")));
+        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
         sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
@@ -104,9 +104,12 @@ public class SftpITest {
 
             sftp.changeDirectory(INVALID_FOLDER_PATH);
             Assert.fail();
-        } catch(SftpException e) {
+        } catch(SkanmotovrigSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("No such file or directory", e.getMessage());
+            Assert.assertEquals("Skanmotovrig failed to change directory, path: foo/bar/baz", e.getMessage());
+        } catch (Exception e) {
+            sftp.disconnect();
+            Assert.fail();
         }
     }
 
@@ -136,9 +139,9 @@ public class SftpITest {
             sftp.getFile("invalidFileName.zip");
 
             Assert.fail();
-        } catch (SftpException e) {
+        } catch (SkanmotovrigSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("No such file or directory", e.getMessage());
+            Assert.assertEquals("Skanmotovrig failed to download invalidFileName.zip", e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }

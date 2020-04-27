@@ -2,13 +2,11 @@ package no.nav.skanmotovrig.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.MottaDokumentUtgaaendeSkanningFunctionalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.LagreFildetaljerConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.LagreFildetaljerService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotovrig.lesoglagre.LesFraFilomraadeOgLagreFildetaljer;
-import no.nav.skanmotovrig.leszipfil.LesZipfilConsumer;
 import no.nav.skanmotovrig.leszipfil.LesZipfilService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
