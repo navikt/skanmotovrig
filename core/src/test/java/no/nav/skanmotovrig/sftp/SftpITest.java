@@ -34,7 +34,7 @@ public class SftpITest {
     private static final String DIR_ONE_FOLDER_PATH = "src/test/resources/sftp/dirOne";
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
-    private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/valid.pub";
+    private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
 
     private int PORT = 2222;
 
@@ -106,7 +106,7 @@ public class SftpITest {
             Assert.fail();
         } catch(SkanmotovrigSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Skanmotovrig failed to change directory, path: foo/bar/baz", e.getMessage());
+            Assert.assertEquals("failed to change directory, path: foo/bar/baz", e.getMessage());
         } catch (Exception e) {
             sftp.disconnect();
             Assert.fail();
@@ -141,7 +141,7 @@ public class SftpITest {
             Assert.fail();
         } catch (SkanmotovrigSftpTechnicalException e) {
             sftp.disconnect();
-            Assert.assertEquals("Skanmotovrig failed to download invalidFileName.zip", e.getMessage());
+            Assert.assertEquals("failed to download invalidFileName.zip", e.getMessage());
         } catch (Exception e) {
             Assert.fail();
         }
