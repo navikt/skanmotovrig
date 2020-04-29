@@ -1,6 +1,7 @@
 package no.nav.skanmotovrig;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.metrics.DokTimedAspect;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,7 +13,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @ComponentScan
 @EnableAutoConfiguration
 @EnableAspectJAutoProxy
-@EnableConfigurationProperties()
+@EnableConfigurationProperties(SkanmotovrigProperties.class)
 @Configuration
 public class ApplicationConfig {
 

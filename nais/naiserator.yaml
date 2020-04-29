@@ -6,6 +6,13 @@ metadata:
   labels:
     team: teamdokumenthandtering
 spec:
+  env:
+    - name: SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL
+      value: {{ SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL }}
+    - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/keys/privatekey
+    - name: SKANMOTOVRIG_SFTP_HOSTKEY
+      value: /var/run/secrets/nais.io/keys/hostkey
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -33,5 +40,9 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: {{ SRVskanmotovrig }}
+      - kvPath: {{ SRVSKANMOTOVRIG }}
         mountPath: /var/run/secrets/nais.io/srvskanmotovrig
+      - kvPath: {{ VAULT }}
+        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: {{ SFTP_KEYS }}
+        mountPath: /var/run/secrets/nais.io/keys
