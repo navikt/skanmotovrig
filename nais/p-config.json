@@ -1,7 +1,7 @@
 {
   "NAMESPACE": "default",
-  "SRVskanmotovrig": "/serviceuser/data/prod/srvskanmotovrig",
-  "skanmotovrig_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.nais.adeo.no/rest/intern/journalpostapi/v1/journalpost",
+  "SRVSKANMOTOVRIG": "/serviceuser/data/prod/srvskanmotovrig",
+  "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.nais.adeo.no/rest/intern/journalpostapi/v1/journalpost",
   "INGRESSES": [
     "https://skanmotovrig.nais.adeo.no"
   ]
