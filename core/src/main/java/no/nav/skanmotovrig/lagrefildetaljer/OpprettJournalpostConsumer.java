@@ -7,6 +7,8 @@ import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigTillaterIkkeTilknyt
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
+import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
 import no.nav.skanmotovrig.constants.MDCConstants;
 import org.slf4j.MDC;
@@ -24,21 +26,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 @Component
-public class LagreFildetaljerConsumer {
+public class OpprettJournalpostConsumer {
 
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "mottaDokumentUtgaaendeSkanning";
+    private final String MOTTA_OVRIG_SKANNING_TJENESTE = "mottaOvrigSkanning";
 
     private final RestTemplate restTemplate;
     private final String dokarkivJournalpostUrl;
 
-    public LagreFildetaljerConsumer(RestTemplateBuilder restTemplateBuilder,
-                                             SkanmotovrigProperties skanmotovrigProperties) {
+    public OpprettJournalpostConsumer(RestTemplateBuilder restTemplateBuilder,
+                                      SkanmotovrigProperties skanmotovrigProperties) {
         this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
         this.restTemplate = restTemplateBuilder
                 .setReadTimeout(Duration.ofSeconds(150))
@@ -49,15 +53,13 @@ public class LagreFildetaljerConsumer {
     }
 
     @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
-    public LagreFildetaljerResponse lagreFilDetaljer(LagreFildetaljerRequest lagreFildetaljerRequest, String journalpostId) {
+    public OpprettJournalpostResponse lagreFilDetaljer(OpprettJournalpostRequest opprettJournalpostRequest) {
         try {
             HttpHeaders headers = createHeaders();
-            HttpEntity<LagreFildetaljerRequest> requestEntity = new HttpEntity<>(lagreFildetaljerRequest, headers);
+            HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);
 
-            URI uri = UriComponentsBuilder.fromHttpUrl(dokarkivJournalpostUrl)
-                    .pathSegment(journalpostId, MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE)
-                    .build().toUri();
-            return restTemplate.exchange(uri, HttpMethod.PUT, requestEntity, LagreFildetaljerResponse.class)
+            URI uri = new URI(dokarkivJournalpostUrl);
+            return restTemplate.exchange(uri, HttpMethod.POST, requestEntity, OpprettJournalpostResponse.class)
                     .getBody();
 
         } catch (HttpClientErrorException e) {
@@ -74,6 +76,9 @@ public class LagreFildetaljerConsumer {
         } catch (HttpServerErrorException e) {
             throw new SkanmotovrigTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
                     .getStatusCode(), e.getMessage()), e);
+        } catch (URISyntaxException e) {
+            throw new SkanmotovrigTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk. Feilmelding=%s",
+                    e.getMessage()), e);
         }
     }
 

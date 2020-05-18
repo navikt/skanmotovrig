@@ -20,6 +20,12 @@ public class SkanmotovrigProperties {
 
     @NotNull
     private ServiceUserProperties serviceuser;
+
+    @NotNull
+    private FilomraadeProperties filomraade;
+
+    @NotNull
+    private SftpProperties sftp;
 }
 
 

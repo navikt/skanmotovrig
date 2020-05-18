@@ -1,5 +1,6 @@
 package no.nav.skanmotovrig.sftp;
 
+import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import org.apache.sshd.server.SshServer;
@@ -26,7 +27,7 @@ import java.util.List;
 
 @ActiveProfiles("itest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = {TestConfig.class, SftpConfig.class})
+@SpringBootTest(classes = {TestConfig.class})
 public class SftpITest {
 
     private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
@@ -39,8 +40,10 @@ public class SftpITest {
     private int PORT = 2222;
 
     private SshServer sshd = SshServer.setUpDefaultServer();
-    @Autowired
     private Sftp sftp;
+
+    @Autowired
+    SkanmotovrigProperties skanmotovrigeProperties;
 
     @BeforeAll
     void startSftpServer() throws IOException {
@@ -50,18 +53,17 @@ public class SftpITest {
         sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
         sshd.start();
+
+        sftp = new Sftp(skanmotovrigeProperties);
     }
 
     @Test
     public void shouldConnectToSftp(){
         try {
-            sftp.connect();
-
+            sftp.listFiles();
             Assert.assertTrue(sftp.isConnected());
             Assert.assertEquals(1, sshd.getActiveSessions().size());
             Assert.assertEquals("itestUser", sshd.getActiveSessions().iterator().next().getUsername());
-            sftp.disconnect();
-            Assert.assertFalse(sftp.isConnected());
         } catch (Exception e) {
             Assert.fail();
         }
@@ -70,8 +72,6 @@ public class SftpITest {
     @Test
     void shouldChangeDirectoryAndListFiles() {
         try {
-
-            sftp.connect();
             String homePath = sftp.getHomePath() + "/";
 
             sftp.changeDirectory(homePath+DIR_ONE_FOLDER_PATH);
@@ -90,8 +90,6 @@ public class SftpITest {
                             "xml_pdf_pairs_testdata.zip"
                     )
             ));
-
-            sftp.disconnect();
         } catch (Exception e) {
             Assert.fail();
         }

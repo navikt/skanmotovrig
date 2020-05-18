@@ -7,8 +7,10 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigSftpFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.List;
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
+@Component
 public class Sftp{
     private String APPLICATION = "Skanmotovrig";
 
+    private JSch jsch = new JSch();
     private Session jschSession;
     private ChannelSftp channelSftp;
     private String homePath;
@@ -31,6 +35,7 @@ public class Sftp{
     private String port;
     private String privateKey;
     private String hostKey;
+    private int timeout;
 
     Sftp(String host, String username, String port, String privateKey, String hostKey) {
         this.host = host;
@@ -40,14 +45,25 @@ public class Sftp{
         this.hostKey = hostKey;
     }
 
+    public Sftp(SkanmotovrigProperties properties) {
+        this.host = properties.getSftp().getHost();
+        this.username = properties.getSftp().getUsername();
+        this.port = properties.getSftp().getPort();
+        this.privateKey = properties.getSftp().getPrivateKey();
+        this.hostKey = properties.getSftp().getHostKey();
+        this.timeout = properties.getSftp().getTimeout() * 1000;
+    }
+
     public List<String> listFiles() throws SftpException {
         return listFiles("*");
     }
 
     public List<String> listFiles(String path){
         if(channelSftp == null || !channelSftp.isConnected()){
-            log.error(APPLICATION + " must be connected to list files");
-            throw new SkanmotovrigSftpFunctionalException("must be connected to list files", new Exception());
+            connect();
+
+//            log.error(APPLICATION + " must be connected to list files");
+  //          throw new SkanmotovrigSftpFunctionalException("must be connected to list files", new Exception());
         }
         try {
             Vector<LsEntry> vector = channelSftp.ls(path);
@@ -60,8 +76,9 @@ public class Sftp{
 
     public String presentWorkingDirectory(){
         if(channelSftp == null || !channelSftp.isConnected()){
-            log.error(APPLICATION + " Must be connected to get present working directory");
-            throw new SkanmotovrigSftpFunctionalException("must be connected to get present working directory", new Exception());
+            connect();
+            //log.error(APPLICATION + " Must be connected to get present working directory");
+            //throw new SkanmotovrigSftpFunctionalException("must be connected to get present working directory", new Exception());
         }
         try {
             return channelSftp.pwd();
@@ -73,8 +90,9 @@ public class Sftp{
 
     public void changeDirectory(String path){
         if(channelSftp == null || !channelSftp.isConnected()){
-            log.warn(APPLICATION + " must be connected to change directory");
-            throw new SkanmotovrigSftpFunctionalException("must be connected to change directory", new Exception());
+            connect();
+            //log.warn(APPLICATION + " must be connected to change directory");
+            //throw new SkanmotovrigSftpFunctionalException("must be connected to change directory", new Exception());
         }
         try {
             channelSftp.cd(path);
@@ -84,10 +102,12 @@ public class Sftp{
         }
     }
 
+
     public InputStream getFile(String filename){
         if(channelSftp == null || !channelSftp.isConnected()){
-            log.warn(APPLICATION + " must be connected to get file");
-            throw new SkanmotovrigSftpFunctionalException("Must be connected to get file", new Exception());
+            connect();
+            //log.warn(APPLICATION + " must be connected to get file");
+            //throw new SkanmotovrigSftpFunctionalException("Must be connected to get file", new Exception());
         }
         try {
             return channelSftp.get(filename);
@@ -102,14 +122,12 @@ public class Sftp{
     }
 
     public void connect() {
-
         try{
-            JSch jsch = new JSch();
             jschSession = jsch.getSession(username, host, Integer.parseInt(port));
             jsch.addIdentity(privateKey);
             jsch.setKnownHosts(hostKey);
 
-            jschSession.connect();
+            jschSession.connect(60000);
 
             channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
@@ -117,6 +135,8 @@ public class Sftp{
         } catch (JSchException | SftpException e) {
             log.error(APPLICATION + " failed to connect to " + host, e);
             throw new SkanmotovrigSftpTechnicalException("failed to connect to " + host, e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -136,7 +156,14 @@ public class Sftp{
     }
 
     public String getHomePath() {
+        if(channelSftp == null || !channelSftp.isConnected()){
+            connect();
+        }
         return homePath;
+    }
+
+    public int getTimeout() {
+        return jschSession.getTimeout();
     }
 
     // A bit hacky, but ChannelSftp does not handle windows paths very well.
