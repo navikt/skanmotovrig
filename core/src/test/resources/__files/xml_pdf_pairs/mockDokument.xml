@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_meta.xsd">
+   <journalpost>
+      <mottakskanal>SKAN_IM</mottakskanal>
+      <bruker>
+         <brukerId>***gammelt_fnr***</brukerId>
+         <brukerType>PERSON</brukerType>
+      </bruker>
+      <journalfoerendeEnhet>1234</journalfoerendeEnhet>
+      <datoMottatt>2020-04-15</datoMottatt>
+      <tema>FOR</tema>
+      <brevKode>295654</brevKode>
+      <batchNavn>mockBatchNavn.zip</batchNavn>
+      <filNavn>mockDokument-0.pdf</filNavn>
+      <endorsernr>3110190003NAV743506</endorsernr>
+      <land>PRK</land>
+   </journalpost>
+   <skanningInfo>
+         <fysiskPostboks>1423</fysiskPostboks>
+         <strekkodePostboks>1423</strekkodePostboks>
+   </skanningInfo>
+</skanningmetadata>

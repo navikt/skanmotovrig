@@ -1,13 +1,15 @@
 package no.nav.skanmotovrig.leszipfil;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
+import no.nav.skanmotovrig.exceptions.functional.LesZipFilFuntionalException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.io.File;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -20,15 +22,35 @@ public class LesZipfilService {
         this.lesZipfilConsumer = lesZipfilConsumer;
     }
 
-    public List<byte[]> getZipFiles() throws Exception {
-        try{
+    public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotovrigSftpTechnicalException {
+        if (!lesZipfilConsumer.isConnected()) {
+            lesZipfilConsumer.connectToSftp();
+        }
+        return lesZipfilConsumer.listZipFiles();
+    }
+
+        public Map<String, byte[]> getZipFiles() throws SkanmotovrigSftpTechnicalException {
+        try {
+            lesZipfilConsumer.connectToSftp();
             List<String> fileNames = lesZipfilConsumer.listZipFiles();
-            List<byte[]> files = fileNames.stream().map(this::getZipFile).filter(Objects::nonNull).collect(Collectors.toList());
-            log.info("Read " + fileNames.toString() + " from sftp");
+            Map<String, byte[]> files = new HashMap<>();
+
+            for (String filename : fileNames) {
+                byte[] zipFile = getZipFile(filename);
+                if (null != zipFile) {
+                    files.put(filename, zipFile);
+                }
+            }
+            log.info("Skanmotutgaaende leser {} fra sftp", fileNames.toString());
             return files;
-        } catch (Exception e) {
-            log.info("failed to connect to sftp");
+        } catch (LesZipFilFuntionalException e) {
+            log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
             throw e;
+        } catch (Exception e) {
+            log.warn("Skanmotutgaaende klarte ikke koble til sftp");
+            throw new SkanmotovrigSftpTechnicalException("Klarte ikke koble til sftp", e);
+        } finally {
+            lesZipfilConsumer.disconnectFromSftp();
         }
     }
 
@@ -36,12 +58,8 @@ public class LesZipfilService {
         try {
             return lesZipfilConsumer.getFile(fileName);
         } catch (Exception e) {
-            log.error("Failed to get file " + fileName, e);
+            log.error("Skanmotutgaaende klarte ikke hente filen {}", fileName, e);
             return null;
         }
-    }
-
-    public File lesZipfil() {
-        return lesZipfilConsumer.hentZipfil();
     }
 }

@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlElement;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkanningInfo {
+public class Bruker {
 
-    @XmlElement(required = true, name = "fysiskpostboks")
-    private String fysiskPostboks;
+    @XmlElement(required = true, name = "brukerid")
+    private String brukerId;
 
-    @XmlElement(required = true, name = "strekkodepostboks")
-    private String strekkodePostboks;
+    @XmlElement(required = true, name = "brukertype")
+    private String brukerType;
 }

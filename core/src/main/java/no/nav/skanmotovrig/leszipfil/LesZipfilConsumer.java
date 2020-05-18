@@ -2,11 +2,12 @@ package no.nav.skanmotovrig.leszipfil;
 
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
+import no.nav.skanmotovrig.exceptions.functional.LesZipFilFuntionalException;
 import no.nav.skanmotovrig.sftp.Sftp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -14,39 +15,41 @@ import java.util.List;
 @Slf4j
 @Component
 public class LesZipfilConsumer {
+
     private Sftp sftp;
+    private String inboundDirectory;
 
     @Autowired
-    LesZipfilConsumer(Sftp sftp){
+    public LesZipfilConsumer(Sftp sftp, SkanmotovrigProperties skanmotovrigProperties) {
         this.sftp = sftp;
+        inboundDirectory = skanmotovrigProperties.getFilomraade().getInngaaendemappe();
     }
 
-    public File hentZipfil() {
-
-
-        // TODO: Hent zipfil bestående av par av pdf'er og xml'er med metadata fra skyfilområde
-        return new File("core/src/main/resources/tmp/__files/SKAN_NETS.zip");
-    }
-
-    public List<String> listZipFiles() throws Exception {
-        try{
-            sftp.connect();
-            sftp.changeDirectory("/inbound/SKANMOTOVRIG");
-            log.info(sftp.getHomePath());
-            List<String> files = sftp.listFiles("*.zip");
-            sftp.disconnect();
+    public List<String> listZipFiles() {
+        try {
+            log.info("Skanmotutgaaende henter zipfiler fra {}", sftp.getHomePath() + inboundDirectory);
+            List<String> files = sftp.listFiles(inboundDirectory + "/*.zip");
             return files;
-        } catch(Exception e) {
-            throw e;
+        } catch (Exception e) {
+            throw new LesZipFilFuntionalException("Skanmotutgaaende klarte ikke hente zipfiler", e);
         }
     }
 
     public byte[] getFile(String filename) throws SftpException, IOException {
-        sftp.connect();
-        InputStream fileStream = sftp.getFile("/inbound/SKANMOTOVRIG/" + filename);
+        InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
-        sftp.disconnect();
         return file;
     }
 
+    public void connectToSftp() {
+        sftp.connect();
+    }
+
+    public void disconnectFromSftp() {
+        sftp.disconnect();
+    }
+
+    public boolean isConnected() {
+        return sftp.isConnected();
+    }
 }

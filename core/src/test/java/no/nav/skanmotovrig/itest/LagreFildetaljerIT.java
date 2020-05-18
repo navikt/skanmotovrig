@@ -4,26 +4,29 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
-import no.nav.skanmotovrig.lagrefildetaljer.LagreFildetaljerConsumer;
-import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerRequest;
-import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
+import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
+import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
+import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
+import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
+import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
+import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,10 +42,10 @@ public class LagreFildetaljerIT {
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
     private final String JOURNALPOST_ID = "001";
     private final String JOURNALPOST_ID_INVALID = "002";
-    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/intern/journalpostapi/v1/journalpost/001/mottaDokumentUtgaaendeSkanning";
-    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST = "/rest/intern/journalpostapi/v1/journalpost/002/mottaDokumentUtgaaendeSkanning";
+    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
+    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST = "/rest/journalpostapi/v15/journalpost\\?foersoekFerdigstill=false";
 
-    private LagreFildetaljerConsumer lagrefildetaljerConsumer;
+    private OpprettJournalpostConsumer opprettJournalpostConsumer;
 
     @Autowired
     private SkanmotovrigProperties skanmotovrigProperties;
@@ -50,7 +53,7 @@ public class LagreFildetaljerIT {
     @BeforeEach
     void setUpConsumer() {
         setUpStubs();
-        lagrefildetaljerConsumer = new LagreFildetaljerConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
+        opprettJournalpostConsumer = new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
     }
 
     @AfterEach
@@ -61,56 +64,59 @@ public class LagreFildetaljerIT {
     }
 
     private void setUpStubs() {
-        stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
+        stubFor(post(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
             .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
-        stubFor(put(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST))
-            .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
     }
 
     @Test
     public void shouldLagreFildetaljer() {
-        LagreFildetaljerRequest request = createLagreFildetaljerRequest();
-        LagreFildetaljerResponse res = lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID);
+        OpprettJournalpostRequest request = createLagreFildetaljerRequest();
+        OpprettJournalpostResponse res = opprettJournalpostConsumer.lagreFilDetaljer(request);
         assertEquals(null, res);
     }
 
-    @Test
-    public void shoulfFailIfInvalidRequest() {
-        LagreFildetaljerRequest request = createLagreFildetaljerRequest();
-        assertThrows(SkanmotovrigFunctionalException.class, () -> lagrefildetaljerConsumer.lagreFilDetaljer(request, JOURNALPOST_ID_INVALID));
-    }
 
-    private LagreFildetaljerRequest createLagreFildetaljerRequest() {
-        return LagreFildetaljerRequest.builder()
-                .datoMottatt(new Date())
-                .batchnavn("xml_pdf_pairs_testdata.zip")
-                .tilleggsopplysninger(Arrays.asList(
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.ENDORSER_NR)
-                                .verdi("3110190003NAV743506")
-                                .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.FYSISK_POSTBOKS)
-                                .verdi("1400")
-                                .build(),
-                        LagreFildetaljerRequest.Tilleggsopplysninger.builder()
-                                .nokkel(LagreFildetaljerRequest.STREKKODE_POSTBOKS)
-                                .verdi("1400")
-                                .build()
-                ))
-                .dokumentvarianter(Arrays.asList(
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
-                                .filtype("pdf")
-                                .variantformat("ARKIV")
-                                .fysiskDokument(DUMMY_FILE)
-                                .filnavn("dummy.pdf")
-                                .build(),
-                        LagreFildetaljerRequest.Dokumentvariant.builder()
-                                .filtype("xml")
-                                .variantformat("ORIGINAL")
-                                .fysiskDokument(DUMMY_FILE)
-                                .filnavn("dummy.xml")
-                                .build()))
+    /*
+        public static final String ENDORSER_NR = "endorsernr";
+    public static final String FYSISK_POSTBOKS = "fysiskPostboks";
+    public static final String STREKKODE_POSTBOKS = "strekkodePostboks";
+    public static final String FILTYPE_PDFA = "PDFA";
+    public static final String FILTYPE_XML = "XML";
+    public static final String VARIANTFORMAT_ARKIV = "ARKIV";
+    public static final String VARIANTFORMAT_SKANNING_META = "SKANNING_META";
+     */
+
+    private OpprettJournalpostRequest createLagreFildetaljerRequest() {
+        List<Tilleggsopplysning> tilleggsopplysninger = List.of(
+                new Tilleggsopplysning("batchNavn", "xml_pdf_pairs_testdata.zip"),
+                new Tilleggsopplysning("fysiskPostboks", "1400"),
+                new Tilleggsopplysning("strekkodePostboks", "1400"),
+                new Tilleggsopplysning("endorsernr", "3110190003NAV743506")
+        );
+
+        DokumentVariant pdf = DokumentVariant.builder()
+            .filtype("pdf")
+            .variantformat("ARKIV")
+            .fysiskDokument(DUMMY_FILE)
+            .filnavn("dummy.pdf")
+            .build();
+
+        DokumentVariant xml = DokumentVariant.builder()
+            .filtype("xml")
+            .variantformat("ORIGINAL")
+            .fysiskDokument(DUMMY_FILE)
+            .filnavn("dummy.xml")
+            .build();
+
+        List<Dokument> dokumenter = List.of(
+                Dokument.builder()
+                        .dokumentVarianter(List.of(pdf, xml))
+                        .build()
+        );
+
+        return OpprettJournalpostRequest.builder()
+                .tilleggsopplysninger(tilleggsopplysninger)
+                .dokumenter(dokumenter)
                 .build();
     }
 }
