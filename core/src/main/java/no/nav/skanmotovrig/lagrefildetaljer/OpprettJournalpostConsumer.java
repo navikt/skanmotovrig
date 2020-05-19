@@ -64,21 +64,13 @@ public class OpprettJournalpostConsumer {
                     .getBody();
 
         } catch (HttpClientErrorException e) {
-            if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
-                throw new SkanmotovrigFinnesIkkeFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
-            } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
-                throw new SkanmotovrigTillaterIkkeTilknyttingFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
-            } else {
-                throw new SkanmotovrigFunctionalException(String.format("mottaDokumentUtgaaendeSkanning feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
-                        .getStatusCode(), e.getMessage()), e);
-            }
+            throw new SkanmotovrigFunctionalException(String.format("opprettJournalpost feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+                    .getStatusCode(), e.getMessage()), e);
         } catch (HttpServerErrorException e) {
-            throw new SkanmotovrigTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk med statusKode=%s. Feilmelding=%s", e
+            throw new SkanmotovrigTechnicalException(String.format("opprettJournalpost feilet teknisk med statusKode=%s. Feilmelding=%s", e
                     .getStatusCode(), e.getMessage()), e);
         } catch (URISyntaxException e) {
-            throw new SkanmotovrigTechnicalException(String.format("mottaDokumentUtgaaendeSkanning feilet teknisk. Feilmelding=%s",
+            throw new SkanmotovrigTechnicalException(String.format("opprettJournalpost feilet teknisk. Feilmelding=%s",
                     e.getMessage()), e);
         }
     }

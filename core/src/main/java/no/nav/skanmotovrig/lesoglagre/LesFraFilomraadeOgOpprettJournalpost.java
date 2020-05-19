@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,7 +36,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
-    @Scheduled(initialDelay = 3000, fixedDelay = 72 * HOUR)
+    @Scheduled(initialDelay = 3000, fixedDelay = 10 * MINUTE)
     public void scheduledJob() {
         lesOgLagre();
     }
@@ -45,6 +46,8 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             List<String> filenames = filomraadeService.getFileNames();
             log.info("Skanmotovrig fant {} zipfiler på sftp server", filenames.size());
             for(String zipName: filenames){
+                AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
+
                 log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
@@ -53,9 +56,10 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                         .map(filepair -> opprettJournalpost(filepair))
                         .collect(Collectors.toList());
 
-                boolean safeToDeleteZipFile = responses.stream()
+
+                responses.stream()
                         .filter(triple -> triple.getT3() != null)
-                        .anyMatch(invalid -> {
+                        .forEach(invalid -> {
                             try {
                                 String filename = invalid.getT2().getName();
                                 String error = invalid.getT3();
@@ -66,7 +70,6 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                                         error
                                 );
                                 lastOppFilpar(invalid.getT2(), zipName);
-                                return true;
                             } catch (Exception e) {
                                 log.error(
                                         "Skanmotovrig klarte ikke lagre {} til feilomrade, zipfil={}, feilmelding={}",
@@ -74,11 +77,11 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                                         zipName,
                                         e.getMessage()
                                 );
-                                return false;
+                                safeToDeleteZipFile.set(false);
                             }
                         });
 
-                if(safeToDeleteZipFile) {
+                if(safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
                 }
             }

@@ -44,6 +44,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -91,7 +92,6 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
         opprettJournalpostService = new OpprettJournalpostService(new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties));
         lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
-        setUpStubs();
     }
 
     @AfterEach
@@ -101,7 +101,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
         WireMock.removeAllMappings();
     }
 
-    private void setUpStubs() {
+    private void setUpHappyStubs() {
         stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
                 .willReturn(aResponse().withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -115,9 +115,31 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
         );
     }
 
+    private void setUpBadStubs() {
+        stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
+                .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody("{}")));
+        stubFor(post(urlMatching(STSUrl))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withJsonBody(Json.node(
+                                "{\"access_token\":\"MockToken\",\"token_type\":\"Bearer\",\"expires_in\":3600}"
+                        )))
+        );
+    }
+
     @Test
     public void shouldLesOgLagreHappy() {
+        setUpHappyStubs();
         assertDoesNotThrow(() -> lesFraFilomraadeOgOpprettJournalpost.lesOgLagre());
         verify(exactly(10), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldMoveFilesWhenBadRequest() {
+        setUpBadStubs();
+        lesFraFilomraadeOgOpprettJournalpost.lesOgLagre();
+        assertTrue("foo".equals("bar"));
     }
 }
