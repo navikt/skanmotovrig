@@ -35,6 +35,7 @@ public class OpprettJournalpostTest {
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
     private final String BRUKER_ID = "***gammelt_fnr***";
     private final String BRUKER_IDTYPE = "PERSON";
+    private final String REQUEST_IDTYPE = "FNR";
 
     @Test
     public void shouldExtractOpprettJournalpostRequestFromSkanningmetadata() {
@@ -78,7 +79,7 @@ public class OpprettJournalpostTest {
         assertEquals(BREVKODE, opprettJournalpostRequest.getDokumenter().iterator().next().getBrevkode());
 
         assertEquals(BRUKER_ID, opprettJournalpostRequest.getBruker().getId());
-        assertEquals(BRUKER_IDTYPE, opprettJournalpostRequest.getBruker().getIdType());
+        assertEquals(REQUEST_IDTYPE, opprettJournalpostRequest.getBruker().getIdType());
 
         AtomicInteger pdfCounter = new AtomicInteger();
         AtomicInteger xmlCounter = new AtomicInteger();

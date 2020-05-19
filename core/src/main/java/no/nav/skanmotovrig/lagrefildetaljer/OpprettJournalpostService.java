@@ -37,6 +37,12 @@ public class OpprettJournalpostService {
     private static final String STREKKODEPOSTBOKS = "strekkodePostboks";
     private static final String BATCHNAVN = "batchNavn";
 
+    private static final String PERSON = "PERSON";
+    private static final String ORGANISASJON = "ORGANISASJON";
+
+    private static final String FNR = "FNR";
+    private static final String ORGNR = "ORGNR";
+
 
     @Inject
     public OpprettJournalpostService(OpprettJournalpostConsumer opprettJournalpostConsumer, STSConsumer stsConsumer) {
@@ -89,7 +95,7 @@ public class OpprettJournalpostService {
                 .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukerType()))
                 .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukerId()))
                 .map(jpBruker -> Bruker.builder()
-                        .idType(jpBruker.getBrukerType())
+                        .idType(jpBruker.getBrukerType().equalsIgnoreCase(PERSON) ? FNR : ORGNR)
                         .id(jpBruker.getBrukerId())
                         .build()
                 ).orElse(null);
