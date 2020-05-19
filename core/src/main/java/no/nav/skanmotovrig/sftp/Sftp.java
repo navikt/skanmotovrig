@@ -109,7 +109,7 @@ public class Sftp{
                 log.error(APPLICATION + " failed to connect to " + host, e);
                 throw new SkanmotovrigSftpTechnicalException("failed to connect to " + host, e);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new SkanmotovrigSftpTechnicalException("Unknown error while connecting " + host, e);
             }
         }
     }
