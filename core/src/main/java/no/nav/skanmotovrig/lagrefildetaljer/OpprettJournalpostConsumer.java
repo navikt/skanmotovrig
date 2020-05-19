@@ -39,8 +39,6 @@ public class OpprettJournalpostConsumer {
                                       SkanmotovrigProperties skanmotovrigProperties) {
         this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
         this.restTemplate = restTemplateBuilder
-                .setReadTimeout(Duration.ofSeconds(150))
-                .setConnectTimeout(Duration.ofSeconds(5))
                 .build();
     }
 

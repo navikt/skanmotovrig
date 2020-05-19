@@ -36,8 +36,6 @@ public class STSConsumer {
                                       SkanmotovrigProperties skanmotovrigProperties) {
         this.stsUrl = skanmotovrigProperties.getStsurl();
         this.restTemplate = restTemplateBuilder
-                .setReadTimeout(Duration.ofSeconds(150))
-                .setConnectTimeout(Duration.ofSeconds(5))
                 .basicAuthentication(skanmotovrigProperties.getServiceuser().getUsername(),
                         skanmotovrigProperties.getServiceuser().getPassword())
                 .build();
