@@ -74,6 +74,8 @@ public class UnzipSkanningmetadataUtils {
             return skanningmetadata;
         } catch (JAXBException | XMLStreamException e) {
             throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
+        } catch (NullPointerException e) {
+            throw new SkanmotovrigUnzipperFunctionalException("Xml fil mangler");
         }
     }
 

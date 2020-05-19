@@ -5,6 +5,7 @@ import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.AbstractSkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
@@ -114,6 +115,9 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             return new Triple<>(filepairWithMetadata, filepair, null);
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
+            return new Triple<>(null, filepair, e.getMessage());
+        } catch (SkanmotovrigUnzipperFunctionalException e) {
+            log.warn("Kunne ikke hente metadata fra xml, feilmelding={}", e.getMessage(), e);
             return new Triple<>(null, filepair, e.getMessage());
         }
     }
