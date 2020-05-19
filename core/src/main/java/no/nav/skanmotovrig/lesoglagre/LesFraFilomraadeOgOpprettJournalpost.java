@@ -48,14 +48,22 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
 
-                List<Triple<OpprettJournalpostResponse, Filepair, Exception>> responses = filepairList.stream()
-                        .map(filepair -> opprettJournalpost(filepair, zipName))
+                List<Triple<OpprettJournalpostResponse, Filepair, String>> responses = filepairList.stream()
+                        .map(filepair -> opprettJournalpost(filepair))
                         .collect(Collectors.toList());
 
                 boolean safeToDeleteZipFile = responses.stream()
                         .filter(triple -> triple.getT3() != null)
                         .anyMatch(invalid -> {
                             try {
+                                String filename = invalid.getT2().getName();
+                                String error = invalid.getT3();
+                                log.warn(
+                                        "Skanmotovrig laster opp {} fra {} til feilomrade, feilmelding={}",
+                                        filename,
+                                        zipName,
+                                        error
+                                );
                                 lastOppFilpar(invalid.getT2(), zipName);
                                 return true;
                             } catch (Exception e) {
@@ -78,11 +86,11 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         }
     }
 
-    private Triple<OpprettJournalpostResponse, Filepair, Exception> opprettJournalpost(Filepair filepair, String zipName) {
+    private Triple<OpprettJournalpostResponse, Filepair, String> opprettJournalpost(Filepair filepair) {
 
         OpprettJournalpostResponse response = null;
 
-        Triple<FilepairWithMetadata, Filepair, Exception> extractMetadataResult = extractMetadata(filepair, zipName);
+        Triple<FilepairWithMetadata, Filepair, String> extractMetadataResult = extractMetadata(filepair);
 
         if (extractMetadataResult.getT3() != null) {
             return new Triple<>(null, filepair, extractMetadataResult.getT3());
@@ -92,21 +100,21 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             log.info("Skanmotovrig lagret fildetaljer for journalpost");
         } catch (AbstractSkanmotovrigFunctionalException e) {
             log.error("Skanmotovrig feilet funskjonelt med lagring av fildetaljer til journalpost", e);
-            return new Triple<>(null, filepair, e);
+            return new Triple<>(null, filepair, e.getMessage());
         } catch (AbstractSkanmotovrigTechnicalException e) {
             log.error("Skanmotovrig feilet teknisk med lagring av fildetaljer til journalpost", e);
-            return new Triple<>(null, filepair, e);
+            return new Triple<>(null, filepair, e.getMessage());
         }
         return new Triple<>(response, filepair, null);
     }
 
-    private Triple<FilepairWithMetadata, Filepair, Exception> extractMetadata(Filepair filepair, String zipName) {
+    private Triple<FilepairWithMetadata, Filepair, String> extractMetadata(Filepair filepair) {
         try {
             FilepairWithMetadata filepairWithMetadata = UnzipSkanningmetadataUtils.extractMetadata(filepair);
             return new Triple<>(filepairWithMetadata, filepair, null);
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
-            return new Triple<>(null, filepair, e);
+            return new Triple<>(null, filepair, e.getMessage());
         }
     }
 
