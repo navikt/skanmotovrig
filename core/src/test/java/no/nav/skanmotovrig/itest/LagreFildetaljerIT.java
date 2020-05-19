@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.common.Json;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
+import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
 import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
@@ -45,6 +46,7 @@ public class LagreFildetaljerIT {
     private final String STSUrl = "/rest/v1/sts/token";
 
     private OpprettJournalpostConsumer opprettJournalpostConsumer;
+    private STSConsumer stsConsumer;
 
     @Autowired
     private SkanmotovrigProperties skanmotovrigProperties;
@@ -52,7 +54,8 @@ public class LagreFildetaljerIT {
     @BeforeEach
     void setUpConsumer() {
         setUpStubs();
-        opprettJournalpostConsumer = new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
+        stsConsumer = new STSConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
+        opprettJournalpostConsumer = new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigProperties, stsConsumer);
     }
 
     @AfterEach

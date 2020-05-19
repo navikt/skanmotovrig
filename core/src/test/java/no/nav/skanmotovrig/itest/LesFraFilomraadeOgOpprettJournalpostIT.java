@@ -6,6 +6,7 @@ import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
+import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
 import no.nav.skanmotovrig.lesoglagre.LesFraFilomraadeOgOpprettJournalpost;
 import no.nav.skanmotovrig.filomraade.FilomraadeConsumer;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
@@ -66,6 +67,8 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
+    private STSConsumer stsConsumer;
+
 
     @Autowired
     SkanmotovrigProperties skanmotovrigeProperties;
@@ -88,9 +91,10 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
 
     @BeforeEach
     void setUpServices() {
+        stsConsumer = new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties);
         sftp = new Sftp(skanmotovrigeProperties);
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
-        opprettJournalpostService = new OpprettJournalpostService(new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties));
+        opprettJournalpostService = new OpprettJournalpostService(new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties, stsConsumer));
         lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
     }
 

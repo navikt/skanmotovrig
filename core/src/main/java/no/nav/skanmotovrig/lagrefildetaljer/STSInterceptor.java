@@ -7,7 +7,6 @@ import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFinnesIkkeFunctiona
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigTillaterIkkeTilknyttingFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.lagrefildetaljer.data.STSRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -31,17 +30,17 @@ import java.util.Collections;
 @Slf4j
 public class STSInterceptor implements ClientHttpRequestInterceptor {
 
+    private final STSConsumer stsConsumer;
     private final RestTemplate restTemplate;
     private final String stsUrl;
-    private final String dokarkivJournalpostUrl;
     private final String urlEncodedBody = "grant_type=client_credentials&scope=openid";
 
 //    private final String username;
 //    private final String password;
 
-    STSInterceptor(SkanmotovrigProperties skanmotovrigProperties){
+    STSInterceptor(SkanmotovrigProperties skanmotovrigProperties, STSConsumer stsConsumer){
+        this.stsConsumer = stsConsumer;
         this.stsUrl = skanmotovrigProperties.getStsurl();
-        this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
         this.restTemplate = new RestTemplateBuilder()
                 .setReadTimeout(Duration.ofSeconds(150))
                 .setConnectTimeout(Duration.ofSeconds(5))
@@ -54,10 +53,7 @@ public class STSInterceptor implements ClientHttpRequestInterceptor {
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
         try{
             log.info("Kaller STS");
-            HttpHeaders stsHeaders = createHeaders();
-            HttpEntity<String> requestEntity = new HttpEntity<>(urlEncodedBody, stsHeaders);
-            STSResponse stsResponse = restTemplate.exchange(stsUrl, HttpMethod.POST, requestEntity, STSResponse.class)
-                    .getBody();
+            STSResponse stsResponse = stsConsumer.getSTSToken();
 
             httpRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             httpRequest.getHeaders().setBearerAuth(stsResponse.getAccess_token());
