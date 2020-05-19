@@ -74,7 +74,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 }
             }
         } catch(Exception e) {
-            log.info(e.getMessage());
+            log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);
         }
     }
 
@@ -102,7 +102,8 @@ public class LesFraFilomraadeOgOpprettJournalpost {
 
     private Triple<FilepairWithMetadata, Filepair, Exception> extractMetadata(Filepair filepair, String zipName) {
         try {
-            return new Triple<>(UnzipSkanningmetadataUtils.extractMetadata(filepair), filepair, null);
+            FilepairWithMetadata filepairWithMetadata = UnzipSkanningmetadataUtils.extractMetadata(filepair);
+            return new Triple<>(filepairWithMetadata, filepair, null);
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
             return new Triple<>(null, filepair, e);
