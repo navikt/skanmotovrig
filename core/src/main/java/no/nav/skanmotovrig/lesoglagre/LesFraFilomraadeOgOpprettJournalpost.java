@@ -102,7 +102,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         try {
             log.info("Skanmotovrig oppretter journalpost for {}", filepair.getName());
             response = opprettJournalpostService.opprettJournalpost(extractMetadataResult.getT1());
-            log.info("Skanmotovrig har opprettet journalpost for {}", filepair.getName());
+            log.info("Skanmotovrig har opprettet journalpost, journalpostId={} fil={}", response.getJournalpostId(), filepair.getName());
         } catch (AbstractSkanmotovrigFunctionalException e) {
             log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost for {}", filepair.getName(), e);
             return new Triple<>(null, filepair, e.getMessage());
