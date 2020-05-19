@@ -9,6 +9,8 @@ spec:
   env:
     - name: SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL
       value: {{ SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL }}
+    - name: SKANMOTOVRIG_STSURL
+      value: {{ SKANMOTOVRIG_STSURL }}
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
