@@ -27,10 +27,10 @@ public class UnzipSkanningmetadataUtils {
             String pdfFilnavn = metadata.getJournalpost().getFilNavn();
             String xmlFilnavn = Utils.changeFiletypeInFilename(pdfFilnavn, "xml");
             if (!pdfs.containsKey(pdfFilnavn)) {
-                throw new SkanmotovrigUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende pdf-fil til journalpost ");
+                throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig fant ikke tilhørende pdf-fil til journalpost ");
             }
             if (!xmls.containsKey(xmlFilnavn)) {
-                throw new SkanmotovrigUnzipperFunctionalException("Skanmotutgaaende fant ikke tilhørende xml-fil til journalpost ");
+                throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig fant ikke tilhørende xml-fil til journalpost ");
             }
             return FilepairWithMetadata.builder()
                     .skanningmetadata(metadata)
@@ -73,7 +73,7 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (JAXBException | XMLStreamException e) {
-            throw new SkanmotovrigUnzipperFunctionalException("Skanmotutgaaende klarte ikke lese metadata i zipfil", e);
+            throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
         }
     }
 

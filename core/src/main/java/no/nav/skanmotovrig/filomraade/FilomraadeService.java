@@ -23,35 +23,12 @@ public class FilomraadeService {
     public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotovrigSftpTechnicalException {
         return filomraadeConsumer.listZipFiles();
     }
-/*
-    public Map<String, byte[]> getZipFiles() throws SkanmotovrigSftpTechnicalException {
-        try {
-            List<String> fileNames = lesZipfilConsumer.listZipFiles();
-            Map<String, byte[]> files = new HashMap<>();
-
-            for (String filename : fileNames) {
-                byte[] zipFile = getZipFile(filename);
-                if (null != zipFile) {
-                    files.put(filename, zipFile);
-                }
-            }
-            log.info("Skanmotutgaaende leser {} fra sftp", fileNames.toString());
-            return files;
-        } catch (LesZipFilFuntionalException e) {
-            log.warn("Skanmotutgaaende klarte ikke hente zipfiler");
-            throw e;
-        } catch (Exception e) {
-            log.warn("Skanmotutgaaende klarte ikke koble til sftp");
-            throw new SkanmotovrigSftpTechnicalException("Klarte ikke koble til sftp", e);
-        }
-    }
- */
 
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke laste opp fil {}", filename, e);
+            log.error("Skanmotovrig klarte ikke laste opp fil {}", filename, e);
         }
     }
 
@@ -74,7 +51,7 @@ public class FilomraadeService {
         try {
             filomraadeConsumer.deleteFile(filename);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke slette fil {}", filename, e);
+            log.error("Skanmotovrig klarte ikke slette fil {}", filename, e);
         }
     }
 
@@ -82,7 +59,7 @@ public class FilomraadeService {
         try {
             filomraadeConsumer.moveFile(from, to, newFilename);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke flytte fil {} til {}/{}", from, to, newFilename, e);
+            log.error("Skanmotovrig klarte ikke flytte fil {} til {}/{}", from, to, newFilename, e);
         }
     }
 
@@ -90,7 +67,7 @@ public class FilomraadeService {
         try {
             return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {
-            log.error("Skanmotutgaaende klarte ikke hente filen {}", fileName, e);
+            log.error("Skanmotovrig klarte ikke hente filen {}", fileName, e);
             return null;
         }
     }

@@ -29,11 +29,11 @@ public class FilomraadeConsumer {
 
     public List<String> listZipFiles() {
         try {
-            log.info("Skanmotutgaaende henter zipfiler fra {}", sftp.getHomePath() + inboundDirectory);
+            log.info("Skanmotovrig henter zipfiler fra {}", sftp.getHomePath() + inboundDirectory);
             List<String> files = sftp.listFiles(inboundDirectory + "/*.zip");
             return files;
         } catch (Exception e) {
-            throw new LesZipFilFuntionalException("Skanmotutgaaende klarte ikke hente zipfiler", e);
+            throw new LesZipFilFuntionalException("Skanmotovrig klarte ikke hente zipfiler", e);
         }
     }
 
@@ -45,22 +45,22 @@ public class FilomraadeConsumer {
 
 
     public void deleteFile(String filename) {
-        log.info("Skanmotutgaaende sletter fil {}", filename);
+        log.info("Skanmotovrig sletter fil {}", filename);
         sftp.deleteFile(inboundDirectory, filename);
-        log.info("Skanmotutgaaende slettet fil {}", filename);
+        log.info("Skanmotovrig slettet fil {}", filename);
     }
 
     public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
-        log.info("Skanmotutgaaende laster opp fil {} til feilområde", filename);
+        log.info("Skanmotovrig laster opp fil {} til feilområde", filename);
         sftp.uploadFile(file, feilDirectory + "/" + path, filename);
-        log.info("Skanmotutgaaende lastet opp fil {} til feilområde", filename);
+        log.info("Skanmotovrig lastet opp fil {} til feilområde", filename);
     }
 
     public void moveFile(String from, String to, String newFilename) {
         String fromPath = inboundDirectory + "/" + from;
         String toPath = inboundDirectory + "/" + to;
-        log.info("Skanmotutgaaende flytter fil {} til {}", fromPath, toPath);
+        log.info("Skanmotovrig flytter fil {} til {}", fromPath, toPath);
         sftp.moveFile(fromPath, toPath, newFilename);
-        log.info("Skanmotutgaende flyttet fil {} til {}", fromPath, toPath);
+        log.info("Skanmotovrig flyttet fil {} til {}", fromPath, toPath);
     }
 }
