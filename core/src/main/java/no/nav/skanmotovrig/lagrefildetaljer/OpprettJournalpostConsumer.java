@@ -36,20 +36,18 @@ public class OpprettJournalpostConsumer {
     private final String dokarkivJournalpostUrl;
 
     public OpprettJournalpostConsumer(RestTemplateBuilder restTemplateBuilder,
-                                      SkanmotovrigProperties skanmotovrigProperties,
-                                      STSConsumer stsConsumer) {
+                                      SkanmotovrigProperties skanmotovrigProperties) {
         this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
         this.restTemplate = restTemplateBuilder
                 .setReadTimeout(Duration.ofSeconds(150))
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .build();
-        this.restTemplate.setInterceptors(Collections.singletonList(new STSInterceptor(skanmotovrigProperties, stsConsumer)));
     }
 
     @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
-    public OpprettJournalpostResponse lagreFilDetaljer(OpprettJournalpostRequest opprettJournalpostRequest) {
+    public OpprettJournalpostResponse lagreFilDetaljer(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
         try {
-            HttpHeaders headers = createHeaders();
+            HttpHeaders headers = createHeaders(token);
             HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);
 
             URI uri = new URI(dokarkivJournalpostUrl);
@@ -69,10 +67,10 @@ public class OpprettJournalpostConsumer {
     }
 
 
-    private HttpHeaders createHeaders() {
+    private HttpHeaders createHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
+        headers.setBearerAuth(token);
         if (MDC.get(MDCConstants.MDC_NAV_CALL_ID) != null) {
             headers.add(MDCConstants.MDC_NAV_CALL_ID, MDC.get(MDCConstants.MDC_NAV_CALL_ID));
         }

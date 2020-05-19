@@ -26,11 +26,10 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
-
+/*
 @Slf4j
 public class STSInterceptor implements ClientHttpRequestInterceptor {
-
-    private final STSConsumer stsConsumer;
+/*
     private final RestTemplate restTemplate;
     private final String stsUrl;
     private final String urlEncodedBody = "grant_type=client_credentials&scope=openid";
@@ -39,7 +38,6 @@ public class STSInterceptor implements ClientHttpRequestInterceptor {
 //    private final String password;
 
     STSInterceptor(SkanmotovrigProperties skanmotovrigProperties, STSConsumer stsConsumer){
-        this.stsConsumer = stsConsumer;
         this.stsUrl = skanmotovrigProperties.getStsurl();
         this.restTemplate = new RestTemplateBuilder()
                 .setReadTimeout(Duration.ofSeconds(150))
@@ -53,7 +51,6 @@ public class STSInterceptor implements ClientHttpRequestInterceptor {
     public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes, ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
         try{
             log.info("Kaller STS");
-            STSResponse stsResponse = stsConsumer.getSTSToken();
 
             httpRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             httpRequest.getHeaders().setBearerAuth(stsResponse.getAccess_token());
@@ -87,4 +84,6 @@ public class STSInterceptor implements ClientHttpRequestInterceptor {
         }
         return headers;
     }
-}
+
+ */
+//}
