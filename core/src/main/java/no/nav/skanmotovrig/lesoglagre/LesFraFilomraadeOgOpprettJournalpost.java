@@ -42,8 +42,11 @@ public class LesFraFilomraadeOgOpprettJournalpost {
     public void lesOgLagre() {
         try{
             List<String> filenames = filomraadeService.getFileNames();
+            log.info("Skanmotovrig fant {} zipfiler på sftp server", filenames.size());
             for(String zipName: filenames){
+                log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
                 List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
+                log.info("Skanmotovrig begynner behandling av {}", zipName);
 
                 List<Triple<OpprettJournalpostResponse, Filepair, Exception>> responses = filepairList.stream()
                         .map(filepair -> opprettJournalpost(filepair, zipName))
