@@ -3,12 +3,10 @@ package no.nav.skanmotovrig.lagrefildetaljer;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
-import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.lagrefildetaljer.data.AvsenderMottaker;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Bruker;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
 import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
-import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
@@ -43,13 +41,13 @@ public class OpprettJournalpostService {
         this.opprettJournalpostConsumer = opprettJournalpostConsumer;
     }
 
-    public OpprettJournalpostResponse lagreFildetaljer(OpprettJournalpostRequest request) {
+    public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
         return opprettJournalpostConsumer.lagreFilDetaljer(request);
     }
 
-    public OpprettJournalpostResponse lagreFildetaljer(FilepairWithMetadata filepairWithMetadata) {
+    public OpprettJournalpostResponse opprettJournalpost(FilepairWithMetadata filepairWithMetadata) {
         OpprettJournalpostRequest request = extractLagreFildetaljerRequestFromSkanningmetadata(filepairWithMetadata);
-        return lagreFildetaljer(request);
+        return opprettJournalpost(request);
     }
 
     public static OpprettJournalpostRequest extractLagreFildetaljerRequestFromSkanningmetadata(FilepairWithMetadata filepairWithMetadata) {

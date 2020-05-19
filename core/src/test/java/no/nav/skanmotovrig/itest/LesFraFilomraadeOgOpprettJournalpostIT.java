@@ -1,14 +1,14 @@
 package no.nav.skanmotovrig.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
-import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.lesoglagre.LesFraFilomraadeOgOpprettJournalpost;
-import no.nav.skanmotovrig.leszipfil.LesZipfilConsumer;
-import no.nav.skanmotovrig.leszipfil.LesZipfilService;
+import no.nav.skanmotovrig.filomraade.FilomraadeConsumer;
+import no.nav.skanmotovrig.filomraade.FilomraadeService;
 import no.nav.skanmotovrig.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -56,11 +56,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class LesFraFilomraadeOgOpprettJournalpostIT {
 
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
-    private final String URL_DOKARKIV_JOURNALPOST_003 = "/rest/intern/journalpostapi/v1/journalpost/003/mottaDokumentUtgaaendeSkanning";
+    private final String STSUrl = "/rest/v1/sts/token";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
 
     LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
-    LesZipfilService lesZipfilService;
+    FilomraadeService filomraadeService;
     OpprettJournalpostService opprettJournalpostService;
 
     private int PORT = 2222;
@@ -89,9 +89,9 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     @BeforeEach
     void setUpServices() {
         sftp = new Sftp(skanmotovrigeProperties);
-        lesZipfilService = new LesZipfilService(new LesZipfilConsumer(sftp, skanmotovrigeProperties));
+        filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
         opprettJournalpostService = new OpprettJournalpostService(new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties));
-        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(lesZipfilService, opprettJournalpostService);
+        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
         setUpStubs();
     }
 
@@ -107,19 +107,18 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
                 .willReturn(aResponse().withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody("{}")));
+        stubFor(post(urlMatching(STSUrl))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withJsonBody(Json.node(
+                                "{\"access_token\":\"MockToken\",\"token_type\":\"Bearer\",\"expires_in\":3600}"
+                        )))
+        );
     }
 
     @Test
     public void shouldLesOgLagreHappy() {
         assertDoesNotThrow(() -> lesFraFilomraadeOgOpprettJournalpost.lesOgLagre());
         verify(exactly(10), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
-
-    @Test
-    public void shouldContinueIfFailingToLagreFildetaljer() {
-        stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_003))
-                .willReturn(aResponse().withStatus(HttpStatus.BAD_REQUEST.value())));
-        List<List<OpprettJournalpostResponse>> responses = lesFraFilomraadeOgOpprettJournalpost.lesOgLagre();
-        assertEquals(9, responses.get(0).size());
     }
 }

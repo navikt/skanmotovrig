@@ -5,8 +5,6 @@ import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFinnesIkkeFunctiona
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigTillaterIkkeTilknyttingFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerRequest;
-import no.nav.skanmotovrig.lagrefildetaljer.data.LagreFildetaljerResponse;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
@@ -28,6 +26,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
@@ -50,6 +50,7 @@ public class OpprettJournalpostConsumer {
                 .basicAuthentication(skanmotovrigProperties.getServiceuser().getUsername(),
                         skanmotovrigProperties.getServiceuser().getPassword())
                 .build();
+        this.restTemplate.setInterceptors(Collections.singletonList(new STSInterceptor(skanmotovrigProperties)));
     }
 
     @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
@@ -81,6 +82,7 @@ public class OpprettJournalpostConsumer {
                     e.getMessage()), e);
         }
     }
+
 
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();

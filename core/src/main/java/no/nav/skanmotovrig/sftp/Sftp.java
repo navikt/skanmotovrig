@@ -51,19 +51,16 @@ public class Sftp{
         this.port = properties.getSftp().getPort();
         this.privateKey = properties.getSftp().getPrivateKey();
         this.hostKey = properties.getSftp().getHostKey();
-        this.timeout = properties.getSftp().getTimeout() * 1000;
+        this.timeout = Integer.parseInt(properties.getSftp().getTimeout()) * 100;
     }
 
-    public List<String> listFiles() throws SftpException {
+    public List<String> listFiles() {
         return listFiles("*");
     }
 
     public List<String> listFiles(String path){
         if(channelSftp == null || !channelSftp.isConnected()){
             connect();
-
-//            log.error(APPLICATION + " must be connected to list files");
-  //          throw new SkanmotovrigSftpFunctionalException("must be connected to list files", new Exception());
         }
         try {
             Vector<LsEntry> vector = channelSftp.ls(path);
@@ -77,8 +74,6 @@ public class Sftp{
     public String presentWorkingDirectory(){
         if(channelSftp == null || !channelSftp.isConnected()){
             connect();
-            //log.error(APPLICATION + " Must be connected to get present working directory");
-            //throw new SkanmotovrigSftpFunctionalException("must be connected to get present working directory", new Exception());
         }
         try {
             return channelSftp.pwd();
@@ -91,8 +86,6 @@ public class Sftp{
     public void changeDirectory(String path){
         if(channelSftp == null || !channelSftp.isConnected()){
             connect();
-            //log.warn(APPLICATION + " must be connected to change directory");
-            //throw new SkanmotovrigSftpFunctionalException("must be connected to change directory", new Exception());
         }
         try {
             channelSftp.cd(path);
@@ -118,7 +111,7 @@ public class Sftp{
     }
 
     public boolean isConnected() {
-        return channelSftp.isConnected();
+        return channelSftp.isConnected() && jschSession.isConnected();
     }
 
     public void connect() {
@@ -127,8 +120,8 @@ public class Sftp{
             jsch.addIdentity(privateKey);
             jsch.setKnownHosts(hostKey);
 
-            jschSession.connect(60000);
-
+            jschSession.connect();
+            //jschSession.setServerAliveInterval(timeout);
             channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
             setHomePath(channelSftp.getHome());
@@ -162,8 +155,61 @@ public class Sftp{
         return homePath;
     }
 
-    public int getTimeout() {
-        return jschSession.getTimeout();
+
+    public void deleteFile(String directory, String filename) {
+        String filePath = directory + "/" + filename;
+        try {
+            channelSftp.rm(filePath);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke slette {}", APPLICATION, filePath, e);
+            throw new SkanmotovrigSftpTechnicalException("Klarte ikke slette " + filePath, e);
+        }
+    }
+
+    public void uploadFile(InputStream file, String path, String filename) {
+        createDirectoryIfNotExisting(path);
+        try {
+            channelSftp.put(file, path + "/" + filename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke laste opp fil {} til {}", APPLICATION, filename, path, e);
+            throw new SkanmotovrigSftpTechnicalException("Klarte ikke laste opp fil", e);
+        }
+    }
+
+    public void moveFile(String from, String to, String newFilename) {
+        try {
+            createDirectoryIfNotExisting(to);
+            channelSftp.rename(from, to + "/" + newFilename);
+        } catch (SftpException e) {
+            log.error("{} klarte ikke flytte fil {} til {}", APPLICATION, from ,to);
+            throw new SkanmotovrigSftpTechnicalException("Klarte ikke flytte fil", e);
+        }
+    }
+
+    private void createDirectoryIfNotExisting(String path) {
+        try {
+            channelSftp.lstat(path);
+        } catch (SftpException mappeFinnesIkke) {
+            // Path finnes ikke, så vi lager den. Kan bare lage en og en mappe
+            String existingPath = "";
+            for (String subPath : path.split("/")) {
+                try {
+                    channelSftp.lstat(existingPath + subPath);
+                    existingPath += subPath + "/";
+                } catch (SftpException delmappeFinnesIkke) {
+                    try {
+                        channelSftp.mkdir(existingPath + subPath);
+                        existingPath += subPath + "/";
+                    } catch (SftpException e) {
+                        log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+                        throw new SkanmotovrigSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("{} klarte ikke lage en ny mappe: {}", APPLICATION, path, e);
+            throw new SkanmotovrigSftpTechnicalException("Klarte ikke lage en ny mappe: " + path, e);
+        }
     }
 
     // A bit hacky, but ChannelSftp does not handle windows paths very well.
