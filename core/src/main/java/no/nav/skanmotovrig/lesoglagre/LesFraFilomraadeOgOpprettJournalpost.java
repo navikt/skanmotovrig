@@ -5,37 +5,32 @@ import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.AbstractSkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
-import no.nav.skanmotovrig.leszipfil.LesZipfilService;
+import no.nav.skanmotovrig.filomraade.FilomraadeService;
 import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
+import no.nav.skanmotovrig.utils.Triple;
+import no.nav.skanmotovrig.utils.Utils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class LesFraFilomraadeOgOpprettJournalpost {
 
-    private final LesZipfilService lesZipfilService;
+    private final FilomraadeService filomraadeService;
     private final OpprettJournalpostService opprettJournalpostService;
     private final int MINUTE = 60_000;
     private final int HOUR = 60 * MINUTE;
 
-    public LesFraFilomraadeOgOpprettJournalpost(LesZipfilService lesZipfilService,
+    public LesFraFilomraadeOgOpprettJournalpost(FilomraadeService filomraadeService,
                                                 OpprettJournalpostService opprettJournalpostService) {
-        this.lesZipfilService = lesZipfilService;
+        this.filomraadeService = filomraadeService;
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
@@ -44,68 +39,76 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         lesOgLagre();
     }
 
-    public List<List<OpprettJournalpostResponse>> lesOgLagre() {
+    public void lesOgLagre() {
+        try{
+            List<String> filenames = filomraadeService.getFileNames();
+            for(String zipName: filenames){
+                List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
 
-        Map<String, byte[]> zipfiles = lesFil();
-
-        log.info("Skanmotutgaaende leste fra filområde og fant {} zipfiler", zipfiles.size());
-
-        List<List<OpprettJournalpostResponse>> allResponses = new ArrayList<>();
-        for (String zipname : zipfiles.keySet()) {
-            try {
-                List<Filepair> filepairList = Unzipper.unzipXmlPdf(zipfiles.get(zipname));
-
-                List<OpprettJournalpostResponse> responses = filepairList.stream()
-                        .map(this::lagreFil)
-                        .filter(Objects::nonNull)
+                List<Triple<OpprettJournalpostResponse, Filepair, Exception>> responses = filepairList.stream()
+                        .map(filepair -> opprettJournalpost(filepair, zipName))
                         .collect(Collectors.toList());
 
-                log.info("Skanmotutgaaende lagret fildetaljer fra zipfil {} i dokarkiv", zipname);
-                allResponses.add(responses);
-            } catch (IOException e) {
-                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
-                log.error("Skanmotutgaaende klarte ikke lese fra fil {}", zipname, e);
-            } catch (SkanmotovrigUnzipperFunctionalException e) {
-                // TODO: Håndter denne feilen skikkelig. Løses av MMA-4346
-                log.error("Skanmotutgaaende feilet i unzipping av fil {}", zipname, e);
+                boolean safeToDeleteZipFile = responses.stream()
+                        .filter(triple -> triple.getT3() != null)
+                        .anyMatch(invalid -> {
+                            try {
+                                lastOppFilpar(invalid.getT2(), zipName);
+                                return true;
+                            } catch (Exception e) {
+                                log.error(
+                                        "Skanmotovrig klarte ikke lagre {} til feilomrade, zipfil={}, feilmelding={}",
+                                        invalid.getT2().getName(),
+                                        zipName,
+                                        e.getMessage()
+                                );
+                                return false;
+                            }
+                        });
+
+                if(safeToDeleteZipFile) {
+                    filomraadeService.moveZipFile(zipName, "processed");
+                }
             }
-        }
-        return allResponses;
-    }
-
-    private Map<String, byte[]> lesFil() {
-        try {
-            return lesZipfilService.getZipFiles();
-        } catch (SkanmotovrigSftpTechnicalException e) {
-            return new HashMap<>();
+        } catch(Exception e) {
+            log.info(e.getMessage());
         }
     }
 
-    private OpprettJournalpostResponse lagreFil(Filepair filepair) {
+    private Triple<OpprettJournalpostResponse, Filepair, Exception> opprettJournalpost(Filepair filepair, String zipName) {
+
         OpprettJournalpostResponse response = null;
-        FilepairWithMetadata filepairWithMetadata = extractMetadata(filepair);
-        if (filepairWithMetadata == null) {
-            return null;
+
+        Triple<FilepairWithMetadata, Filepair, Exception> extractMetadataResult = extractMetadata(filepair, zipName);
+
+        if (extractMetadataResult.getT3() != null) {
+            return new Triple<>(null, filepair, extractMetadataResult.getT3());
         }
         try {
-            response = opprettJournalpostService.lagreFildetaljer(filepairWithMetadata);
-            log.info("Skanmotutgaaende lagret fildetaljer for journalpost");
+            response = opprettJournalpostService.opprettJournalpost(extractMetadataResult.getT1());
+            log.info("Skanmotovrig lagret fildetaljer for journalpost");
         } catch (AbstractSkanmotovrigFunctionalException e) {
-            // TODO: Feilhåndtering
-            log.error("Skanmotutgaaende feilet funskjonelt med lagring av fildetaljer til journalpost", e);
+            log.error("Skanmotovrig feilet funskjonelt med lagring av fildetaljer til journalpost", e);
+            return new Triple<>(null, filepair, e);
         } catch (AbstractSkanmotovrigTechnicalException e) {
-            // TODO: Feilhåndtering
-            log.error("Skanmotutgaaende feilet teknisk med lagring av fildetaljer til journalpost", e);
+            log.error("Skanmotovrig feilet teknisk med lagring av fildetaljer til journalpost", e);
+            return new Triple<>(null, filepair, e);
         }
-        return response;
+        return new Triple<>(response, filepair, null);
     }
 
-    private FilepairWithMetadata extractMetadata(Filepair filepair) {
+    private Triple<FilepairWithMetadata, Filepair, Exception> extractMetadata(Filepair filepair, String zipName) {
         try {
-            return UnzipSkanningmetadataUtils.extractMetadata(filepair);
+            return new Triple<>(UnzipSkanningmetadataUtils.extractMetadata(filepair), filepair, null);
         } catch (InvalidMetadataException e) {
-            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}", filepair.getName(), e);
-            return null;
+            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
+            return new Triple<>(null, filepair, e);
         }
+    }
+
+    private void lastOppFilpar(Filepair filepair, String zipName) {
+        String path = Utils.removeFileExtensionInFilename(zipName);
+        filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
+        filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
     }
 }

@@ -6,7 +6,6 @@ import lombok.ToString;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -29,5 +28,5 @@ public class SftpProperties {
     @NotEmpty
     private String port;
 
-    private int timeout = 60;
+    private String timeout = "60";
 }

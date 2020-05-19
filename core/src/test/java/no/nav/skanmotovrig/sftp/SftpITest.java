@@ -3,6 +3,9 @@ package no.nav.skanmotovrig.sftp;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
+import org.apache.sshd.common.FactoryManager;
+import org.apache.sshd.common.PropertyResolverUtils;
+import org.apache.sshd.common.session.helpers.SessionTimeoutListener;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -52,20 +55,32 @@ public class SftpITest {
         sshd.setCommandFactory(new ScpCommandFactory());
         sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
         sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get(VALID_PUBLIC_KEY_PATH)));
-        sshd.start();
 
+        sshd.start();
         sftp = new Sftp(skanmotovrigeProperties);
     }
 
     @Test
-    public void shouldConnectToSftp(){
+    public void shouldConnectAndReconnectToSftp(){
         try {
+            PropertyResolverUtils.updateProperty(sshd, FactoryManager.IDLE_TIMEOUT, 2000L);
+
+            sftp.listFiles();
+            Assert.assertTrue(sftp.isConnected());
+            Assert.assertEquals(1, sshd.getActiveSessions().size());
+            Assert.assertEquals("itestUser", sshd.getActiveSessions().iterator().next().getUsername());
+
+            Thread.sleep(3000);
+            Assert.assertFalse(sftp.isConnected());
+
             sftp.listFiles();
             Assert.assertTrue(sftp.isConnected());
             Assert.assertEquals(1, sshd.getActiveSessions().size());
             Assert.assertEquals("itestUser", sshd.getActiveSessions().iterator().next().getUsername());
         } catch (Exception e) {
             Assert.fail();
+        } finally {
+            PropertyResolverUtils.updateProperty(sshd, FactoryManager.IDLE_TIMEOUT, 60000L);
         }
     }
 
@@ -98,15 +113,11 @@ public class SftpITest {
     @Test
     public void shouldFailToChangeDirectoryToInvalidPath() {
         try {
-            sftp.connect();
-
             sftp.changeDirectory(INVALID_FOLDER_PATH);
             Assert.fail();
         } catch(SkanmotovrigSftpTechnicalException e) {
-            sftp.disconnect();
             Assert.assertEquals("failed to change directory, path: foo/bar/baz", e.getMessage());
         } catch (Exception e) {
-            sftp.disconnect();
             Assert.fail();
         }
     }
@@ -116,13 +127,10 @@ public class SftpITest {
         try{
             File zipFile = Paths.get(ZIP_FILE_PATH).toFile();
 
-            sftp.connect();
             sftp.changeDirectory(RESOURCE_FOLDER_PATH);
 
             InputStream inputStream = sftp.getFile("xml_pdf_pairs_testdata.zip");
             Assert.assertArrayEquals(inputStream.readAllBytes(), new FileInputStream(zipFile).readAllBytes());
-
-            sftp.disconnect();
         } catch (Exception e) {
             Assert.fail();
         }
@@ -131,14 +139,11 @@ public class SftpITest {
     @Test
     void shouldFailToGetFileWhenFileNameIsInvalid() {
         try{
-            sftp.connect();
-
             sftp.changeDirectory(RESOURCE_FOLDER_PATH);
             sftp.getFile("invalidFileName.zip");
 
             Assert.fail();
         } catch (SkanmotovrigSftpTechnicalException e) {
-            sftp.disconnect();
             Assert.assertEquals("failed to download invalidFileName.zip", e.getMessage());
         } catch (Exception e) {
             Assert.fail();

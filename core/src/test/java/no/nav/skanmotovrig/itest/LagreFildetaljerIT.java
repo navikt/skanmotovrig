@@ -1,8 +1,8 @@
 package no.nav.skanmotovrig.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.Json;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
@@ -43,7 +42,7 @@ public class LagreFildetaljerIT {
     private final String JOURNALPOST_ID = "001";
     private final String JOURNALPOST_ID_INVALID = "002";
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
-    private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE_INVALID_JOURNALPOST = "/rest/journalpostapi/v15/journalpost\\?foersoekFerdigstill=false";
+    private final String STSUrl = "/rest/v1/sts/token";
 
     private OpprettJournalpostConsumer opprettJournalpostConsumer;
 
@@ -66,11 +65,19 @@ public class LagreFildetaljerIT {
     private void setUpStubs() {
         stubFor(post(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
             .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+        stubFor(post(urlMatching(STSUrl))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withJsonBody(Json.node(
+                        "{\"access_token\":\"MockToken\",\"token_type\":\"Bearer\",\"expires_in\":3600}"
+                )))
+        );
     }
 
+
     @Test
-    public void shouldLagreFildetaljer() {
-        OpprettJournalpostRequest request = createLagreFildetaljerRequest();
+    public void shouldOpprettJournalpost() {
+        OpprettJournalpostRequest request = createOpprettJournalpostRequest();
         OpprettJournalpostResponse res = opprettJournalpostConsumer.lagreFilDetaljer(request);
         assertEquals(null, res);
     }
@@ -86,7 +93,7 @@ public class LagreFildetaljerIT {
     public static final String VARIANTFORMAT_SKANNING_META = "SKANNING_META";
      */
 
-    private OpprettJournalpostRequest createLagreFildetaljerRequest() {
+    private OpprettJournalpostRequest createOpprettJournalpostRequest() {
         List<Tilleggsopplysning> tilleggsopplysninger = List.of(
                 new Tilleggsopplysning("batchNavn", "xml_pdf_pairs_testdata.zip"),
                 new Tilleggsopplysning("fysiskPostboks", "1400"),
