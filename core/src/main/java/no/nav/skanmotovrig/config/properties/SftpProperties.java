@@ -27,6 +27,4 @@ public class SftpProperties {
 
     @NotEmpty
     private String port;
-
-    private String timeout = "60";
 }
