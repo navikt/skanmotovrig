@@ -10,6 +10,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
 import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
+import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {TestConfig.class},
@@ -55,7 +55,7 @@ public class LagreFildetaljerIT {
     void setUpConsumer() {
         setUpStubs();
         stsConsumer = new STSConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
-        opprettJournalpostConsumer = new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigProperties, stsConsumer);
+        opprettJournalpostConsumer = new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigProperties);
     }
 
     @AfterEach
@@ -81,7 +81,8 @@ public class LagreFildetaljerIT {
     @Test
     public void shouldOpprettJournalpost() {
         OpprettJournalpostRequest request = createOpprettJournalpostRequest();
-        OpprettJournalpostResponse res = opprettJournalpostConsumer.lagreFilDetaljer(request);
+        STSResponse stsResponse = stsConsumer.getSTSToken();
+        OpprettJournalpostResponse res = opprettJournalpostConsumer.lagreFilDetaljer(stsResponse.getAccess_token(), request);
         assertEquals(null, res);
     }
 

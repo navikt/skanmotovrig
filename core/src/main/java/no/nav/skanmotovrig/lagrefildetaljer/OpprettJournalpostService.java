@@ -9,6 +9,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
 import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
+import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
 import no.nav.skanmotovrig.utils.Utils;
 import org.springframework.stereotype.Service;
@@ -38,12 +39,14 @@ public class OpprettJournalpostService {
 
 
     @Inject
-    public OpprettJournalpostService(OpprettJournalpostConsumer opprettJournalpostConsumer) {
+    public OpprettJournalpostService(OpprettJournalpostConsumer opprettJournalpostConsumer, STSConsumer stsConsumer) {
         this.opprettJournalpostConsumer = opprettJournalpostConsumer;
+        this.stsConsumer = stsConsumer;
     }
 
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
-        return opprettJournalpostConsumer.lagreFilDetaljer(request);
+        STSResponse stsResponse = stsConsumer.getSTSToken();
+        return opprettJournalpostConsumer.lagreFilDetaljer(stsResponse.getAccess_token(), request);
     }
 
     public OpprettJournalpostResponse opprettJournalpost(FilepairWithMetadata filepairWithMetadata) {

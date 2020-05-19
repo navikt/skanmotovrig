@@ -67,8 +67,6 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
-    private STSConsumer stsConsumer;
-
 
     @Autowired
     SkanmotovrigProperties skanmotovrigeProperties;
@@ -91,10 +89,12 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
 
     @BeforeEach
     void setUpServices() {
-        stsConsumer = new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties);
         sftp = new Sftp(skanmotovrigeProperties);
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
-        opprettJournalpostService = new OpprettJournalpostService(new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties, stsConsumer));
+        opprettJournalpostService = new OpprettJournalpostService(
+                new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties),
+                new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties)
+        );
         lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
     }
 
