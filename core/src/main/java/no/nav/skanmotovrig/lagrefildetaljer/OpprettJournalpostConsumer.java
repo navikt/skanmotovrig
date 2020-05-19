@@ -43,7 +43,7 @@ public class OpprettJournalpostConsumer {
     }
 
     @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "lagreFilDetaljer"}, percentiles = {0.5, 0.95}, histogram = true)
-    public OpprettJournalpostResponse lagreFilDetaljer(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
+    public OpprettJournalpostResponse opprettJournalpost(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
         try {
             HttpHeaders headers = createHeaders(token);
             HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);

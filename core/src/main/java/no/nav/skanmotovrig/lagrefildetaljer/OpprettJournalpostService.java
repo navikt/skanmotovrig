@@ -52,7 +52,7 @@ public class OpprettJournalpostService {
 
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
         STSResponse stsResponse = stsConsumer.getSTSToken();
-        return opprettJournalpostConsumer.lagreFilDetaljer(stsResponse.getAccess_token(), request);
+        return opprettJournalpostConsumer.opprettJournalpost(stsResponse.getAccess_token(), request);
     }
 
     public OpprettJournalpostResponse opprettJournalpost(FilepairWithMetadata filepairWithMetadata) {

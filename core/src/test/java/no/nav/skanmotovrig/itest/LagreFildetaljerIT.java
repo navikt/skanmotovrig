@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -40,8 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LagreFildetaljerIT {
 
     private final byte[] DUMMY_FILE = "dummyfile".getBytes();
-    private final String JOURNALPOST_ID = "001";
-    private final String JOURNALPOST_ID_INVALID = "002";
+    private final String JOURNALPOST_ID = "467010363";
     private final String MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
     private final String STSUrl = "/rest/v1/sts/token";
 
@@ -67,7 +65,21 @@ public class LagreFildetaljerIT {
 
     private void setUpStubs() {
         stubFor(post(urlMatching(MOTTA_DOKUMENT_UTGAAENDE_SKANNING_TJENESTE))
-            .willReturn(aResponse().withStatus(HttpStatus.OK.value())));
+            .willReturn(aResponse().withHeader("Content-Type", "application/json")
+                    .withJsonBody(Json.node(
+                            "{" +
+                                    "\"journalpostId\": \"467010363\"," +
+                                    "\"journalpostferdigstilt\": true," +
+                                    "  \"dokumenter\": [" +
+                                    "    {" +
+                                    "      \"dokumentInfoId\": \"485227498\"," +
+                                    "      \"brevkode\": \"NAV 04-01.04\"," +
+                                    "      \"tittel\": \"Søknad om dagpenger ved permittering\"" +
+                                    "    }" +
+                                    "  ]" +
+                                    "}"
+                    )))
+        );
         stubFor(post(urlMatching(STSUrl))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -82,8 +94,8 @@ public class LagreFildetaljerIT {
     public void shouldOpprettJournalpost() {
         OpprettJournalpostRequest request = createOpprettJournalpostRequest();
         STSResponse stsResponse = stsConsumer.getSTSToken();
-        OpprettJournalpostResponse res = opprettJournalpostConsumer.lagreFilDetaljer(stsResponse.getAccess_token(), request);
-        assertEquals(null, res);
+        OpprettJournalpostResponse res = opprettJournalpostConsumer.opprettJournalpost(stsResponse.getAccess_token(), request);
+        assertEquals(JOURNALPOST_ID, res.getJournalpostId());
     }
 
 
