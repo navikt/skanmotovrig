@@ -53,7 +53,7 @@ public class FilomraadeConsumer {
     public void uploadFileToFeilomrade(InputStream file, String filename, String path) {
         log.info("Skanmotovrig laster opp fil {} til feilområde", filename);
         sftp.uploadFile(file, feilDirectory + "/" + path, filename);
-        log.info("Skanmotovrig lastet opp fil {} til feilområde", filename);
+        log.info("Skanmotovrig har lastet opp fil {} til feilområde", filename);
     }
 
     public void moveFile(String from, String to, String newFilename) {

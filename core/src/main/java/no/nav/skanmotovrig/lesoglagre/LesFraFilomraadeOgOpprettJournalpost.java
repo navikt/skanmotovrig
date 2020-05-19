@@ -97,13 +97,14 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             return new Triple<>(null, filepair, extractMetadataResult.getT3());
         }
         try {
+            log.info("Skanmotovrig oppretter journalpost for {}", filepair.getName());
             response = opprettJournalpostService.opprettJournalpost(extractMetadataResult.getT1());
-            log.info("Skanmotovrig lagret fildetaljer for journalpost");
+            log.info("Skanmotovrig har opprettet journalpost for {}", filepair.getName());
         } catch (AbstractSkanmotovrigFunctionalException e) {
-            log.error("Skanmotovrig feilet funskjonelt med lagring av fildetaljer til journalpost", e);
+            log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost for {}", filepair.getName(), e);
             return new Triple<>(null, filepair, e.getMessage());
         } catch (AbstractSkanmotovrigTechnicalException e) {
-            log.error("Skanmotovrig feilet teknisk med lagring av fildetaljer til journalpost", e);
+            log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost for {}", filepair.getName(), e);
             return new Triple<>(null, filepair, e.getMessage());
         }
         return new Triple<>(response, filepair, null);
@@ -117,7 +118,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
             return new Triple<>(null, filepair, e.getMessage());
         } catch (SkanmotovrigUnzipperFunctionalException e) {
-            log.warn("Kunne ikke hente metadata fra xml, feilmelding={}", e.getMessage(), e);
+            log.warn("Kunne ikke hente metadata fra {}, feilmelding={}",filepair.getName(), e.getMessage(), e);
             return new Triple<>(null, filepair, e.getMessage());
         }
     }
