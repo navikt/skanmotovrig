@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class OpprettJournalpostService {
 
     private OpprettJournalpostConsumer opprettJournalpostConsumer;
+    private STSConsumer stsConsumer;
 
     private static final String PDFA = "PDFA";
     private static final String XML = "XML";
