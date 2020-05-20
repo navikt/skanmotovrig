@@ -20,24 +20,6 @@ import java.util.zip.ZipEntry;
 
 public class UnzipSkanningmetadataUtils {
 
-    public static List<FilepairWithMetadata> pairFiles(List<Skanningmetadata> skanningmetadataList, Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
-        return skanningmetadataList.stream().map(metadata -> {
-            String pdfFilnavn = metadata.getJournalpost().getFilNavn();
-            String xmlFilnavn = Utils.changeFiletypeInFilename(pdfFilnavn, "xml");
-            if (!pdfs.containsKey(pdfFilnavn)) {
-                throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig fant ikke tilhørende pdf-fil til journalpost ");
-            }
-            if (!xmls.containsKey(xmlFilnavn)) {
-                throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig fant ikke tilhørende xml-fil til journalpost ");
-            }
-            return FilepairWithMetadata.builder()
-                    .skanningmetadata(metadata)
-                    .pdf(pdfs.get(pdfFilnavn))
-                    .xml(xmls.get(xmlFilnavn))
-                    .build();
-        }).collect(Collectors.toList());
-    }
-
     public static List<Filepair> pairFiles(Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
         return pdfs.keySet().stream().map(pdfName ->
                 Filepair.builder()
