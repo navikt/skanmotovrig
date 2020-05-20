@@ -29,6 +29,7 @@ public class FilomraadeService {
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
         } catch (Exception e) {
             log.error("Skanmotovrig klarte ikke laste opp fil {}", filename, e);
+            throw e;
         }
     }
 

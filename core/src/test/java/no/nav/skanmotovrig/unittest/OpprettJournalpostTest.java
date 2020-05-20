@@ -1,11 +1,10 @@
 package no.nav.skanmotovrig.unittest;
 
 import no.nav.skanmotovrig.domain.Bruker;
-import no.nav.skanmotovrig.domain.FilepairWithMetadata;
+import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
-import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
@@ -14,6 +13,8 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostRequestMapper.generateRequestBody;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,31 +40,32 @@ public class OpprettJournalpostTest {
 
     @Test
     public void shouldExtractOpprettJournalpostRequestFromSkanningmetadata() {
-        OpprettJournalpostRequest opprettJournalpostRequest = OpprettJournalpostService.extractLagreFildetaljerRequestFromSkanningmetadata(
-                FilepairWithMetadata.builder()
-                        .skanningmetadata(Skanningmetadata.builder()
-                                .journalpost(
-                                        Journalpost.builder()
-                                                .tema(TEMA)
-                                                .brevkode(BREVKODE)
-                                                .journalfoerendeEnhet(JOURNALFOERENDEENHET)
-                                                .datoMottatt(new Date())
-                                                .land(LAND)
-                                                .mottakskanal(MOTTAKSKANAL)
-                                                .batchNavn(BATCHNAVN)
-                                                .filNavn(FILNAVN_PDF)
-                                                .endorsernr(ENDORSERNR)
-                                                .bruker(Bruker.builder().brukerId(BRUKER_ID).brukerType(BRUKER_IDTYPE).build())
-                                                .build()
-                                )
-                                .skanningInfo(SkanningInfo.builder()
-                                        .fysiskPostboks(FYSISK_POSTBOKS)
-                                        .strekkodePostboks(STREKKODE_POSTBOKS)
-                                        .build())
-                                .build())
-                        .pdf(DUMMY_FILE)
-                        .xml(DUMMY_FILE)
-                        .build()
+        OpprettJournalpostRequest opprettJournalpostRequest = generateRequestBody(
+            Skanningmetadata.builder()
+                    .journalpost(
+                            Journalpost.builder()
+                                    .tema(TEMA)
+                                    .brevkode(BREVKODE)
+                                    .journalfoerendeEnhet(JOURNALFOERENDEENHET)
+                                    .datoMottatt(new Date())
+                                    .land(LAND)
+                                    .mottakskanal(MOTTAKSKANAL)
+                                    .batchNavn(BATCHNAVN)
+                                    .filNavn(FILNAVN_PDF)
+                                    .endorsernr(ENDORSERNR)
+                                    .bruker(Bruker.builder().brukerId(BRUKER_ID).brukerType(BRUKER_IDTYPE).build())
+                                    .build()
+                    )
+                    .skanningInfo(SkanningInfo.builder()
+                            .fysiskPostboks(FYSISK_POSTBOKS)
+                            .strekkodePostboks(STREKKODE_POSTBOKS)
+                            .build())
+                    .build(),
+            Filepair.builder()
+                    .pdf(DUMMY_FILE)
+                    .xml(DUMMY_FILE)
+                    .build()
+
         );
         assertEquals(ENDORSERNR, getTillegsopplysningerVerdiFromNokkel(opprettJournalpostRequest.getTilleggsopplysninger(), "endorsernr"));
         assertEquals(FYSISK_POSTBOKS, getTillegsopplysningerVerdiFromNokkel(opprettJournalpostRequest.getTilleggsopplysninger(), "fysiskPostboks"));

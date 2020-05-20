@@ -2,7 +2,7 @@ package no.nav.skanmotovrig.lesoglagre;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Filepair;
-import no.nav.skanmotovrig.domain.FilepairWithMetadata;
+import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
@@ -12,14 +12,13 @@ import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
 import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
-import no.nav.skanmotovrig.utils.Triple;
 import no.nav.skanmotovrig.utils.Utils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -28,7 +27,6 @@ public class LesFraFilomraadeOgOpprettJournalpost {
     private final FilomraadeService filomraadeService;
     private final OpprettJournalpostService opprettJournalpostService;
     private final int MINUTE = 60_000;
-    private final int HOUR = 60 * MINUTE;
 
     public LesFraFilomraadeOgOpprettJournalpost(FilomraadeService filomraadeService,
                                                 OpprettJournalpostService opprettJournalpostService) {
@@ -49,37 +47,22 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
 
                 log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
-                List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
+                List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName)); // TODO feilhåndtering hvis zipfil ikke er lesbar.
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
 
-                List<Triple<OpprettJournalpostResponse, Filepair, String>> responses = filepairList.stream()
-                        .map(filepair -> opprettJournalpost(filepair))
-                        .collect(Collectors.toList());
-
-
-                responses.stream()
-                        .filter(triple -> triple.getT3() != null)
-                        .forEach(invalid -> {
-                            try {
-                                String filename = invalid.getT2().getName();
-                                String error = invalid.getT3();
-                                log.warn(
-                                        "Skanmotovrig laster opp {} fra {} til feilomrade, feilmelding={}",
-                                        filename,
-                                        zipName,
-                                        error
-                                );
-                                lastOppFilpar(invalid.getT2(), zipName);
-                            } catch (Exception e) {
-                                log.error(
-                                        "Skanmotovrig klarte ikke lagre {} til feilomrade, zipfil={}, feilmelding={}",
-                                        invalid.getT2().getName(),
-                                        zipName,
-                                        e.getMessage()
-                                );
-                                safeToDeleteZipFile.set(false);
+                filepairList.forEach(filepair -> {
+                        Optional<OpprettJournalpostResponse> response = opprettJournalpost(filepair);
+                        try {
+                            if (response.isEmpty()){
+                                log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
+                                lastOppFilpar(filepair, zipName);
+                                log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
                             }
-                        });
+                        } catch (Exception e) {
+                            log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
+                            safeToDeleteZipFile.set(false);
+                        }
+                });
 
                 if(safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
@@ -90,40 +73,43 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         }
     }
 
-    private Triple<OpprettJournalpostResponse, Filepair, String> opprettJournalpost(Filepair filepair) {
+    private Optional<OpprettJournalpostResponse> opprettJournalpost(Filepair filepair) {
 
         OpprettJournalpostResponse response = null;
 
-        Triple<FilepairWithMetadata, Filepair, String> extractMetadataResult = extractMetadata(filepair);
+        Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair);
 
-        if (extractMetadataResult.getT3() != null) {
-            return new Triple<>(null, filepair, extractMetadataResult.getT3());
+        if (skanningmetadata.isEmpty()) {
+            return Optional.empty();
         }
         try {
             log.info("Skanmotovrig oppretter journalpost for {}", filepair.getName());
-            response = opprettJournalpostService.opprettJournalpost(extractMetadataResult.getT1());
+            response = opprettJournalpostService.opprettJournalpost(skanningmetadata.get(), filepair);
             log.info("Skanmotovrig har opprettet journalpost, journalpostId={} fil={}", response.getJournalpostId(), filepair.getName());
         } catch (AbstractSkanmotovrigFunctionalException e) {
             log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost for {}", filepair.getName(), e);
-            return new Triple<>(null, filepair, e.getMessage());
+            return Optional.empty();
         } catch (AbstractSkanmotovrigTechnicalException e) {
             log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost for {}", filepair.getName(), e);
-            return new Triple<>(null, filepair, e.getMessage());
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Skanmotovrig feilet med ukjent feil ved oppretting av journalpost for {}", filepair.getName(), e);
+            return Optional.empty();
         }
-        return new Triple<>(response, filepair, null);
+        return Optional.of(response);
     }
 
-    private Triple<FilepairWithMetadata, Filepair, String> extractMetadata(Filepair filepair) {
+    private Optional<Skanningmetadata> extractMetadata(Filepair filepair){
         try {
-            FilepairWithMetadata filepairWithMetadata = UnzipSkanningmetadataUtils.extractMetadata(filepair);
-            return new Triple<>(filepairWithMetadata, filepair, null);
+            return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
             log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
-            return new Triple<>(null, filepair, e.getMessage());
+            return Optional.empty();
         } catch (SkanmotovrigUnzipperFunctionalException e) {
-            log.warn("Kunne ikke hente metadata fra {}, feilmelding={}",filepair.getName(), e.getMessage(), e);
-            return new Triple<>(null, filepair, e.getMessage());
+            log.warn("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
+            return Optional.empty();
         }
+
     }
 
     private void lastOppFilpar(Filepair filepair, String zipName) {
