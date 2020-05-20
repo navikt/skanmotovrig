@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static no.nav.skanmotovrig.utils.Utils.changeFiletypeInFilename;
+
 @Slf4j
 public class Unzipper {
 
@@ -39,11 +41,13 @@ public class Unzipper {
             while ((len = zipInputStream.read(buffer)) > 0) {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
-            if ("xml".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                xmls.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+            if ("xml".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+                String xmlName = changeFiletypeInFilename(zipEntry.getName(), "xml");
+                xmls.put(xmlName, byteArrayOutputStream.toByteArray());
             }
-            if ("pdf".equals(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
-                pdfs.put(zipEntry.getName(), byteArrayOutputStream.toByteArray());
+            if ("pdf".equalsIgnoreCase(UnzipSkanningmetadataUtils.getFileType(zipEntry))) {
+                String pdfName = changeFiletypeInFilename(zipEntry.getName(), "pdf");
+                pdfs.put(pdfName, byteArrayOutputStream.toByteArray());
             }
             byteArrayOutputStream.close();
             zipEntry = zipInputStream.getNextZipEntry();
