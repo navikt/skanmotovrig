@@ -1,7 +1,7 @@
 {
   "NAMESPACE": "default",
   "SRVSKANMOTOVRIG": "/serviceuser/data/prod/srvskanmotovrig",
-  "VAULT": "kv/prod/fss/skanmotovrig/q1",
+  "VAULT": "kv/prod/fss/skanmotovrig/default",
   "SFTP_KEYS": "kv/prod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.nais.adeo.no/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
   "SKANMOTOVRIG_STSURL":"https://security-token-service.nais.adeo.no/rest/v1/sts/token",
