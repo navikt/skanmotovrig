@@ -2,6 +2,7 @@ package no.nav.skanmotovrig.lesoglagre;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Filepair;
+import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
@@ -82,18 +83,19 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         if (skanningmetadata.isEmpty()) {
             return Optional.empty();
         }
+        String batchNavn = skanningmetadata.map(Skanningmetadata::getJournalpost).map(Journalpost::getBatchNavn).orElse(null);
         try {
-            log.info("Skanmotovrig oppretter journalpost for {}", filepair.getName());
+            log.info("Skanmotovrig oppretter journalpost fil={}, batch={}", filepair.getName(), batchNavn);
             response = opprettJournalpostService.opprettJournalpost(skanningmetadata.get(), filepair);
-            log.info("Skanmotovrig har opprettet journalpost, journalpostId={} fil={}", response.getJournalpostId(), filepair.getName());
+            log.info("Skanmotovrig har opprettet journalpost, journalpostId={}, fil={}, batch={}", response.getJournalpostId(), filepair.getName(), batchNavn);
         } catch (AbstractSkanmotovrigFunctionalException e) {
-            log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost for {}", filepair.getName(), e);
+            log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
             return Optional.empty();
         } catch (AbstractSkanmotovrigTechnicalException e) {
-            log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost for {}", filepair.getName(), e);
+            log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
             return Optional.empty();
         } catch (Exception e) {
-            log.error("Skanmotovrig feilet med ukjent feil ved oppretting av journalpost for {}", filepair.getName(), e);
+            log.error("Skanmotovrig feilet med ukjent feil ved oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
             return Optional.empty();
         }
         return Optional.of(response);
