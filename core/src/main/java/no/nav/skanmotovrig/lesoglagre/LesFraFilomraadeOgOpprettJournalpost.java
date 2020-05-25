@@ -8,6 +8,7 @@ import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalE
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.AbstractSkanmotovrigTechnicalException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
@@ -112,6 +113,9 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             return Optional.empty();
         } catch (SkanmotovrigUnzipperFunctionalException e) {
             log.warn("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
+            return Optional.empty();
+        } catch (SkanmotovrigUnzipperTechnicalException e) {
+            log.error("Tenknisk feil oppstod ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
             return Optional.empty();
         }
 

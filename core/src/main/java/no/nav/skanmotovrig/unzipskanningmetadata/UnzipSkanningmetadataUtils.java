@@ -4,6 +4,7 @@ import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
 import no.nav.skanmotovrig.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
@@ -53,7 +54,7 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (JAXBException | XMLStreamException e) {
-            throw new SkanmotovrigUnzipperFunctionalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
+            throw new SkanmotovrigUnzipperTechnicalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
         } catch (NullPointerException e) {
             throw new SkanmotovrigUnzipperFunctionalException("Xml fil mangler");
         }
