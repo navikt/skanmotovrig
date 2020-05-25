@@ -98,17 +98,6 @@ public class LagreFildetaljerIT {
         assertEquals(JOURNALPOST_ID, res.getJournalpostId());
     }
 
-
-    /*
-        public static final String ENDORSER_NR = "endorsernr";
-    public static final String FYSISK_POSTBOKS = "fysiskPostboks";
-    public static final String STREKKODE_POSTBOKS = "strekkodePostboks";
-    public static final String FILTYPE_PDFA = "PDFA";
-    public static final String FILTYPE_XML = "XML";
-    public static final String VARIANTFORMAT_ARKIV = "ARKIV";
-    public static final String VARIANTFORMAT_SKANNING_META = "SKANNING_META";
-     */
-
     private OpprettJournalpostRequest createOpprettJournalpostRequest() {
         List<Tilleggsopplysning> tilleggsopplysninger = List.of(
                 new Tilleggsopplysning("batchNavn", "xml_pdf_pairs_testdata.zip"),

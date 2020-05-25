@@ -24,6 +24,8 @@ public class OpprettJournalpostRequest {
 
     private String kanal;
 
+    private String datoMottatt;
+
     private String journalfoerendeEnhet;
 
     private String eksternReferanseId;
@@ -31,6 +33,7 @@ public class OpprettJournalpostRequest {
     private List<Tilleggsopplysning> tilleggsopplysninger;
 
     private Bruker bruker;
+
 
     @NotNull(message = "dokumenter kan ikke være null")
     private List<Dokument> dokumenter;

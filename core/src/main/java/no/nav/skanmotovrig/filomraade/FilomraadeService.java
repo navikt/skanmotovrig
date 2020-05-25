@@ -72,4 +72,8 @@ public class FilomraadeService {
             return null;
         }
     }
+
+    public void disconnect() {
+        filomraadeConsumer.disconnect();
+    }
 }

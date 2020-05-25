@@ -33,6 +33,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -45,7 +46,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -59,6 +59,9 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
     private final String STSUrl = "/rest/v1/sts/token";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
+
+    private final Path MOCKZIP = Path.of("src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");//"src/test/resources/__files/inbound/mockDataSkanmotovrig.zip";//"__files/inbound";
+    private final Path SKANMOTOVRIG_ZIP_PATH = Path.of("src/test/resources/inbound/mockDataSkanmotovrig.zip");
 
     LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
     FilomraadeService filomraadeService;
@@ -88,7 +91,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     }
 
     @BeforeEach
-    void setUpServices() {
+    void setUpServices() throws IOException {
         sftp = new Sftp(skanmotovrigeProperties);
         filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
         opprettJournalpostService = new OpprettJournalpostService(
@@ -96,6 +99,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
                 new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties)
         );
         lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
+        copyFileToSkanmotovrigFolder();
     }
 
     @AfterEach
@@ -149,4 +153,14 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     }
 
      */
+
+    private void copyFileToSkanmotovrigFolder() {
+        try {
+            Path source = MOCKZIP;
+            Path dest = SKANMOTOVRIG_ZIP_PATH;
+            Files.copy(source, dest);
+        } catch(IOException ignored) {
+            // File either already exists or the test will crash and burn
+        }
+    }
 }

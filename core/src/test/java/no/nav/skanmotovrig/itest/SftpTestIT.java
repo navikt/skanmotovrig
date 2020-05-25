@@ -1,11 +1,11 @@
-package no.nav.skanmotovrig.sftp;
+package no.nav.skanmotovrig.itest;
 
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.itest.config.TestConfig;
+import no.nav.skanmotovrig.sftp.Sftp;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.PropertyResolverUtils;
-import org.apache.sshd.common.session.helpers.SessionTimeoutListener;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -31,10 +32,9 @@ import java.util.List;
 @ActiveProfiles("itest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = {TestConfig.class})
-public class SftpITest {
-
-    private static final String RESOURCE_FOLDER_PATH = "src/test/resources/__files/xml_pdf_pairs";
-    private static final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
+public class SftpTestIT {
+    private static final String RESOURCE_FOLDER_PATH = "src/test/resources/inbound";
+    private static final String ZIP_FILE_PATH = "src/test/resources/inbound/mockDataSkanmotovrig.zip";
     private static final String DIR_ONE_FOLDER_PATH = "src/test/resources/sftp/dirOne";
     private static final String DIR_TWO_FOLDER_PATH = "src/test/resources/sftp/dirTwo";
     private static final String INVALID_FOLDER_PATH = "foo/bar/baz";
@@ -45,11 +45,16 @@ public class SftpITest {
     private SshServer sshd = SshServer.setUpDefaultServer();
     private Sftp sftp;
 
+    private final Path MOCKZIP = Path.of("src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");//"src/test/resources/__files/inbound/mockDataSkanmotovrig.zip";//"__files/inbound";
+    private final Path SKANMOTOVRIG_ZIP_PATH = Path.of("src/test/resources/inbound/mockDataSkanmotovrig.zip");
+
     @Autowired
     SkanmotovrigProperties skanmotovrigeProperties;
 
     @BeforeAll
     void startSftpServer() throws IOException {
+        copyFileToSkanmotovrigFolder();
+
         sshd.setPort(PORT);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
         sshd.setCommandFactory(new ScpCommandFactory());
@@ -99,12 +104,7 @@ public class SftpITest {
 
             sftp.changeDirectory(homePath+RESOURCE_FOLDER_PATH);
             Assert.assertTrue(sftp.presentWorkingDirectory().endsWith(homePath+RESOURCE_FOLDER_PATH));
-            Assert.assertTrue(sftp.listFiles().containsAll(
-                    List.of(
-                            "xml_pdf_pairs_invalid_testdata.zip",
-                            "xml_pdf_pairs_testdata.zip"
-                    )
-            ));
+            Assert.assertTrue(sftp.listFiles().contains("mockDataSkanmotovrig.zip"));
         } catch (Exception e) {
             Assert.fail();
         }
@@ -129,7 +129,7 @@ public class SftpITest {
 
             sftp.changeDirectory(RESOURCE_FOLDER_PATH);
 
-            InputStream inputStream = sftp.getFile("xml_pdf_pairs_testdata.zip");
+            InputStream inputStream = sftp.getFile("mockDataSkanmotovrig.zip");
             Assert.assertArrayEquals(inputStream.readAllBytes(), new FileInputStream(zipFile).readAllBytes());
         } catch (Exception e) {
             Assert.fail();
@@ -154,5 +154,15 @@ public class SftpITest {
     void shutdownSftpServer() throws IOException {
         sshd.stop();
         sshd.close();
+    }
+
+    private void copyFileToSkanmotovrigFolder() {
+        try {
+            Path source = MOCKZIP;
+            Path dest = SKANMOTOVRIG_ZIP_PATH;
+            Files.copy(source, dest);
+        } catch(IOException ignored) {
+            // File either already exists or the test will crash and burn
+        }
     }
 }

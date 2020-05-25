@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_meta.xsd">
+<skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_metadata.xsd">
    <journalpost>
-      <mottakskanal>SKAN_IM</mottakskanal>
       <bruker>
          <brukerId>***gammelt_fnr***</brukerId>
-         <brukerType>PERSON</brukerType>
+         <brukertype>PERSON</brukertype>
       </bruker>
-      <journalfoerendeEnhet>1234</journalfoerendeEnhet>
-      <datoMottatt>2020-04-15</datoMottatt>
-      <tema>FOR</tema>
-      <brevKode>295654</brevKode>
-      <batchNavn>mockBatchNavn.zip</batchNavn>
+      <tema>DAG</tema>
+      <brevKode></brevKode>
+      <journalforendeEnhet>0000</journalforendeEnhet>
+      <datoMottatt>2020-05-22</datoMottatt>
+      <batchNavn>TEST 40404</batchNavn>
+      <mottakskanal>SKAN_IM</mottakskanal>
       <filNavn>mockDokument-0.pdf</filNavn>
-      <endorsernr>3110190003NAV743506</endorsernr>
-      <land>PRK</land>
+      <endorsernr>22.05.2020_R105411969_1580</endorsernr>
+      <antallsider>1</antallsider>
    </journalpost>
    <skanningInfo>
-         <fysiskPostboks>1423</fysiskPostboks>
-         <strekkodePostboks>1423</strekkodePostboks>
+      <fysiskPostboks>1423</fysiskPostboks>
+      <strekkodePostboks>1423</strekkodePostboks>
    </skanningInfo>
 </skanningmetadata>
