@@ -5,7 +5,7 @@ import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
 import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
 import org.junit.Test;
@@ -75,7 +75,7 @@ public class UnzipperTest {
     @Test
     public void shouldThrowExceptionIfUnableToReadMetadata() throws IOException {
         File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
-        assertThrows(SkanmotovrigUnzipperFunctionalException.class, () ->
+        assertThrows(SkanmotovrigUnzipperTechnicalException.class, () ->
                 Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
                         UnzipSkanningmetadataUtils.extractMetadata(filepair))
                         .collect(Collectors.toList()));
