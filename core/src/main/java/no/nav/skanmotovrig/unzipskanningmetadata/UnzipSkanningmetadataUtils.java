@@ -1,5 +1,6 @@
 package no.nav.skanmotovrig.unzipskanningmetadata;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
+@Slf4j
 public class UnzipSkanningmetadataUtils {
 
     public static List<Filepair> pairFiles(Map<String, byte[]> pdfs, Map<String, byte[]> xmls) {
@@ -54,6 +56,7 @@ public class UnzipSkanningmetadataUtils {
 
             return skanningmetadata;
         } catch (JAXBException | XMLStreamException e) {
+            log.error("Skanmotovrig klarte ikke lese metadata i zipfil, feilmedling={}",e.getMessage(), e);
             throw new SkanmotovrigUnzipperTechnicalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
         } catch (NullPointerException e) {
             throw new SkanmotovrigUnzipperFunctionalException("Xml fil mangler");
