@@ -71,6 +71,9 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             }
         } catch(Exception e) {
             log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);
+        } finally {
+            // Feels like a leaky abstraction ...
+            filomraadeService.disconnect();
         }
     }
 

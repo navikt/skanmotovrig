@@ -40,6 +40,7 @@ public class FilomraadeConsumer {
     public byte[] getFile(String filename) throws SkanmotovrigSftpTechnicalException, IOException {
         InputStream fileStream = sftp.getFile(inboundDirectory + "/" + filename);
         byte[] file = fileStream.readAllBytes();
+        fileStream.close();
         return file;
     }
 
@@ -62,5 +63,9 @@ public class FilomraadeConsumer {
         log.info("Skanmotovrig flytter fil {} til {}", fromPath, toPath);
         sftp.moveFile(fromPath, toPath, newFilename);
         log.info("Skanmotovrig flyttet fil {} til {}", fromPath, toPath);
+    }
+
+    public void disconnect() {
+        sftp.disconnect();
     }
 }

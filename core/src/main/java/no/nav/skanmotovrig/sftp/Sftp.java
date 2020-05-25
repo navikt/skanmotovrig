@@ -8,10 +8,10 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigSftpFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
@@ -49,7 +49,7 @@ public class Sftp{
     }
 
     public List<String> listFiles(String path){
-        connect();
+        connectIfNotConnected();
         try {
             Vector<LsEntry> vector = channelSftp.ls(path);
             return vector.stream().map(ChannelSftp.LsEntry::getFilename).collect(Collectors.toList());
@@ -60,7 +60,7 @@ public class Sftp{
     }
 
     public String presentWorkingDirectory(){
-        connect();
+        connectIfNotConnected();
         try {
             return channelSftp.pwd();
         } catch(SftpException e) {
@@ -70,7 +70,7 @@ public class Sftp{
     }
 
     public void changeDirectory(String path){
-        connect();
+        connectIfNotConnected();
         try {
             channelSftp.cd(path);
         } catch(SftpException e) {
@@ -81,7 +81,7 @@ public class Sftp{
 
 
     public InputStream getFile(String filename){
-        connect();
+        connectIfNotConnected();
         try {
             return channelSftp.get(filename);
         } catch (SftpException e) {
@@ -94,7 +94,7 @@ public class Sftp{
         return channelSftp.isConnected() && jschSession.isConnected();
     }
 
-    public void connect() {
+    public void connectIfNotConnected() {
         if(channelSftp == null || !channelSftp.isConnected()) {
             try {
                 jschSession = jsch.getSession(username, host, Integer.parseInt(port));
@@ -115,7 +115,7 @@ public class Sftp{
     }
 
     public void disconnect() {
-        if (channelSftp.isConnected()) {
+        if (channelSftp != null && channelSftp.isConnected()) {
             try {
                 channelSftp.exit();
                 jschSession.disconnect();
@@ -130,13 +130,13 @@ public class Sftp{
     }
 
     public String getHomePath() {
-        connect();
+        connectIfNotConnected();
         return homePath;
     }
 
 
     public void deleteFile(String directory, String filename) {
-        connect();
+        connectIfNotConnected();
         String filePath = directory + "/" + filename;
         try {
             channelSftp.rm(filePath);
@@ -147,7 +147,7 @@ public class Sftp{
     }
 
     public void uploadFile(InputStream file, String path, String filename) {
-        connect();
+        connectIfNotConnected();
         createDirectoryIfNotExisting(path);
         try {
             channelSftp.put(file, path + "/" + filename);
@@ -158,7 +158,7 @@ public class Sftp{
     }
 
     public void moveFile(String from, String to, String newFilename) {
-        connect();
+        connectIfNotConnected();
         try {
             createDirectoryIfNotExisting(to);
             channelSftp.rename(from, to + "/" + newFilename);
@@ -169,7 +169,7 @@ public class Sftp{
     }
 
     private void createDirectoryIfNotExisting(String path) {
-        connect();
+        connectIfNotConnected();
         try {
             channelSftp.lstat(path);
         } catch (SftpException mappeFinnesIkke) {
@@ -204,5 +204,10 @@ public class Sftp{
         } else {
             this.homePath = homePath;
         }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        disconnect();
     }
 }

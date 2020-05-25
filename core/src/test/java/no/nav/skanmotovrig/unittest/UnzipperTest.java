@@ -33,13 +33,13 @@ public class UnzipperTest {
     private final String MOTTAKSKANAL = "SKAN_IM";
     private final String BRUKERID = "10108000398";
     private final String BRUKERTYPE = "PERSON";
-    private final String JOURNALFOERENDEENHET = "1234";
-    private final String TEMA = "FOR";
-    private final String BREVKODE = "295654";
-    private final String LAND = "PRK";
-    private final long DATO_MOTTATT = 1586901600000L;
-    private final String BATCH_NAVN = "mockBatchNavn.zip";
-    private final String ENDORSERNR = "3110190003NAV743506";
+    private final String JOURNALFOERENDEENHET = null;//"1234";
+    private final String TEMA = "DAG";
+    private final String BREVKODE = "";//"295654";
+    private final String LAND = null;//"PRK";
+    private final long DATO_MOTTATT = 1590098400000L;
+    private final String BATCH_NAVN = "TEST 40404";
+    private final String ENDORSERNR = "22.05.2020_R105411969_1580";
     private final String POSTBOKS = "1423";
     private final byte CR = 13;
 

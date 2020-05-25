@@ -12,6 +12,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
 import no.nav.skanmotovrig.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -81,12 +82,16 @@ public class OpprettJournalpostRequestMapper {
                 new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchNavn())
         ).stream().filter(tilleggsopplysning -> tilleggsopplysning.getVerdi() != null).collect(Collectors.toList());
 
+        String datoMottatt = journalpost.getDatoMottatt() == null
+                ? null
+                : new SimpleDateFormat("yyyy-MM-dd").format(journalpost.getDatoMottatt());
 
         return OpprettJournalpostRequest.builder()
                 .journalfoerendeEnhet(journalpost.getJournalfoerendeEnhet())
                 .journalpostType(JOURNALPOSTTYPE)
                 .avsenderMottaker(avsenderMottaker)
                 .kanal(journalpost.getMottakskanal())
+                .datoMottatt(datoMottatt)
                 .tema(journalpost.getTema())
                 .eksternReferanseId(journalpost.getFilNavn())
                 .tilleggsopplysninger(tilleggsopplysninger)
