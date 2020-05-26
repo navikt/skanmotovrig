@@ -2,13 +2,13 @@ package no.nav.skanmotovrig.lagrefildetaljer.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
-@Getter
+@Value
 @Builder
 @AllArgsConstructor
-//@NoArgsConstructor
-public class LagreFildetaljerResponse {
+public class Tilleggsopplysning {
+    private String nokkel;
 
+    private String verdi;
 }

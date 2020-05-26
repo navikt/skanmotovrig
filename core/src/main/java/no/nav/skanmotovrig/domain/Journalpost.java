@@ -15,22 +15,34 @@ import java.util.Date;
 @AllArgsConstructor
 public class Journalpost {
 
-    @XmlElement(required = true)
-    private String journalpostId;
+    @XmlElement(required = false, name = "tema")
+    private String tema;
 
-    @XmlElement(required = true)
+    @XmlElement(required = false, name = "brevkode")
+    private String brevkode;
+
+    @XmlElement(required = false, name = "bruker")
+    private Bruker bruker;
+
+    @XmlElement(required = false, name = "journalfoerendeenhet")
+    private String journalfoerendeEnhet;
+
+    @XmlElement(required = true, name = "mottakskanal")
     private String mottakskanal;
 
-    @XmlElement(required = true)
+    @XmlElement(required = true, name = "datomottatt")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private Date datoMottatt;
 
-    @XmlElement(required = true)
+    @XmlElement(required = true, name = "batchnavn")
     private String batchNavn;
 
-    @XmlElement(required = true)
+    @XmlElement(required = true, name = "filnavn")
     private String filNavn;
 
-    @XmlElement(required = true)
+    @XmlElement(required = true, name = "endorsernr")
     private String endorsernr;
+
+    @XmlElement(required = false, name = "land")
+    private String land;
 }

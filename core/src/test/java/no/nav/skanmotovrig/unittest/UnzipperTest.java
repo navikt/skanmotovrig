@@ -1,60 +1,111 @@
 package no.nav.skanmotovrig.unittest;
 
+import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
-import no.nav.skanmotovrig.utils.Unzipper;
+import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
+import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
+import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnzipperTest {
 
-    private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
+    private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDataSkanmotovrig.zip";
+    private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
     private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
-    private final String ZIPPED_PDF_NAME = "1408-005.pdf";
-    private final String JOURNALPOST_ID = "005";
+    private final String PDF_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDokument.pdf";
+    private final String XML_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDokument.xml";
+    private final String ZIPPED_PDF_NAME = "mockDokument-0.pdf";
     private final String MOTTAKSKANAL = "SKAN_IM";
-    private final long DATO_MOTTATT = 1572476400000L;
-    private final String BATCH_NAVN = "xml_pdf_pairs_testdata.zip";
-    private final String FIL_NAVN = "1408-005.pdf";
-    private final String ENDORSERNR = "3110190003NAV743506";
-    private final String FYSISK_POSTBOKS = "1400";
-    private final String STREKKODE_POSTBOKS = "1400";
+    private final String BRUKERID = "10108000398";
+    private final String BRUKERTYPE = "PERSON";
+    private final String JOURNALFOERENDEENHET = null;//"1234";
+    private final String TEMA = "DAG";
+    private final String BREVKODE = "";//"295654";
+    private final String LAND = null;//"PRK";
+    private final long DATO_MOTTATT = 1590098400000L;
+    private final String BATCH_NAVN = "TEST 40404";
+    private final String ENDORSERNR = "22.05.2020_R105411969_1580";
+    private final String POSTBOKS = "1423";
+    private final byte CR = 13;
 
     @Test
     public void shouldExtractContentFromZip() throws IOException {
         File zip = Paths.get(ZIP_FILE_PATH).toFile();
-        List<FilepairWithMetadata> extracted = Unzipper.unzipXmlPdf(zip);
+        byte[] pdf = Files.readAllBytes(Path.of(PDF_PATH));
+        byte[] xml = Files.readAllBytes(Path.of(XML_PATH));
+        List<Filepair> filepairs = Unzipper.unzipXmlPdf(zip);
+        List<FilepairWithMetadata> extracted = filepairs.stream().map(filepair -> UnzipSkanningmetadataUtils.extractMetadata(filepair)).collect(Collectors.toList());
         FilepairWithMetadata pair = getSkanningmetadataPdfPairFromPdfName(extracted, ZIPPED_PDF_NAME);
         Journalpost journalpost = pair.getSkanningmetadata().getJournalpost();
         SkanningInfo skanningInfo = pair.getSkanningmetadata().getSkanningInfo();
 
         assertEquals(10, extracted.size());
-        assertEquals(JOURNALPOST_ID, journalpost.getJournalpostId());
         assertEquals(MOTTAKSKANAL, journalpost.getMottakskanal());
         assertEquals(DATO_MOTTATT, journalpost.getDatoMottatt().getTime());
         assertEquals(BATCH_NAVN, journalpost.getBatchNavn());
-        assertEquals(FIL_NAVN, journalpost.getFilNavn());
+        assertEquals(ZIPPED_PDF_NAME, journalpost.getFilNavn());
         assertEquals(ENDORSERNR, journalpost.getEndorsernr());
-        assertEquals(FYSISK_POSTBOKS, skanningInfo.getFysiskPostboks());
-        assertEquals(STREKKODE_POSTBOKS, skanningInfo.getStrekkodePostboks());
-        assertNotNull(pair.getXml());
-        assertNotNull(pair.getPdf());
+        assertEquals(JOURNALFOERENDEENHET, journalpost.getJournalfoerendeEnhet());
+        assertEquals(TEMA, journalpost.getTema());
+        assertEquals(BREVKODE, journalpost.getBrevkode());
+        assertEquals(LAND, journalpost.getLand());
+        assertEquals(BRUKERID, journalpost.getBruker().getBrukerId());
+        assertEquals(BRUKERTYPE, journalpost.getBruker().getBrukerType());
+        assertEquals(POSTBOKS, skanningInfo.getFysiskPostboks());
+        assertEquals(POSTBOKS, skanningInfo.getStrekkodePostboks());
+        assertArrayEqualsIgnoreCR(xml, pair.getXml());
+        assertArrayEqualsIgnoreCR(pdf, pair.getPdf());
     }
 
     @Test
-    public void shouldThrowExceptionIfUnableToReadMetadata() {
-        File zip = new File(INVALID_ZIP_FILE_PATH);
-        assertThrows(SkanmotovrigUnzipperFunctionalException.class, () -> Unzipper.unzipXmlPdf(zip));
+    public void shouldThrowExceptionIfUnableToReadMetadata() throws IOException {
+        File zip = Paths.get(BROKEN_ZIP_FILE_PATH).toFile();
+        assertThrows(SkanmotovrigUnzipperTechnicalException.class, () ->
+                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
+                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
+                        .collect(Collectors.toList()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfInvalidMetadata() {
+        File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
+        assertThrows(InvalidMetadataException.class, () ->
+                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
+                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
+                        .collect(Collectors.toList()));
+    }
+
+    private void assertArrayEqualsIgnoreCR(byte[] expected, byte[] actual) {
+        int len = Math.min(expected.length, actual.length);
+        byte[] expectedIgnored = removeCR(expected, len);
+        byte[] actualIgnored = removeCR(actual, len);
+        assertArrayEquals(expectedIgnored, actualIgnored);
+    }
+
+    private byte[] removeCR(byte[] array, int len) {
+        int i = 0;
+        byte[] byteArrayWithoutCR = new byte[len];
+        for (byte b : array) {
+            if (CR != b) {
+                byteArrayWithoutCR[i++] = b;
+            }
+        }
+        return byteArrayWithoutCR;
     }
 
     private FilepairWithMetadata getSkanningmetadataPdfPairFromPdfName(List<FilepairWithMetadata> filepairWithMetadata, String name) {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import no.nav.skanmotovrig.validator.SkanningMetadataValidator;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -15,9 +16,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "skanningmetadata")
 public class Skanningmetadata {
 
-    @XmlElement(required = true)
+    public void verifyFields() {
+        SkanningMetadataValidator.validate(this);
+    }
+
+    @XmlElement(required = true, name = "journalpost")
     private Journalpost journalpost;
 
-    @XmlElement(required = true)
+    @XmlElement(required = true, name = "skanninginfo")
     private SkanningInfo skanningInfo;
 }
