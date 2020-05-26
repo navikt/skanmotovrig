@@ -60,7 +60,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     private final String STSUrl = "/rest/v1/sts/token";
     private static final String VALID_PUBLIC_KEY_PATH = "src/test/resources/sftp/itest_valid.pub";
 
-    private final Path MOCKZIP = Path.of("src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");//"src/test/resources/__files/inbound/mockDataSkanmotovrig.zip";//"__files/inbound";
+    private final Path MOCKZIP = Path.of("src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");
     private final Path SKANMOTOVRIG_ZIP_PATH = Path.of("src/test/resources/inbound/mockDataSkanmotovrig.zip");
 
     LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
