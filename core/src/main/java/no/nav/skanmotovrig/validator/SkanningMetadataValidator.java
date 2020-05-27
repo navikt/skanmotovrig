@@ -1,11 +1,13 @@
 package no.nav.skanmotovrig.validator;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Bruker;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 
+@Slf4j
 public class SkanningMetadataValidator {
 
     public static void validate(Skanningmetadata skanningmetadata) {
@@ -58,7 +60,7 @@ public class SkanningMetadataValidator {
             throw new InvalidMetadataException("Filnavn is not valid: " + journalpost.getFilNavn());
         }
         if (!JournalpostValidator.isValidEndorsernr(journalpost.getEndorsernr())) {
-            throw new InvalidMetadataException("Endorsernr is not valid: " + journalpost.getEndorsernr());
+            log.warn("Skanmotovrig Endorsernr is not valid, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());
         }
     }
 
