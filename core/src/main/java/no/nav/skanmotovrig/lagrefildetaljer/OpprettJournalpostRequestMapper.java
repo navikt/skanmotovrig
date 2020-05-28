@@ -80,7 +80,7 @@ public class OpprettJournalpostRequestMapper {
                 new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
                 new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
                 new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchNavn())
-        ).stream().filter(tilleggsopplysning -> tilleggsopplysning.getVerdi() != null).collect(Collectors.toList());
+        ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
         String datoMottatt = journalpost.getDatoMottatt() == null
                 ? null
