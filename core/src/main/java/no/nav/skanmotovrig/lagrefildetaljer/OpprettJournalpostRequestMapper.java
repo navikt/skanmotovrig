@@ -34,6 +34,8 @@ public class OpprettJournalpostRequestMapper {
 
     private static final String FNR = "FNR";
     private static final String ORGNR = "ORGNR";
+    private static final String UKJENT_TEMA = "UKJ";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public static OpprettJournalpostRequest generateRequestBody(Skanningmetadata skanningmetadata, Filepair filepair) {
         Journalpost journalpost = skanningmetadata.getJournalpost();
@@ -84,7 +86,9 @@ public class OpprettJournalpostRequestMapper {
 
         String datoMottatt = journalpost.getDatoMottatt() == null
                 ? null
-                : new SimpleDateFormat("yyyy-MM-dd").format(journalpost.getDatoMottatt());
+                : new SimpleDateFormat(DATE_FORMAT).format(journalpost.getDatoMottatt());
+
+        String tema = notNullOrEmpty(journalpost.getTema())? journalpost.getTema() : UKJENT_TEMA;
 
         return OpprettJournalpostRequest.builder()
                 .journalfoerendeEnhet(journalpost.getJournalfoerendeEnhet())
@@ -92,7 +96,7 @@ public class OpprettJournalpostRequestMapper {
                 .avsenderMottaker(avsenderMottaker)
                 .kanal(journalpost.getMottakskanal())
                 .datoMottatt(datoMottatt)
-                .tema(journalpost.getTema())
+                .tema(tema)
                 .eksternReferanseId(journalpost.getFilNavn())
                 .tilleggsopplysninger(tilleggsopplysninger)
                 .bruker(bruker)
