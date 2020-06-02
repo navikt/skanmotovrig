@@ -12,6 +12,7 @@ import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalExc
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
+import no.nav.skanmotovrig.mdc.MDCGenerate;
 import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
 import no.nav.skanmotovrig.utils.Utils;
@@ -46,6 +47,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             List<String> filenames = filomraadeService.getFileNames();
             log.info("Skanmotovrig fant {} zipfiler på sftp server", filenames.size());
             for(String zipName: filenames){
+                MDCGenerate.setZipId(zipName);
                 AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
 
                 log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
@@ -53,22 +55,25 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
 
                 filepairList.forEach(filepair -> {
-                        Optional<OpprettJournalpostResponse> response = opprettJournalpost(filepair);
-                        try {
-                            if (response.isEmpty()){
-                                log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
-                                lastOppFilpar(filepair, zipName);
-                                log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
-                            }
-                        } catch (Exception e) {
-                            log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
-                            safeToDeleteZipFile.set(false);
+                    MDCGenerate.generateNewCallIdIfThereAreNone();
+                    Optional<OpprettJournalpostResponse> response = opprettJournalpost(filepair);
+                    try {
+                        if (response.isEmpty()){
+                            log.info("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
+                            lastOppFilpar(filepair, zipName);
                         }
+                    } catch (Exception e) {
+                        log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
+                        safeToDeleteZipFile.set(false);
+                    } finally {
+                        MDCGenerate.clearCallId();
+                    }
                 });
 
                 if(safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
                 }
+                MDCGenerate.clearZipId();
             }
         } catch(Exception e) {
             log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);

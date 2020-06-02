@@ -1,14 +1,12 @@
 package no.nav.skanmotovrig.lagrefildetaljer;
 
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFinnesIkkeFunctionalException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
-import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigTillaterIkkeTilknyttingFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
-import no.nav.skanmotovrig.constants.MDCConstants;
+import no.nav.skanmotovrig.mdc.MDCConstants;
 import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -23,8 +21,6 @@ import org.springframework.http.HttpHeaders;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.Collections;
 
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
