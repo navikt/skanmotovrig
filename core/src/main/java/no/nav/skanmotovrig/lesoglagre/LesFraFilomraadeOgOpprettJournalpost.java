@@ -61,7 +61,6 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                         if (response.isEmpty()){
                             log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
                             lastOppFilpar(filepair, zipName);
-                            log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
                         }
                     } catch (Exception e) {
                         log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
