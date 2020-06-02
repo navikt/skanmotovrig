@@ -8,7 +8,7 @@ import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.lang.NonNullApi;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotovrig.constants.MDCConstants;
+import no.nav.skanmotovrig.mdc.MDCConstants;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
