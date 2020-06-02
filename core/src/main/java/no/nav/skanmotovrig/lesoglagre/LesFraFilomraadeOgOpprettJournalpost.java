@@ -59,7 +59,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                     Optional<OpprettJournalpostResponse> response = opprettJournalpost(filepair);
                     try {
                         if (response.isEmpty()){
-                            log.warn("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
+                            log.info("Skanmotovrig laster opp fil til feilområde fil={} zipFil={}", filepair.getName(), zipName);
                             lastOppFilpar(filepair, zipName);
                         }
                     } catch (Exception e) {
