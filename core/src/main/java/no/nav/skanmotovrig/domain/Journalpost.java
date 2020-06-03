@@ -37,7 +37,7 @@ public class Journalpost {
     @XmlElement(required = true, name = "batchnavn")
     private String batchNavn;
 
-    @XmlElement(required = true, name = "filnavn")
+    @XmlElement(required = false, name = "filnavn")
     private String filNavn;
 
     @XmlElement(required = false, name = "endorsernr")
