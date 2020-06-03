@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.lesoglagre;
+package no.nav.skanmotovrig;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Filepair;

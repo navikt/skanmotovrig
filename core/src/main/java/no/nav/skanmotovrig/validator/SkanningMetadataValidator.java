@@ -60,7 +60,7 @@ public class SkanningMetadataValidator {
             throw new InvalidMetadataException("Filnavn is not valid: " + journalpost.getFilNavn());
         }
         if (!JournalpostValidator.isValidEndorsernr(journalpost.getEndorsernr())) {
-            log.warn("Skanmotovrig Endorsernr is not valid, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());
+            log.warn("Skanmotovrig Endorsernr is not valid but generating journalpost anyway, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());
         }
     }
 
@@ -69,10 +69,10 @@ public class SkanningMetadataValidator {
             throw new InvalidMetadataException("SkanningInfo is null");
         }
         if (!SkanningInfoValidator.isValidFysiskPostboks(skanningInfo.getFysiskPostboks())) {
-            log.warn("Skanmotovrig FysiskPostboks is not valid, FysiskPostboks={}", skanningInfo.getFysiskPostboks());
+            log.warn("Skanmotovrig FysiskPostboks is not valid but generating journalpost anyway, FysiskPostboks={}", skanningInfo.getFysiskPostboks());
         }
         if (!SkanningInfoValidator.isValidStrekkodePostboks(skanningInfo.getStrekkodePostboks())) {
-            log.warn("Skanmotovrig StrekkodePostboks is not valid, StrekkodePostboks={}", skanningInfo.getStrekkodePostboks());
+            log.warn("Skanmotovrig StrekkodePostboks is not valid but generating journalpost anyway, StrekkodePostboks={}", skanningInfo.getStrekkodePostboks());
         }
     }
 }

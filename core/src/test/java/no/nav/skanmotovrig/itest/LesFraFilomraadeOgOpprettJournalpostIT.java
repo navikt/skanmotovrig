@@ -7,7 +7,7 @@ import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
-import no.nav.skanmotovrig.lesoglagre.LesFraFilomraadeOgOpprettJournalpost;
+import no.nav.skanmotovrig.LesFraFilomraadeOgOpprettJournalpost;
 import no.nav.skanmotovrig.filomraade.FilomraadeConsumer;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
 import no.nav.skanmotovrig.sftp.Sftp;
