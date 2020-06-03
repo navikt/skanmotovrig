@@ -47,7 +47,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             List<String> filenames = filomraadeService.getFileNames();
             log.info("Skanmotovrig fant {} zipfiler på sftp server", filenames.size());
             for(String zipName: filenames){
-                MDCGenerate.setZipId(zipName);
+                setUpMDCforZip(zipName);
                 AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
 
                 log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
@@ -55,7 +55,8 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
 
                 filepairList.forEach(filepair -> {
-                    MDCGenerate.generateNewCallIdIfThereAreNone();
+                    setUpMDCforFile(filepair.getName());
+
                     Optional<OpprettJournalpostResponse> response = opprettJournalpost(filepair);
                     try {
                         if (response.isEmpty()){
@@ -66,14 +67,14 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                         log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
                         safeToDeleteZipFile.set(false);
                     } finally {
-                        MDCGenerate.clearCallId();
+                        tearDownMDCforFile();
                     }
                 });
 
                 if(safeToDeleteZipFile.get()) {
                     filomraadeService.moveZipFile(zipName, "processed");
                 }
-                MDCGenerate.clearZipId();
+                tearDownMDCforZip();
             }
         } catch(Exception e) {
             log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);
@@ -130,5 +131,20 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         String path = Utils.removeFileExtensionInFilename(zipName);
         filomraadeService.uploadFileToFeilomrade(filepair.getPdf(), filepair.getName() + ".pdf", path);
         filomraadeService.uploadFileToFeilomrade(filepair.getXml(), filepair.getName() + ".xml", path);
+    }
+
+    private void setUpMDCforZip(String zipname){
+        MDCGenerate.setZipId(zipname);
+    }
+    private void tearDownMDCforZip(){
+        MDCGenerate.clearZipId();
+    }
+    private void setUpMDCforFile(String filename){
+        MDCGenerate.setFileName(filename);
+        MDCGenerate.generateNewCallIdIfThereAreNone();
+    }
+    private void tearDownMDCforFile(){
+        MDCGenerate.clearFilename();
+        MDCGenerate.clearCallId();
     }
 }

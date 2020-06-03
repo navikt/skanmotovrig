@@ -4,6 +4,7 @@ import org.slf4j.MDC;
 
 import java.util.UUID;
 
+import static no.nav.skanmotovrig.mdc.MDCConstants.MDC_FILENAME;
 import static no.nav.skanmotovrig.mdc.MDCConstants.MDC_ZIP_ID;
 import static no.nav.skanmotovrig.mdc.MDCConstants.MDC_NAV_CALL_ID;
 
@@ -25,6 +26,14 @@ public class MDCGenerate {
     public static void clearZipId() {
         if (MDC.get(MDC_ZIP_ID) != null) {
             MDC.remove(MDC_ZIP_ID);
+        }
+    }
+    public static void setFileName(String filename) {
+        MDC.put(MDC_FILENAME, filename);
+    }
+    public static void clearFilename() {
+        if (MDC.get(MDC_FILENAME) != null) {
+            MDC.remove(MDC_FILENAME);
         }
     }
     public static void clearMdc() {

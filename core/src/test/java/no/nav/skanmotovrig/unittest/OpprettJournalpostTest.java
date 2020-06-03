@@ -24,6 +24,8 @@ public class OpprettJournalpostTest {
 
     private final String MOTTAKSKANAL = "SKAN_IM";
     private final String BATCHNAVN = "navnPaaBatch.zip";
+    private final String FILNAVN_I_XML = "ABC.PDF";
+    private final String FILNAVN = "filnavn";
     private final String FILNAVN_PDF = "filnavn.pdf";
     private final String FILNAVN_XML = "filnavn.xml";
     private final String ENDORSERNR = "222111NAV456";
@@ -51,7 +53,7 @@ public class OpprettJournalpostTest {
                                     .land(LAND)
                                     .mottakskanal(MOTTAKSKANAL)
                                     .batchNavn(BATCHNAVN)
-                                    .filNavn(FILNAVN_PDF)
+                                    .filNavn(FILNAVN_I_XML)
                                     .endorsernr(ENDORSERNR)
                                     .bruker(Bruker.builder().brukerId(BRUKER_ID).brukerType(BRUKER_IDTYPE).build())
                                     .build()
@@ -62,6 +64,7 @@ public class OpprettJournalpostTest {
                             .build())
                     .build(),
             Filepair.builder()
+                    .name(FILNAVN)
                     .pdf(DUMMY_FILE)
                     .xml(DUMMY_FILE)
                     .build()
