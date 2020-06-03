@@ -57,7 +57,7 @@ public class SkanningMetadataValidator {
             throw new InvalidMetadataException("Batchnavn is not valid: " + journalpost.getBatchNavn());
         }
         if (!JournalpostValidator.isValidFilnavn(journalpost.getFilNavn())) {
-            throw new InvalidMetadataException("Filnavn is not valid: " + journalpost.getFilNavn());
+            log.warn("Skanmotovrig Filnavn is not valid but generating journalpost anyway, filnavn={}", journalpost.getFilNavn());
         }
         if (!JournalpostValidator.isValidEndorsernr(journalpost.getEndorsernr())) {
             log.warn("Skanmotovrig Endorsernr is not valid but generating journalpost anyway, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());

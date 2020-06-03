@@ -41,6 +41,7 @@ public class OpprettJournalpostRequestMapper {
     public static OpprettJournalpostRequest generateRequestBody(Skanningmetadata skanningmetadata, Filepair filepair) {
         Journalpost journalpost = skanningmetadata.getJournalpost();
         SkanningInfo skanningInfo = skanningmetadata.getSkanningInfo();
+        String eksternReferanseId = appendFileType(filepair.getName(), FILTYPE_PDF);
 
         AvsenderMottaker avsenderMottaker = null;
         if(journalpost.getLand() != null) {
@@ -98,7 +99,7 @@ public class OpprettJournalpostRequestMapper {
                 .kanal(journalpost.getMottakskanal())
                 .datoMottatt(datoMottatt)
                 .tema(tema)
-                .eksternReferanseId(journalpost.getFilNavn())
+                .eksternReferanseId(eksternReferanseId)
                 .tilleggsopplysninger(tilleggsopplysninger)
                 .bruker(bruker)
                 .dokumenter(List.of(dokument))
