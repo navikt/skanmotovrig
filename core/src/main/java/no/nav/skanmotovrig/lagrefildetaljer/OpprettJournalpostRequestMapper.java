@@ -24,6 +24,7 @@ public class OpprettJournalpostRequestMapper {
     private static final String VARIANTFORMAT_PDF = "ARKIV";
     private static final String VARIANTFORMAT_XML = "SKANNING_META";
     private static final String FILTYPE_XML = "xml";
+    private static final String FILTYPE_PDF = "pdf";
     private static final String DOKUMENTKATEGORI = "IS";
     private static final String JOURNALPOSTTYPE = "INNGAAENDE";
     private static final String ENDORSERNR = "endorsernr";
@@ -52,14 +53,14 @@ public class OpprettJournalpostRequestMapper {
                 .filtype(PDFA)
                 .variantformat(VARIANTFORMAT_PDF)
                 .fysiskDokument(filepair.getPdf())
-                .filnavn(journalpost.getFilNavn())
+                .filnavn(appendFileType(filepair.getName(), FILTYPE_PDF))
                 .build();
 
         DokumentVariant xml = DokumentVariant.builder()
                 .filtype(XML)
                 .variantformat(VARIANTFORMAT_XML)
                 .fysiskDokument(filepair.getXml())
-                .filnavn(Utils.changeFiletypeInFilename(journalpost.getFilNavn(), FILTYPE_XML))
+                .filnavn(appendFileType(filepair.getName(), FILTYPE_XML))
                 .build();
 
         Dokument dokument = Dokument.builder()
@@ -106,5 +107,9 @@ public class OpprettJournalpostRequestMapper {
 
     private static boolean notNullOrEmpty(String string) {
         return string != null && !string.isBlank();
+    }
+
+    private static String appendFileType(String filename, String filetype) {
+        return filename + "." + filetype;
     }
 }
