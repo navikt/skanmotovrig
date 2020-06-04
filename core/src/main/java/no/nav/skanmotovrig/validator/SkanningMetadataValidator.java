@@ -69,10 +69,18 @@ public class SkanningMetadataValidator {
             throw new InvalidMetadataException("SkanningInfo is null");
         }
         if (!SkanningInfoValidator.isValidFysiskPostboks(skanningInfo.getFysiskPostboks())) {
+            throw new InvalidMetadataException("FysiskPostboks is not valid: " + skanningInfo.getFysiskPostboks());
+        }
+        if (!SkanningInfoValidator.isValidStrekkodePostboks(skanningInfo.getStrekkodePostboks())) {
+            throw new   InvalidMetadataException("StrekkodePostboks is not valid: " + skanningInfo.getStrekkodePostboks());
+        }
+        /* TODO TEMP so production don't blow up
+        if (!SkanningInfoValidator.isValidFysiskPostboks(skanningInfo.getFysiskPostboks())) {
             log.warn("Skanmotovrig FysiskPostboks is not valid but generating journalpost anyway, FysiskPostboks={}", skanningInfo.getFysiskPostboks());
         }
         if (!SkanningInfoValidator.isValidStrekkodePostboks(skanningInfo.getStrekkodePostboks())) {
             log.warn("Skanmotovrig StrekkodePostboks is not valid but generating journalpost anyway, StrekkodePostboks={}", skanningInfo.getStrekkodePostboks());
         }
+         */
     }
 }
