@@ -17,7 +17,7 @@ public class JournalpostValidator {
     }
 
     public static boolean isValidFilnavn(String filnavn) {
-        if(isNonEmptyString(filnavn) && filnavn.lastIndexOf(".") != -1){
+        if(isNonEmptyString(filnavn) && filnavn.lastIndexOf(".") > 0){
             return filnavn.lastIndexOf(".") < filnavn.length() -1;
         }
         return false;
