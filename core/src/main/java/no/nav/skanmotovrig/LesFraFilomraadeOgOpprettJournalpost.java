@@ -37,7 +37,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
-    //@Scheduled(initialDelay = 3000, fixedDelay = 10 * MINUTE)
+    @Scheduled(initialDelay = 3000, fixedDelay = 10 * MINUTE)
     public void scheduledJob() {
         lesOgLagre();
     }
