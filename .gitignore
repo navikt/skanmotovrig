@@ -19,3 +19,7 @@ testDb.properties
 
 **/application-t*.properties
 **/application-q*.properties
+
+*.pem
+*.ppk
+*known_hosts
