@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkanningAvUtgaende {
+public class SkanningAvOvrig {
     private Skanningmetadata skanningmetadata;
 }
