@@ -6,7 +6,7 @@ import javax.xml.stream.util.StreamReaderDelegate;
 
 // Used to parse xml attributes in case insensitive manner
 
-class MetadataStreamReaderDelegate extends StreamReaderDelegate {
+public class MetadataStreamReaderDelegate extends StreamReaderDelegate {
 
     public MetadataStreamReaderDelegate(XMLStreamReader xsr) {
         super(xsr);

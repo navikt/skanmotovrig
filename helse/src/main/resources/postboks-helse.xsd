@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <xs:element name="skanningmetadata" type="skanningmetadataType" />
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="skanningmetadata" type="skanningmetadataType"/>
     <xs:complexType name="skanningmetadataType">
         <xs:sequence>
-            <xs:element name="journalpost" type="journalpostType" minOccurs="1" />
-            <xs:element name="skanninginfo" type="skanninginfoType" minOccurs="1" />
+            <xs:element name="journalpost" type="journalpostType" minOccurs="1"/>
+            <xs:element name="skanninginfo" type="skanninginfoType" minOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="journalpostType">
@@ -12,31 +13,38 @@
             <xs:element name="bruker" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element name="brukerid" type="xs:string" minOccurs="1">
-                        </xs:element>
-                        <xs:element name="brukertype" type="xs:string" minOccurs="1">
-                        </xs:element>
+                        <xs:element name="brukerid" type="brukeridType" minOccurs="1"/>
+                        <xs:element name="brukertype" type="brukerType" minOccurs="1"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="mottakskanal" type="xs:string" minOccurs="1" fixed="SKAN_IM" />
-            <xs:element name="datoMottatt" type="xs:date" minOccurs="1" />
-            <xs:element name="batchnavn" type="xs:string" minOccurs="1" />
-            <xs:element name="filnavn" type="xs:string" minOccurs="1" />
-            <xs:element name="endorsernr" type="xs:string" minOccurs="1" />
-            <xs:element name="antallSider" type="xs:string" minOccurs="1" />
+            <xs:element name="mottakskanal" type="xs:string" minOccurs="1" fixed="SKAN_IM"/>
+            <xs:element name="datomottatt" type="xs:date" minOccurs="1"/>
+            <xs:element name="batchnavn" type="xs:string" minOccurs="1"/>
+            <xs:element name="filnavn" type="xs:string" minOccurs="0"/>
+            <xs:element name="endorsernr" type="xs:string" minOccurs="0"/>
+            <xs:element name="antallsider" type="xs:string" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="skanninginfoType">
         <xs:sequence>
-            <xs:element name="fysiskPostboks" type="xs:string" minOccurs="1" />
-            <xs:element name="strekkodePostboks" type="xs:string" minOccurs="1">
-                <xs:restriction base="xs:string">
-                    <xs:enumeration value="1405" />
-                    <xs:enumeration value="1411" />
-                    <xs:enumeration value="1413" />
-                </xs:restriction>
-            </xs:element>
+            <xs:element name="fysiskpostboks" type="xs:string" minOccurs="1"/>
+            <xs:element name="strekkodepostboks" type="strekkodePostboksType" minOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
+    <xs:simpleType name="brukeridType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{11}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="brukerType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PERSON"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="strekkodePostboksType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1411"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>
