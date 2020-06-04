@@ -5,6 +5,7 @@ import no.nav.skanmotovrig.helse.domain.Skanningmetadata;
 import no.nav.skanmotovrig.unzipskanningmetadata.MetadataStreamReaderDelegate;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -34,7 +35,8 @@ public class SkanningmetadataUnmarshaller {
             envelope.setSkanningmetadata(skanningmetadata);
             return envelope;
         } catch (JAXBException | XMLStreamException | SAXException e) {
-            throw new SkanningmetadataValidationException("Kunne ikke unmarshalle xml: " + e.getMessage(), e);
+            final String message = ExceptionUtils.getRootCauseMessage(e);
+            throw new SkanningmetadataValidationException("Kunne ikke unmarshalle xml: " + message, e);
         }
     }
 }
