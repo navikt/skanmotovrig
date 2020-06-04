@@ -17,7 +17,10 @@
 			<groupId>no.nav.skanmotovrig</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>no.nav.skanmotovrig</groupId>
+			<artifactId>helse</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>

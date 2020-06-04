@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -26,6 +27,9 @@ public class SkanmotovrigProperties {
 
     @NotNull
     private FilomraadeProperties filomraade;
+
+    @NotNull
+    private FilomraadeProperties helse;
 
     @NotNull
     private SftpProperties sftp;
