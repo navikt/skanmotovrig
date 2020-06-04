@@ -17,9 +17,8 @@ public class JournalpostValidator {
     }
 
     public static boolean isValidFilnavn(String filnavn) {
-        if (isNonEmptyString(filnavn) && filnavn.length() >= 5) {
-            String fileEnding = filnavn.substring(filnavn.length() - 4);
-            return '.' == fileEnding.charAt(0);
+        if(isNonEmptyString(filnavn) && filnavn.lastIndexOf(".") > 0){
+            return filnavn.lastIndexOf(".") < filnavn.length() -1;
         }
         return false;
     }
@@ -30,6 +29,14 @@ public class JournalpostValidator {
 
     public static boolean isValidJournalfoerendeEnhet(String journalfoerendeEnhet) {
         return journalfoerendeEnhet == null || (isNumeric(journalfoerendeEnhet) && journalfoerendeEnhet.length() == 4);
+    }
+
+    public static boolean isValidReferansenummer(String referansenummer) {
+        return referansenummer == null;
+    }
+
+    public static boolean isValidjournalpostId(String journalpostId) {
+        return journalpostId == null;
     }
 
     private static boolean isNumeric(String string) {
