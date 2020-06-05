@@ -15,6 +15,10 @@ public class MdcProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
+        final String exchangeId = exchange.getExchangeId();
+        if (exchangeId != null) {
+            MDC.put(MDCConstants.MDC_CALL_ID, exchangeId);
+        }
         final String zipId = exchange.getProperty(PROPERTY_FORSENDELSE_ZIPNAME, String.class);
         if (zipId != null) {
             MDC.put(MDCConstants.MDC_ZIP_ID, zipId);
