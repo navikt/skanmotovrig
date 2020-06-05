@@ -6,21 +6,15 @@ import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
-import no.nav.skanmotovrig.mdc.MDCConstants;
-import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import org.springframework.http.HttpHeaders;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
@@ -43,20 +37,13 @@ public class OpprettJournalpostConsumer {
         try {
             HttpHeaders headers = createHeaders(token);
             HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);
-
-            URI uri = new URI(dokarkivJournalpostUrl);
-            return restTemplate.exchange(uri, HttpMethod.POST, requestEntity, OpprettJournalpostResponse.class)
-                    .getBody();
-
+            return restTemplate.exchange(dokarkivJournalpostUrl, HttpMethod.POST, requestEntity, OpprettJournalpostResponse.class).getBody();
         } catch (HttpClientErrorException e) {
             throw new SkanmotovrigFunctionalException(String.format("opprettJournalpost feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
                     .getStatusCode(), e.getMessage()), e);
         } catch (HttpServerErrorException e) {
             throw new SkanmotovrigTechnicalException(String.format("opprettJournalpost feilet teknisk med statusKode=%s. Feilmelding=%s", e
                     .getStatusCode(), e.getMessage()), e);
-        } catch (URISyntaxException e) {
-            throw new SkanmotovrigTechnicalException(String.format("opprettJournalpost feilet teknisk. Feilmelding=%s",
-                    e.getMessage()), e);
         }
     }
 
@@ -65,12 +52,7 @@ public class OpprettJournalpostConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
-        if (MDC.get(MDCConstants.MDC_NAV_CALL_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CALL_ID, MDC.get(MDCConstants.MDC_NAV_CALL_ID));
-        }
-        if (MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID));
-        }
+        headers.addAll(NavHeaders.createNavCustomHeaders());
         return headers;
     }
 }

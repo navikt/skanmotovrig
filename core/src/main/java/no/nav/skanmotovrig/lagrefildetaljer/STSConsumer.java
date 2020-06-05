@@ -1,12 +1,10 @@
 package no.nav.skanmotovrig.lagrefildetaljer;
 
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.mdc.MDCConstants;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
-import org.slf4j.MDC;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -61,13 +59,7 @@ public class STSConsumer {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-        if (MDC.get(MDCConstants.MDC_NAV_CALL_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CALL_ID, MDC.get(MDCConstants.MDC_NAV_CALL_ID));
-        }
-        if (MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID) != null) {
-            headers.add(MDCConstants.MDC_NAV_CONSUMER_ID, MDC.get(MDCConstants.MDC_NAV_CONSUMER_ID));
-        }
+        headers.addAll(NavHeaders.createNavCustomHeaders());
         return headers;
     }
 }
