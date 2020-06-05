@@ -27,7 +27,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"xml", "ocr", "pdf"})
-public class HelseforsendelseEnvelope {
+public class PostboksHelseforsendelseEnvelope {
     private final String zipname;
     private final String filebasename;
     private Skanningmetadata skanningmetadata;
@@ -38,9 +38,6 @@ public class HelseforsendelseEnvelope {
     public void validate() {
         if (xml == null) {
             throw new ForsendelseNotCompleteException("Fant ikke filnavn=" + filebasename + ".xml i zip=" + zipname);
-        }
-        if (ocr == null) {
-            throw new ForsendelseNotCompleteException("Fant ikke filnavn=" + filebasename + ".ocr i zip=" + zipname);
         }
         if (pdf == null) {
             throw new ForsendelseNotCompleteException("Fant ikke filnavn=" + filebasename + ".xml i zip=" + zipname);

@@ -16,14 +16,14 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-public class HelseSplitter {
+public class PostboksHelseSplitter {
     @Handler
     public List<Message> splitMessage(@Body List<Exchange> body, CamelContext camelContext) {
         return body.stream().map(exchange -> {
             DefaultMessage message = new DefaultMessage(camelContext);
             final String filename = exchange.getIn().getHeader(Exchange.FILE_NAME, String.class);
             message.setHeader(Exchange.FILE_NAME, filename);
-            message.setHeader(HelseRoute.HEADER_FORSENDELSE_FILE_EXTENSION, getExtension(filename));
+            message.setHeader(PostboksHelseRoute.HEADER_FORSENDELSE_FILE_EXTENSION, getExtension(filename));
             message.setBody(exchange.getIn().getBody(InputStream.class));
             return message;
         }).collect(Collectors.toList());
