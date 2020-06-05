@@ -62,6 +62,13 @@ public class SkanningMetadataValidator {
         if (!JournalpostValidator.isValidEndorsernr(journalpost.getEndorsernr())) {
             log.warn("Skanmotovrig Endorsernr is not valid but generating journalpost anyway, endorsernr={}, fil={}", journalpost.getEndorsernr(), journalpost.getFilNavn());
         }
+        // Disse to feltene skal IKKE være i skanmotovrig
+        if(!JournalpostValidator.isValidjournalpostId(journalpost.getJournalpostId())) {
+            throw new InvalidMetadataException("Skanmotovrig JournalpostId is not valid: journalpostId should not be set. JournalpostId=" + journalpost.getJournalpostId());
+        }
+        if(!JournalpostValidator.isValidReferansenummer(journalpost.getReferansenummer())) {
+            throw new InvalidMetadataException("Skanmotovrig Referansenummer is not valid: referansenummer should not be set. Referansenummer=" + journalpost.getReferansenummer());
+        }
     }
 
     private static void verifySkanningInfoIsValid(SkanningInfo skanningInfo) {

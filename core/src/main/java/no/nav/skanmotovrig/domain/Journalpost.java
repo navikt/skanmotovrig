@@ -45,4 +45,10 @@ public class Journalpost {
 
     @XmlElement(required = false, name = "land")
     private String land;
+
+    @XmlElement(required = false, name = "referansenummer")
+    private String referansenummer;
+
+    @XmlElement(required = false, name = "journalpostid")
+    private String journalpostId;
 }
