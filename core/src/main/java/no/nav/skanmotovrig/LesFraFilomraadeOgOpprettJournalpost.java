@@ -37,7 +37,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
-    //@Scheduled(initialDelay = 3000, fixedDelay = 10 * MINUTE)
+    @Scheduled(initialDelay = 3000, fixedDelay = 10 * MINUTE)
     public void scheduledJob() {
         lesOgLagre();
     }
@@ -115,10 +115,10 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         try {
             return Optional.of(UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml()));
         } catch (InvalidMetadataException e) {
-            log.warn("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
+            log.error("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperFunctionalException e) {
-            log.warn("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
+            log.error("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperTechnicalException e) {
             log.error("Tenknisk feil oppstod ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
