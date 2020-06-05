@@ -40,7 +40,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     static final String UKJENT_TEMA = "UKJ";
     static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    public OpprettJournalpostRequest mapRequest(HelseforsendelseEnvelope envelope) {
+    public OpprettJournalpostRequest mapRequest(PostboksHelseforsendelseEnvelope envelope) {
         final String strekkodePostboks = envelope.getSkanningmetadata().getSkanninginfo().getStrekkodePostboks();
         final PostboksHelseTema.PostboksHelse postboks = PostboksHelseTema.lookup(strekkodePostboks);
         if (postboks == null) {
@@ -49,7 +49,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
         return doMap(envelope, postboks);
     }
 
-    private OpprettJournalpostRequest doMap(HelseforsendelseEnvelope envelope, PostboksHelseTema.PostboksHelse postboks) {
+    private OpprettJournalpostRequest doMap(PostboksHelseforsendelseEnvelope envelope, PostboksHelseTema.PostboksHelse postboks) {
         final Skanningmetadata skanningmetadata = envelope.getSkanningmetadata();
         Journalpost journalpost = skanningmetadata.getJournalpost();
         Skanninginfo skanningInfo = skanningmetadata.getSkanninginfo();
@@ -69,19 +69,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 .filnavn(envelope.createEntryName(FILE_EXTENSION_XML))
                 .build();
 
-        DokumentVariant ocr = DokumentVariant.builder()
-                .filtype(FILTYPE_OCR)
-                .variantformat(VARIANTFORMAT_OCR)
-                .fysiskDokument(envelope.getOcr())
-                .filnavn(envelope.createEntryName(FILE_EXTENSION_OCR))
-                .build();
-
-        Dokument dokument = Dokument.builder()
-                .brevkode(postboks.getBrevkode())
-                .tittel(postboks.getDokumentTittel())
-                .dokumentKategori(DOKUMENTKATEGORI)
-                .dokumentVarianter(List.of(pdf, xml, ocr))
-                .build();
+        Dokument dokument = createDokument(envelope, postboks, pdf, xml);
 
         Bruker bruker = Optional.ofNullable(journalpost.getBruker())
                 .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukerType()))
@@ -117,6 +105,31 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 .bruker(bruker)
                 .dokumenter(List.of(dokument))
                 .build();
+    }
+
+    private Dokument createDokument(final PostboksHelseforsendelseEnvelope envelope, final PostboksHelseTema.PostboksHelse postboks,
+                                    final DokumentVariant pdf, final DokumentVariant xml) {
+        if (envelope.getOcr() == null) {
+            return Dokument.builder()
+                    .brevkode(postboks.getBrevkode())
+                    .tittel(postboks.getDokumentTittel())
+                    .dokumentKategori(DOKUMENTKATEGORI)
+                    .dokumentVarianter(List.of(pdf, xml))
+                    .build();
+        } else {
+            DokumentVariant ocr = DokumentVariant.builder()
+                    .filtype(FILTYPE_OCR)
+                    .variantformat(VARIANTFORMAT_OCR)
+                    .fysiskDokument(envelope.getOcr())
+                    .filnavn(envelope.createEntryName(FILE_EXTENSION_OCR))
+                    .build();
+            return Dokument.builder()
+                    .brevkode(postboks.getBrevkode())
+                    .tittel(postboks.getDokumentTittel())
+                    .dokumentKategori(DOKUMENTKATEGORI)
+                    .dokumentVarianter(List.of(pdf, xml, ocr))
+                    .build();
+        }
     }
 
     private static boolean notNullOrEmpty(String string) {

@@ -70,8 +70,8 @@ class OpprettJournalpostPostboksHelseTemaRequestMapperTest {
                         tuple(OpprettJournalpostPostboksHelseRequestMapper.FILTYPE_OCR, OpprettJournalpostPostboksHelseRequestMapper.VARIANTFORMAT_OCR, OCR_FIL, FILEBASENAME + ".ocr"));
     }
 
-    private HelseforsendelseEnvelope createEnvelope() {
-        return HelseforsendelseEnvelope.builder()
+    private PostboksHelseforsendelseEnvelope createEnvelope() {
+        return PostboksHelseforsendelseEnvelope.builder()
                 .filebasename(FILEBASENAME)
                 .zipname(ZIPNAME)
                 .skanningmetadata(Skanningmetadata.builder()

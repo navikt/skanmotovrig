@@ -16,7 +16,7 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Slf4j
-public class HelseSkanningAggregator implements AggregationStrategy {
+public class PostboksHelseSkanningAggregator implements AggregationStrategy {
     public static final String XML_EXTENSION = "xml";
     public static final String OCR_EXTENSION = "ocr";
     public static final String PDF_EXTENSION = "pdf";
@@ -25,13 +25,13 @@ public class HelseSkanningAggregator implements AggregationStrategy {
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
         try {
             if (oldExchange == null) {
-                final HelseforsendelseEnvelope envelope = new HelseforsendelseEnvelope(newExchange.getProperty(HelseRoute.PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
+                final PostboksHelseforsendelseEnvelope envelope = new PostboksHelseforsendelseEnvelope(newExchange.getProperty(PostboksHelseRoute.PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
                 applyOnEnvelope(newExchange, envelope);
                 newExchange.getIn().setBody(envelope);
                 return newExchange;
             }
 
-            final HelseforsendelseEnvelope envelope = oldExchange.getIn().getBody(HelseforsendelseEnvelope.class);
+            final PostboksHelseforsendelseEnvelope envelope = oldExchange.getIn().getBody(PostboksHelseforsendelseEnvelope.class);
             applyOnEnvelope(newExchange, envelope);
             return oldExchange;
         } catch (IOException e) {
@@ -39,7 +39,7 @@ public class HelseSkanningAggregator implements AggregationStrategy {
         }
     }
 
-    private void applyOnEnvelope(Exchange newExchange, HelseforsendelseEnvelope envelope) throws IOException {
+    private void applyOnEnvelope(Exchange newExchange, PostboksHelseforsendelseEnvelope envelope) throws IOException {
         final String extension = getExtension(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class));
         if (XML_EXTENSION.equals(extension)) {
             final InputStream inputStream = newExchange.getIn().getBody(InputStream.class);

@@ -15,19 +15,22 @@ import javax.inject.Inject;
  */
 @Slf4j
 @Component
-public class HelseService {
+public class PostboksHelseService {
     private final OpprettJournalpostPostboksHelseRequestMapper mapper;
     private final OpprettJournalpostService opprettJournalpostService;
 
     @Inject
-    public HelseService(OpprettJournalpostPostboksHelseRequestMapper mapper,
-                        OpprettJournalpostService opprettJournalpostService) {
+    public PostboksHelseService(OpprettJournalpostPostboksHelseRequestMapper mapper,
+                                OpprettJournalpostService opprettJournalpostService) {
         this.mapper = mapper;
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
     @Handler
-    public String behandleForsendelse(@Body HelseforsendelseEnvelope envelope) {
+    public String behandleForsendelse(@Body PostboksHelseforsendelseEnvelope envelope) {
+        if (envelope.getOcr() == null) {
+            log.info("Skanmothelse mangler OCR fil. Fortsetter journalføring. fil=" + envelope.getFilebasename() + ", batch=" + envelope.getSkanningmetadata().getJournalpost().getBatchnavn());
+        }
         OpprettJournalpostRequest request = mapper.mapRequest(envelope);
         final OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpostService.opprettJournalpost(request);
         return opprettJournalpostResponse.getJournalpostId();
