@@ -23,8 +23,8 @@ public class FilomraadeConsumer {
     @Autowired
     public FilomraadeConsumer(Sftp sftp, SkanmotovrigProperties skanmotovrigProperties) {
         this.sftp = sftp;
-        this.inboundDirectory = skanmotovrigProperties.getFilomraade().getInngaaendemappe();
-        this.feilDirectory = skanmotovrigProperties.getFilomraade().getFeilmappe();
+        this.inboundDirectory = skanmotovrigProperties.getOvrig().getFilomraade().getInngaaendemappe();
+        this.feilDirectory = skanmotovrigProperties.getOvrig().getFilomraade().getFeilmappe();
     }
 
     public List<String> listZipFiles() {
