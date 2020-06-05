@@ -2,7 +2,6 @@ package no.nav.skanmotovrig.helse;
 
 import no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException;
 import no.nav.skanmotovrig.helse.domain.Skanningmetadata;
-import no.nav.skanmotovrig.unzipskanningmetadata.MetadataStreamReaderDelegate;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -30,7 +29,7 @@ public class SkanningmetadataUnmarshaller {
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-helse.xsd"))));
             XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-            XMLStreamReader xmlStreamReader = new MetadataStreamReaderDelegate(xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml())));
+            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml()));
             final Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
             envelope.setSkanningmetadata(skanningmetadata);
             return envelope;

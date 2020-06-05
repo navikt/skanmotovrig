@@ -2,12 +2,10 @@ package no.nav.skanmotovrig.helse;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
-import no.nav.skanmotovrig.mdc.MDCConstants;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -20,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class HelseRoute extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
     static final String HEADER_FORSENDELSE_FILE_EXTENSION = "ForsendelseFileExtension";
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
@@ -35,22 +35,20 @@ public class HelseRoute extends RouteBuilder {
     public void configure() throws Exception {
         onException(Exception.class)
                 .handled(true)
-                .process(new MdcProcessor())
-                .log(LoggingLevel.WARN, log, "Skanmothelse feilet teknisk for forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}. ${exception}")
+                .process(new MdcSetterProcessor())
+                .log(LoggingLevel.ERROR, log, "Skanmothelse feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:avvik")
-                .log(LoggingLevel.WARN, log, "Skanmothelse skrev forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "} til feilmappe. fil=${header." + Exchange.FILE_NAME_PRODUCED + "}.")
-                .process(exchange -> MDC.remove(MDCConstants.MDC_FILENAME));
+                .log(LoggingLevel.ERROR, log, "Skanmothelse skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         // Kjente funksjonelle feil
         onException(AbstractSkanmotovrigFunctionalException.class)
                 .handled(true)
-                .process(new MdcProcessor())
-                .log(LoggingLevel.WARN, log, "Skanmothelse feilet funksjonelt for forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}. ${exception}")
+                .process(new MdcSetterProcessor())
+                .log(LoggingLevel.WARN, log, "Skanmothelse feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-funksjonelt.zip"))
                 .to("direct:avvik")
-                .log(LoggingLevel.WARN, log, "Skanmothelse skrev forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "} til feilmappe. fil=${header." + Exchange.FILE_NAME_PRODUCED + "}.")
-                .process(exchange -> MDC.remove(MDCConstants.MDC_FILENAME));
+                .log(LoggingLevel.WARN, log, "Skanmothelse skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         from("{{skanmotovrig.helse.endpointuri}}/{{skanmotovrig.helse.filomraade.inngaaendemappe}}" +
                 "?{{skanmotovrig.helse.endpointconfig}}" +
@@ -64,26 +62,29 @@ public class HelseRoute extends RouteBuilder {
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
-                .process(new MdcProcessor())
+                .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext}"), new HelseSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(500)
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
-                .process(new MdcProcessor())
+                .process(new MdcSetterProcessor())
                 .process(exchange -> exchange.getIn().getBody(HelseforsendelseEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
+                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
                 .to("direct:process_helse")
                 .end() // aggregate
                 .end() // split
-                .process(exchange -> MDC.remove(MDCConstants.MDC_FILENAME))
+                .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmothelse behandlet ferdig fil=${file:absolute.path}.");
 
         from("direct:process_helse")
                 .routeId("process_helse")
-                .log(LoggingLevel.INFO, log, "Skanmothelse behandler forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.")
+                .process(new MdcSetterProcessor())
+                .log(LoggingLevel.INFO, log, "Skanmothelse behandler " + KEY_LOGGING_INFO + ".")
                 .bean(helseService)
-                .log(LoggingLevel.INFO, log, "Skanmothelse journalførte forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "} som journalpostId=${body}");
+                .log(LoggingLevel.INFO, log, "Skanmothelse journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
+                .process(new MdcRemoverProcessor());
 
         from("direct:avvik")
                 .routeId("avvik")
@@ -92,7 +93,8 @@ public class HelseRoute extends RouteBuilder {
                 .to("{{skanmotovrig.helse.endpointuri}}/{{skanmotovrig.helse.filomraade.feilmappe}}" +
                         "?{{skanmotovrig.helse.endpointconfig}}")
                 .otherwise()
-                .log(LoggingLevel.ERROR, log, "Skanmothelse teknisk feil der forsendelse=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "} ikke ble flyttet til feilområde. Må analyseres.")
-                .end();
+                .log(LoggingLevel.ERROR, log, "Skanmothelse teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+                .end()
+                .process(new MdcRemoverProcessor());
     }
 }

@@ -41,7 +41,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public OpprettJournalpostRequest mapRequest(HelseforsendelseEnvelope envelope) {
-        final String strekkodePostboks = envelope.getSkanningmetadata().getSkanningInfo().getStrekkodePostboks();
+        final String strekkodePostboks = envelope.getSkanningmetadata().getSkanninginfo().getStrekkodePostboks();
         final PostboksHelseTema.PostboksHelse postboks = PostboksHelseTema.lookup(strekkodePostboks);
         if (postboks == null) {
             throw new SkanmotovrigFunctionalException("Fant ikke postboks metadata for strekkodePostboks=" + strekkodePostboks);
@@ -52,7 +52,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     private OpprettJournalpostRequest doMap(HelseforsendelseEnvelope envelope, PostboksHelseTema.PostboksHelse postboks) {
         final Skanningmetadata skanningmetadata = envelope.getSkanningmetadata();
         Journalpost journalpost = skanningmetadata.getJournalpost();
-        Skanninginfo skanningInfo = skanningmetadata.getSkanningInfo();
+        Skanninginfo skanningInfo = skanningmetadata.getSkanninginfo();
         String eksternReferanseId = envelope.createEntryName(FILE_EXTENSION_PDF);
 
         DokumentVariant pdf = DokumentVariant.builder()
@@ -96,7 +96,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 new Tilleggsopplysning(ENDORSERNR, journalpost.getEndorsernr()),
                 new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
                 new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
-                new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchNavn()),
+                new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchnavn()),
                 new Tilleggsopplysning(ANTALL_SIDER, journalpost.getAntallSider())
         ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
