@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Skanninginfo {
 
-    @XmlElement(required = true, name = "fysiskpostboks")
+    @XmlElement(required = true, name = "fysiskPostboks")
     private String fysiskPostboks;
 
-    @XmlElement(required = true, name = "strekkodepostboks")
+    @XmlElement(required = true, name = "strekkodePostboks")
     private String strekkodePostboks;
 }

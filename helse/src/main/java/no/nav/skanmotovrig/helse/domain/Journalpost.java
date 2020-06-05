@@ -28,11 +28,11 @@ public class Journalpost {
     private String mottakskanal;
 
     @XmlJavaTypeAdapter(LocalDateAdapter.class)
-    @XmlElement(required = true, name = "datomottatt")
+    @XmlElement(required = true, name = "datoMottatt")
     private LocalDate datoMottatt;
 
     @XmlElement(required = true, name = "batchnavn")
-    private String batchNavn;
+    private String batchnavn;
 
     @XmlElement(required = false, name = "filnavn")
     private String filNavn;
@@ -40,6 +40,6 @@ public class Journalpost {
     @XmlElement(required = false, name = "endorsernr")
     private String endorsernr;
 
-    @XmlElement(required = false, name = "antallsider")
+    @XmlElement(required = false, name = "antallSider")
     private String antallSider;
 }

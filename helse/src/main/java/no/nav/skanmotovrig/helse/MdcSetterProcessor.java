@@ -5,13 +5,14 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.MDC;
 
+import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_BATCHNAVN;
 import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_FILEBASENAME;
 import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_ZIPNAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
-public class MdcProcessor implements Processor {
+public class MdcSetterProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -19,6 +20,11 @@ public class MdcProcessor implements Processor {
         if (exchangeId != null) {
             MDC.put(MDCConstants.MDC_CALL_ID, exchangeId);
         }
+        final String batchNavn = exchange.getProperty(PROPERTY_FORSENDELSE_BATCHNAVN, String.class);
+        if (batchNavn != null) {
+            MDC.put(MDCConstants.MDC_BATCHNAVN, batchNavn);
+        }
+
         final String zipId = exchange.getProperty(PROPERTY_FORSENDELSE_ZIPNAME, String.class);
         if (zipId != null) {
             MDC.put(MDCConstants.MDC_ZIP_ID, zipId);
