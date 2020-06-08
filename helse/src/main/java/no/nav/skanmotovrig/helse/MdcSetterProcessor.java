@@ -5,9 +5,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.MDC;
 
-import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_BATCHNAVN;
-import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_FILEBASENAME;
-import static no.nav.skanmotovrig.helse.HelseRoute.PROPERTY_FORSENDELSE_ZIPNAME;
+import static no.nav.skanmotovrig.helse.PostboksHelseRoute.PROPERTY_FORSENDELSE_BATCHNAVN;
+import static no.nav.skanmotovrig.helse.PostboksHelseRoute.PROPERTY_FORSENDELSE_FILEBASENAME;
+import static no.nav.skanmotovrig.helse.PostboksHelseRoute.PROPERTY_FORSENDELSE_ZIPNAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS

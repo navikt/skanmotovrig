@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class HelseRoute extends RouteBuilder {
+public class PostboksHelseRoute extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
     public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
@@ -24,11 +24,11 @@ public class HelseRoute extends RouteBuilder {
     static final String HEADER_FORSENDELSE_FILE_EXTENSION = "ForsendelseFileExtension";
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
-    private final HelseService helseService;
+    private final PostboksHelseService postboksHelseService;
 
     @Inject
-    public HelseRoute(HelseService helseService) {
-        this.helseService = helseService;
+    public PostboksHelseRoute(PostboksHelseService postboksHelseService) {
+        this.postboksHelseService = postboksHelseService;
     }
 
     @Override
@@ -58,18 +58,19 @@ public class HelseRoute extends RouteBuilder {
                 "&maxMessagesPerPoll=1" +
                 "&idempotent=true" +
                 "&move=processed" +
-                "&jailStartingDirectory=false")
+                "&jailStartingDirectory=false"+
+                "&scheduler=spring&scheduler.cron={{skanmotovrig.helse.schedule}}")
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
-                .aggregate(simple("${file:name.noext}"), new HelseSkanningAggregator())
+                .aggregate(simple("${file:name.noext}"), new PostboksHelseSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(500)
+                .completionTimeout(TimeUnit.SECONDS.toMillis(1))
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
-                .process(exchange -> exchange.getIn().getBody(HelseforsendelseEnvelope.class).validate())
+                .process(exchange -> exchange.getIn().getBody(PostboksHelseforsendelseEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
                 .to("direct:process_helse")
@@ -82,13 +83,13 @@ public class HelseRoute extends RouteBuilder {
                 .routeId("process_helse")
                 .process(new MdcSetterProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmothelse behandler " + KEY_LOGGING_INFO + ".")
-                .bean(helseService)
+                .bean(postboksHelseService)
                 .log(LoggingLevel.INFO, log, "Skanmothelse journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
                 .process(new MdcRemoverProcessor());
 
         from("direct:avvik")
                 .routeId("avvik")
-                .choice().when(body().isInstanceOf(HelseforsendelseEnvelope.class))
+                .choice().when(body().isInstanceOf(PostboksHelseforsendelseEnvelope.class))
                 .setBody(simple("${body.createZip}"))
                 .to("{{skanmotovrig.helse.endpointuri}}/{{skanmotovrig.helse.filomraade.feilmappe}}" +
                         "?{{skanmotovrig.helse.endpointconfig}}")

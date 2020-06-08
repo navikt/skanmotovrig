@@ -22,26 +22,84 @@ public class SkanmotovrigProperties {
     @NotNull
     private String stsurl;
 
-    @NotNull
-    private ServiceUserProperties serviceuser;
-
-    @NotNull
-    private FilomraadeProperties filomraade;
-
-    @NotNull
+    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
+    private final FilomraadeProperties filomraade = new FilomraadeProperties();
+    private final Ovrig ovrig = new Ovrig();
     private final Helse helse = new Helse();
+    private final SftpProperties sftp = new SftpProperties();
 
-    @NotNull
-    private SftpProperties sftp;
+    @Getter
+    @Setter
+    @Validated
+    public static class ServiceUserProperties {
+        @ToString.Exclude
+        @NotEmpty
+        private String username;
 
+        @ToString.Exclude
+        @NotEmpty
+        private String password;
+    }
+
+    @Getter
+    @Setter
+    @Validated
+    public static class FilomraadeProperties {
+        @NotEmpty
+        private String inngaaendemappe;
+
+        @NotEmpty
+        private String feilmappe;
+    }
+
+    @Getter
+    @Setter
+    @Validated
+    public static class Ovrig {
+        @NotNull
+        private final FilomraadeProperties filomraade = new FilomraadeProperties();
+    }
+
+    @Getter
+    @Setter
     @Validated
     public static class Helse {
         @NotEmpty
         private String endpointuri;
+
         @NotEmpty
         private String endpointconfig;
+
+        @NotEmpty
+        private String schedule;
+
         @NotNull
-        private FilomraadeProperties filomraade;
+        private final FilomraadeProperties filomraade = new FilomraadeProperties();
+    }
+
+    @Getter
+    @Setter
+    @Validated
+    public static class SftpProperties {
+        @ToString.Exclude
+        @NotEmpty
+        private String host;
+
+        @ToString.Exclude
+        @NotEmpty
+        private String privateKey;
+
+        @ToString.Exclude
+        @NotEmpty
+        private String hostKey;
+
+        @ToString.Exclude
+        @NotEmpty
+        private String username;
+
+        @ToString.Exclude
+        @NotEmpty
+        private String port;
     }
 }
 
