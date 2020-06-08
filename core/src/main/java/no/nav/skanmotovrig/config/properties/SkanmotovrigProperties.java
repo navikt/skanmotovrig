@@ -70,6 +70,9 @@ public class SkanmotovrigProperties {
         @NotEmpty
         private String endpointconfig;
 
+        @NotEmpty
+        private String schedule;
+
         @NotNull
         private final FilomraadeProperties filomraade = new FilomraadeProperties();
     }

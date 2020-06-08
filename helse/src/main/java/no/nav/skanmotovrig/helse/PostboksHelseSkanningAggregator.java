@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static no.nav.skanmotovrig.helse.PostboksHelseRoute.PROPERTY_FORSENDELSE_ZIPNAME;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -25,7 +26,7 @@ public class PostboksHelseSkanningAggregator implements AggregationStrategy {
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
         try {
             if (oldExchange == null) {
-                final PostboksHelseforsendelseEnvelope envelope = new PostboksHelseforsendelseEnvelope(newExchange.getProperty(PostboksHelseRoute.PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
+                final PostboksHelseforsendelseEnvelope envelope = new PostboksHelseforsendelseEnvelope(newExchange.getProperty(PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
                 applyOnEnvelope(newExchange, envelope);
                 newExchange.getIn().setBody(envelope);
                 return newExchange;
@@ -37,6 +38,12 @@ public class PostboksHelseSkanningAggregator implements AggregationStrategy {
         } catch (IOException e) {
             throw new SkanmotovrigTechnicalException("Klarte ikke lese fil", e);
         }
+    }
+
+    @Override
+    public void timeout(Exchange exchange, int index, int total, long timeout) {
+        final String fil = exchange.getProperty(Exchange.AGGREGATED_CORRELATION_KEY, String.class);
+        log.info("Skanmothelse fant ikke 3 filer under aggreggering av zipfil innen timeout={}ms. Fortsetter behandling. fil={}.", timeout, fil);
     }
 
     private void applyOnEnvelope(Exchange newExchange, PostboksHelseforsendelseEnvelope envelope) throws IOException {

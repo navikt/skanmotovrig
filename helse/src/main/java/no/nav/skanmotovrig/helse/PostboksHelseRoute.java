@@ -58,7 +58,8 @@ public class PostboksHelseRoute extends RouteBuilder {
                 "&maxMessagesPerPoll=1" +
                 "&idempotent=true" +
                 "&move=processed" +
-                "&jailStartingDirectory=false")
+                "&jailStartingDirectory=false"+
+                "&scheduler=spring&scheduler.cron={{skanmotovrig.helse.schedule}}")
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
@@ -66,7 +67,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext}"), new PostboksHelseSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(500)
+                .completionTimeout(TimeUnit.SECONDS.toMillis(1))
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
                 .process(exchange -> exchange.getIn().getBody(PostboksHelseforsendelseEnvelope.class).validate())
