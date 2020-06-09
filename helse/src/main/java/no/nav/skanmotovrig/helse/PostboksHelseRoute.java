@@ -63,6 +63,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
+                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext}"), new PostboksHelseSkanningAggregator())
@@ -70,7 +71,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .completionTimeout(TimeUnit.SECONDS.toMillis(1))
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
-                .process(exchange -> exchange.getIn().getBody(PostboksHelseforsendelseEnvelope.class).validate())
+                .process(exchange -> exchange.getIn().getBody(PostboksHelseEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
                 .to("direct:process_helse")
@@ -89,7 +90,7 @@ public class PostboksHelseRoute extends RouteBuilder {
 
         from("direct:avvik")
                 .routeId("avvik")
-                .choice().when(body().isInstanceOf(PostboksHelseforsendelseEnvelope.class))
+                .choice().when(body().isInstanceOf(PostboksHelseEnvelope.class))
                 .setBody(simple("${body.createZip}"))
                 .to("{{skanmotovrig.helse.endpointuri}}/{{skanmotovrig.helse.filomraade.feilmappe}}" +
                         "?{{skanmotovrig.helse.endpointconfig}}")

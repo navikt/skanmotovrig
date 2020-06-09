@@ -22,7 +22,7 @@ import java.io.ByteArrayInputStream;
  */
 public class SkanningmetadataUnmarshaller {
     @Handler
-    PostboksHelseforsendelseEnvelope unmarshal(@Body PostboksHelseforsendelseEnvelope envelope) {
+    PostboksHelseEnvelope unmarshal(@Body PostboksHelseEnvelope envelope) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
             SchemaFactory schemaFactory = SchemaFactory.newDefaultInstance();

@@ -27,7 +27,7 @@ public class PostboksHelseService {
     }
 
     @Handler
-    public String behandleForsendelse(@Body PostboksHelseforsendelseEnvelope envelope) {
+    public String behandleForsendelse(@Body PostboksHelseEnvelope envelope) {
         if (envelope.getOcr() == null) {
             log.info("Skanmothelse mangler OCR fil. Fortsetter journalføring. fil=" + envelope.getFilebasename() + ", batch=" + envelope.getSkanningmetadata().getJournalpost().getBatchnavn());
         }

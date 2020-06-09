@@ -26,13 +26,13 @@ public class PostboksHelseSkanningAggregator implements AggregationStrategy {
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
         try {
             if (oldExchange == null) {
-                final PostboksHelseforsendelseEnvelope envelope = new PostboksHelseforsendelseEnvelope(newExchange.getProperty(PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
+                final PostboksHelseEnvelope envelope = new PostboksHelseEnvelope(newExchange.getProperty(PROPERTY_FORSENDELSE_ZIPNAME, String.class), getBaseName(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class)));
                 applyOnEnvelope(newExchange, envelope);
                 newExchange.getIn().setBody(envelope);
                 return newExchange;
             }
 
-            final PostboksHelseforsendelseEnvelope envelope = oldExchange.getIn().getBody(PostboksHelseforsendelseEnvelope.class);
+            final PostboksHelseEnvelope envelope = oldExchange.getIn().getBody(PostboksHelseEnvelope.class);
             applyOnEnvelope(newExchange, envelope);
             return oldExchange;
         } catch (IOException e) {
@@ -46,7 +46,7 @@ public class PostboksHelseSkanningAggregator implements AggregationStrategy {
         log.info("Skanmothelse fant ikke 3 filer under aggreggering av zipfil innen timeout={}ms. Fortsetter behandling. fil={}.", timeout, fil);
     }
 
-    private void applyOnEnvelope(Exchange newExchange, PostboksHelseforsendelseEnvelope envelope) throws IOException {
+    private void applyOnEnvelope(Exchange newExchange, PostboksHelseEnvelope envelope) throws IOException {
         final String extension = getExtension(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class));
         if (XML_EXTENSION.equals(extension)) {
             final InputStream inputStream = newExchange.getIn().getBody(InputStream.class);
