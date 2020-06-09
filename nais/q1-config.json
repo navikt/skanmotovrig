@@ -5,6 +5,7 @@
   "SFTP_KEYS": "kv/preprod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
+  "SKANMOTOVRIG_OVRIG_SCHEDULE":"0 0/1 * * * *",
   "INGRESSES": [
     "https://skanmotovrig-q1.nais.preprod.local"
   ]

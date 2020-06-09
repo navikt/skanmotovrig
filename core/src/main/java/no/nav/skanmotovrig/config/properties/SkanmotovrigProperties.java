@@ -56,6 +56,9 @@ public class SkanmotovrigProperties {
     @Setter
     @Validated
     public static class Ovrig {
+        @NotEmpty
+        private String schedule;
+
         @NotNull
         private final FilomraadeProperties filomraade = new FilomraadeProperties();
     }
