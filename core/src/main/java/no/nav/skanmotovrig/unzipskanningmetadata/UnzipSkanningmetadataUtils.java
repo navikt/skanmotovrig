@@ -6,6 +6,7 @@ import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigUnzipperFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
+import no.nav.skanmotovrig.metrics.Metrics;
 import no.nav.skanmotovrig.utils.Utils;
 
 import javax.xml.bind.JAXBContext;
@@ -19,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+
+import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
+import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 @Slf4j
 public class UnzipSkanningmetadataUtils {
@@ -41,6 +45,7 @@ public class UnzipSkanningmetadataUtils {
                 .build();
     }
 
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "bytesToSkanningmetadata"}, percentiles = {0.5, 0.95}, histogram = true)
     public static Skanningmetadata bytesToSkanningmetadata(byte[] bytes) {
         try {
             JAXBContext jaxbContext;
@@ -50,11 +55,7 @@ public class UnzipSkanningmetadataUtils {
             XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
             XMLStreamReader xmlStreamReader =  new MetadataStreamReaderDelegate(xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bytes)));
 
-            Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
-
-            skanningmetadata.verifyFields();
-
-            return skanningmetadata;
+            return (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
         } catch (JAXBException | XMLStreamException e) {
             log.error("Skanmotovrig klarte ikke lese metadata i zipfil, feilmedling={}",e.getMessage(), e);
             throw new SkanmotovrigUnzipperTechnicalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);
