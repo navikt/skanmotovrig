@@ -40,7 +40,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     static final String UKJENT_TEMA = "UKJ";
     static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    public OpprettJournalpostRequest mapRequest(PostboksHelseforsendelseEnvelope envelope) {
+    public OpprettJournalpostRequest mapRequest(PostboksHelseEnvelope envelope) {
         final String strekkodePostboks = envelope.getSkanningmetadata().getSkanninginfo().getStrekkodePostboks();
         final PostboksHelseTema.PostboksHelse postboks = PostboksHelseTema.lookup(strekkodePostboks);
         if (postboks == null) {
@@ -49,7 +49,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
         return doMap(envelope, postboks);
     }
 
-    private OpprettJournalpostRequest doMap(PostboksHelseforsendelseEnvelope envelope, PostboksHelseTema.PostboksHelse postboks) {
+    private OpprettJournalpostRequest doMap(PostboksHelseEnvelope envelope, PostboksHelseTema.PostboksHelse postboks) {
         final Skanningmetadata skanningmetadata = envelope.getSkanningmetadata();
         Journalpost journalpost = skanningmetadata.getJournalpost();
         Skanninginfo skanningInfo = skanningmetadata.getSkanninginfo();
@@ -107,7 +107,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 .build();
     }
 
-    private Dokument createDokument(final PostboksHelseforsendelseEnvelope envelope, final PostboksHelseTema.PostboksHelse postboks,
+    private Dokument createDokument(final PostboksHelseEnvelope envelope, final PostboksHelseTema.PostboksHelse postboks,
                                     final DokumentVariant pdf, final DokumentVariant xml) {
         if (envelope.getOcr() == null) {
             return Dokument.builder()
