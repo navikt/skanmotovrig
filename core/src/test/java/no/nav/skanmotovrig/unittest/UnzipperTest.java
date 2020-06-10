@@ -81,15 +81,6 @@ public class UnzipperTest {
                         .collect(Collectors.toList()));
     }
 
-    @Test
-    public void shouldThrowExceptionIfInvalidMetadata() {
-        File zip = Paths.get(INVALID_ZIP_FILE_PATH).toFile();
-        assertThrows(InvalidMetadataException.class, () ->
-                Unzipper.unzipXmlPdf(zip).stream().map(filepair ->
-                        UnzipSkanningmetadataUtils.extractMetadata(filepair))
-                        .collect(Collectors.toList()));
-    }
-
     private void assertArrayEqualsIgnoreCR(byte[] expected, byte[] actual) {
         int len = Math.min(expected.length, actual.length);
         byte[] expectedIgnored = removeCR(expected, len);
