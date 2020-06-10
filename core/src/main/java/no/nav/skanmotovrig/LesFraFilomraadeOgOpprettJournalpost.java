@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 @Slf4j
 @Component
@@ -140,9 +141,21 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             Skanningmetadata skanningmetadata = UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml());
 
             metadataCounter.incrementMetadata(Map.of(
-                    TEMA, Optional.ofNullable(skanningmetadata).map(Skanningmetadata::getJournalpost).map(Journalpost::getTema).orElse(EMPTY),
-                    STREKKODEPOSTBOKS, Optional.ofNullable(skanningmetadata).map(Skanningmetadata::getSkanningInfo).map(SkanningInfo::getStrekkodePostboks).orElse(EMPTY),
-                    FYSISKPOSTBOKS, Optional.ofNullable(skanningmetadata).map(Skanningmetadata::getSkanningInfo).map(SkanningInfo::getFysiskPostboks).orElse(EMPTY)
+                    TEMA, Optional.ofNullable(skanningmetadata)
+                            .map(Skanningmetadata::getJournalpost)
+                            .map(Journalpost::getTema)
+                            .filter(Predicate.not(String::isBlank))
+                            .orElse(EMPTY),
+                    STREKKODEPOSTBOKS, Optional.ofNullable(skanningmetadata)
+                            .map(Skanningmetadata::getSkanningInfo)
+                            .map(SkanningInfo::getStrekkodePostboks)
+                            .filter(Predicate.not(String::isBlank))
+                            .orElse(EMPTY),
+                    FYSISKPOSTBOKS, Optional.ofNullable(skanningmetadata)
+                            .map(Skanningmetadata::getSkanningInfo)
+                            .map(SkanningInfo::getFysiskPostboks)
+                            .filter(Predicate.not(String::isBlank))
+                            .orElse(EMPTY)
             ));
 
             skanningmetadata.verifyFields();
