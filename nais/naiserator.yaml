@@ -13,6 +13,8 @@ spec:
       value: {{ SKANMOTOVRIG_STSURL }}
     - name: SKANMOTOVRIG_OVRIG_SCHEDULE
       value: {{ SKANMOTOVRIG_OVRIG_SCHEDULE }}
+    - name: SKANMOTOVRIG_HELSE_SCHEDULE
+      value: {{ SKANMOTOVRIG_HELSE_SCHEDULE }}
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
