@@ -20,9 +20,8 @@ public class MetadataCounter {
     }
 
     private void incrementMetadata(String key, String value) {
-        Counter.builder("dok_skanmotovrig_metadata")
-                .tags("metadataType", key)
-                .tags("metadataValue", value)
+        Counter.builder("dok_skanmotovrig_" + key + "_total")
+                .tags(key, value)
                 .register(meterRegistry)
                 .increment();
     }
