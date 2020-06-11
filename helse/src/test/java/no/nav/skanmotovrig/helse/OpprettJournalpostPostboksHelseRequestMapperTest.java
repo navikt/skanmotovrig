@@ -87,7 +87,7 @@ class OpprettJournalpostPostboksHelseRequestMapperTest {
                                 .datoMottatt(DATO_MOTTATT)
                                 .batchnavn(BATCH_NAVN)
                                 .endorsernr(null)
-                                .antallSider(ANTALL_SIDER)
+                                .antallSider("")
                                 .build())
                         .skanninginfo(Skanninginfo.builder()
                                 .fysiskPostboks(FYSISK_POSTBOKS)
@@ -95,11 +95,10 @@ class OpprettJournalpostPostboksHelseRequestMapperTest {
                                 .build())
                         .build())
                 .build());
-        assertThat(request.getTilleggsopplysninger()).hasSize(4);
+        assertThat(request.getTilleggsopplysninger()).hasSize(3);
         assertThat(request.getTilleggsopplysninger()).extracting(Tilleggsopplysning::getNokkel, Tilleggsopplysning::getVerdi)
                 .containsExactly(tuple(OpprettJournalpostPostboksHelseRequestMapper.FYSISKPOSTBOKS, FYSISK_POSTBOKS),
                         tuple(OpprettJournalpostPostboksHelseRequestMapper.STREKKODEPOSTBOKS, STREKKODE_POSTBOKS),
-                        tuple(OpprettJournalpostPostboksHelseRequestMapper.BATCHNAVN, BATCH_NAVN),
-                        tuple(OpprettJournalpostPostboksHelseRequestMapper.ANTALL_SIDER, ANTALL_SIDER));
+                        tuple(OpprettJournalpostPostboksHelseRequestMapper.BATCHNAVN, BATCH_NAVN));
     }
 }
