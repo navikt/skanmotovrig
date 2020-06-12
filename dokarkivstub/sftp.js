@@ -7,25 +7,26 @@ const { v4: uuidv4 } = require('uuid');
 const OPEN_MODE = ssh2.SFTP_OPEN_MODE;
 const STATUS_CODE = ssh2.SFTP_STATUS_CODE;
 
-var ROOT_DIR_HANDLE = Buffer.from('rood_dir');
-var ReadDirs = 0;
+const ZIPPATH = '../core/src/test/resources/__files/inbound/mockDataSkanmotovrig.zip';
 
-var dirUdid = 0;
-
-let writeTimeout;
+let dirUdid = 0;
 
 function getDirStats() {
+    stats = fs.statSync(ZIPPATH);
+
     return {
         mode: constants.S_IFDIR,
         uid: dirUdid++,
         gid: dirUdid,
         size: 0,
-        atime: new Date(0),
-        mtime: new Date(0)
+        atime: Date.now() / 1000 | 0,
+        mtime: Date.now() / 1000 | 0
     }
 }
+
 let key = fs.readFileSync("../core/src/test/resources/sftp/itest_privatekey", {encoding: 'utf8'});
 let zipBuffer = fs.readFileSync("../core/src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");
+let fd = fs.openSync("../core/src/test/resources/__files/inbound/mockDataSkanmotovrig.zip", "r");
 
 function* fileGenerator() {
     yield "zip1.zip";
@@ -62,7 +63,7 @@ new ssh2.Server({
                     console.log(`REALPATH req:[${reqId}], path:[${path}]`);
 
                     sftpStream.name(reqId, [
-                        { filename: '/', longname: getLongName('root') },
+                        { filename: path, longname: getLongName(path) },
                     ]);
                 });
 
@@ -104,25 +105,26 @@ new ssh2.Server({
                     console.log('Opening file for read')
                 });
 
-                sftpStream.on('READ', function (reqId, handle, offset, length) {
-                    console.log(`READ req:[${reqId}], handle:[${handle}], offset:[${offset}], length[${length}]`);
-                    let end = (offset + length) > zipBuffer.length ? zipBuffer.length : offset + length;
-                    console.log(zipBuffer.length, offset, length, end);
-                    if(offset < end){
-                        console.log("READ sending data");
-                       //let buffer = Buffer(end-offset);
-                        //zipBuffer.copy(buffer, 0, offset, end);
 
-                            //Buffer.from(zipBuffer.slice(offset, end))
+                sftpStream.on('READ', function(reqid, handle, offset, length) {
 
+                    let stats = fs.statSync(ZIPPATH);
+                    if(offset >= stats.size){
+                        sftpStream.status(reqid, STATUS_CODE.EOF);
+                    }else{
+                        let remainder = stats.size - offset;
+                        let bufferSize = length > remainder? remainder : length;
+                        let buffer = new Buffer(bufferSize);
 
-                        sftpStream.data(reqId, "buffer");
-                    }
-                    if(end === zipBuffer.length){
-                        console.log("READ sending EOF");
-                        sftpStream.status(reqId, STATUS_CODE.EOF)
+                        let fd = fs.openSync(ZIPPATH, 'r');
+                        fs.readSync(fd, buffer, 0, bufferSize, offset);
+
+                        console.log(`fd=${fd}, length==${bufferSize}, offset=${offset}, fileSize=${stats.size}, remainder=${remainder}`);
+                        sftpStream.data(reqid, buffer);
+                        fs.closeSync(fd);
                     }
                 });
+
                 sftpStream.on('CLOSE', function (reqId, handle) {
                     console.log(`CLOSE req:[${reqId}], handle:[${handle}]`);
                     sftpStream.status(reqId, STATUS_CODE.OK);
@@ -164,31 +166,6 @@ new ssh2.Server({
                     sftpStream.status(reqId, STATUS_CODE.OK);
                 });
 
-
-
-                /*
-                REMOVE(< integer >reqID, < string >path)
-
-Respond using:
-
-status() - Use this to indicate success/failure of the removal of the file at path.
-RMDIR(< integer >reqID, < string >path)
-
-Respond using:
-
-status() - Use this to indicate success/failure of the removal of the directory at path.
-                 */
-
-                /*
-                READDIR(< integer >reqID, < Buffer >handle)
-
-Respond using one of the following:
-
-name() - Use this to send one or more directory listings for the open directory back to the client.
-
-status() - Use this to indicate either end of directory contents (STATUS_CODE.EOF) or if an error occurred while reading the directory contents.
-
-                 */
                 function onSTAT(reqid, path) {
                     var mode = constants.S_IFREG; // Regular file
                     mode |= constants.S_IRWXU; // read, write, execute for user
