@@ -80,7 +80,6 @@ new ssh2.Server({
                 });
 
                 sftpStream.on('FSETSTAT', function (reqId, handle, attrs) {
-                    console.log(attrs)
                     console.log(`FSETSTAT req:[${reqId}], path:[${handle}]`);
                 });
 
@@ -162,8 +161,12 @@ new ssh2.Server({
                 });
 
                 sftpStream.on('RENAME', function (reqId, handle) {
-                    console.log(`RENAME req:[${reqId}], path:[${handle}]`);
-                    sftpStream.status(reqId, STATUS_CODE.OK);
+                    try{
+                        console.log(`RENAME req:[${reqId}], path:[${handle}]`);
+                        sftpStream.status(reqId, STATUS_CODE.OK);
+                    } catch (e) {
+                        console.trace(e);
+                    }
                 });
 
                 function onSTAT(reqid, path) {
