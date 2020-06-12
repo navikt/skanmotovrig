@@ -71,8 +71,15 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 AtomicBoolean safeToDeleteZipFile = new AtomicBoolean(true);
 
                 log.info("Skanmotovrig laster ned {} fra sftp server", zipName);
-                List<Filepair> filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName)); // TODO feilhåndtering hvis zipfil ikke er lesbar.
+                List<Filepair> filepairList;
+                try {
+                    filepairList = Unzipper.unzipXmlPdf(filomraadeService.getZipFile(zipName));
+                } catch (Exception e){
+                    filepairList = List.of();
+                    safeToDeleteZipFile.set(false);
+                }
                 numberOfFilePairs += filepairList.size();
+
                 log.info("Skanmotovrig begynner behandling av {}", zipName);
 
                 filepairList.forEach(filepair -> {

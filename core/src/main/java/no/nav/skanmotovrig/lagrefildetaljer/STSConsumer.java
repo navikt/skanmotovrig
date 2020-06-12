@@ -36,7 +36,7 @@ public class STSConsumer {
                 .build();
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true, createErrorMetric = true)
     public STSResponse getSTSToken() {
         try {
             HttpHeaders headers = createHeaders();

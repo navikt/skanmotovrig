@@ -20,6 +20,8 @@ testDb.properties
 **/application-t*.properties
 **/application-q*.properties
 
+node_modules
+
 *.pem
 *.ppk
 *known_hosts

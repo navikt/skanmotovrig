@@ -2,6 +2,7 @@ package no.nav.skanmotovrig.unzipskanningmetadata;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.domain.Filepair;
+import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
+import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 import static no.nav.skanmotovrig.utils.Utils.changeFiletypeInFilename;
 
 @Slf4j
@@ -29,6 +32,7 @@ public class Unzipper {
         return unzipXmlPdf(zipInputStream);
     }
 
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "unzipXmlPdf"}, createErrorMetric = true)
     public static List<Filepair> unzipXmlPdf(ZipArchiveInputStream zipInputStream) throws IOException {
         Map<String, byte[]> xmls = new HashMap<>();
         Map<String, byte[]> pdfs = new HashMap<>();

@@ -45,7 +45,7 @@ public class UnzipSkanningmetadataUtils {
                 .build();
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "bytesToSkanningmetadata"}, percentiles = {0.5, 0.95}, histogram = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "bytesToSkanningmetadata"}, createErrorMetric = true)
     public static Skanningmetadata bytesToSkanningmetadata(byte[] bytes) {
         try {
             JAXBContext jaxbContext;
