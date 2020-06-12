@@ -38,7 +38,6 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     static final String FNR = "FNR";
     static final String ORGNR = "ORGNR";
     static final String UKJENT_TEMA = "UKJ";
-    static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public OpprettJournalpostRequest mapRequest(PostboksHelseEnvelope envelope) {
         final String strekkodePostboks = envelope.getSkanningmetadata().getSkanninginfo().getStrekkodePostboks();
