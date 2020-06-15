@@ -5,6 +5,7 @@ import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
+import no.nav.skanmotovrig.metrics.Metrics;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
+import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 
 @Component
@@ -25,10 +29,10 @@ public class OpprettJournalpostConsumer {
     public OpprettJournalpostConsumer(RestTemplateBuilder restTemplateBuilder,
                                       SkanmotovrigProperties skanmotovrigProperties) {
         this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
-        this.restTemplate = restTemplateBuilder
-                .build();
+        this.restTemplate = restTemplateBuilder.build();
     }
 
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "opprettJournalpost"}, percentiles = {0.5, 0.95}, histogram = true)
     public OpprettJournalpostResponse opprettJournalpost(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
         try {
             HttpHeaders headers = createHeaders(token);

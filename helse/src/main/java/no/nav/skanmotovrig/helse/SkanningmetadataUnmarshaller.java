@@ -2,7 +2,6 @@ package no.nav.skanmotovrig.helse;
 
 import no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException;
 import no.nav.skanmotovrig.helse.domain.Skanningmetadata;
-import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -18,15 +17,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
-
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
 public class SkanningmetadataUnmarshaller {
     @Handler
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "unmarshal"}, createErrorMetric = true)
     PostboksHelseEnvelope unmarshal(@Body PostboksHelseEnvelope envelope) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);

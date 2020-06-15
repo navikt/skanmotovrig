@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotovrig.validator.SkanningMetadataValidator;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -16,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "skanningmetadata")
 public class Skanningmetadata {
 
-    public void verifyFields() {
+    public void verifyFields() throws InvalidMetadataException {
         SkanningMetadataValidator.validate(this);
     }
 

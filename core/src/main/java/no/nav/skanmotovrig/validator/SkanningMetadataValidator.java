@@ -6,20 +6,15 @@ import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotovrig.metrics.Metrics;
-
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 @Slf4j
 public class SkanningMetadataValidator {
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "validate-ovrig"}, createErrorMetric = true)
-    public static void validate(Skanningmetadata skanningmetadata) {
+    public static void validate(Skanningmetadata skanningmetadata) throws InvalidMetadataException{
         verfiyMetadataIsValid(skanningmetadata);
     }
 
-    private static void verfiyMetadataIsValid(Skanningmetadata skanningmetadata) {
+    private static void verfiyMetadataIsValid(Skanningmetadata skanningmetadata) throws InvalidMetadataException{
         if (null == skanningmetadata) {
             throw new InvalidMetadataException("Skanningmetadata is null");
         }
@@ -28,7 +23,7 @@ public class SkanningMetadataValidator {
         verifySkanningInfoIsValid(skanningmetadata.getSkanningInfo());
     }
 
-    private static void verifyBrukerisValid(Bruker bruker) {
+    private static void verifyBrukerisValid(Bruker bruker) throws InvalidMetadataException{
         if(null != bruker){
             if(null == bruker.getBrukerId()){
                 throw new InvalidMetadataException("BrukerId is null");
@@ -45,7 +40,7 @@ public class SkanningMetadataValidator {
         }
     }
 
-    private static void verifyJournalpostIsValid(Journalpost journalpost) {
+    private static void verifyJournalpostIsValid(Journalpost journalpost) throws InvalidMetadataException {
         if (null == journalpost) {
             throw new InvalidMetadataException("Journalpost is null");
         }
@@ -76,7 +71,7 @@ public class SkanningMetadataValidator {
         }
     }
 
-    private static void verifySkanningInfoIsValid(SkanningInfo skanningInfo) {
+    private static void verifySkanningInfoIsValid(SkanningInfo skanningInfo) throws InvalidMetadataException {
         if (null == skanningInfo) {
             throw new InvalidMetadataException("SkanningInfo is null");
         }

@@ -11,7 +11,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
 import no.nav.skanmotovrig.LesFraFilomraadeOgOpprettJournalpost;
 import no.nav.skanmotovrig.filomraade.FilomraadeConsumer;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
-import no.nav.skanmotovrig.metrics.MetadataCounter;
+import no.nav.skanmotovrig.metrics.DokCounter;
 import no.nav.skanmotovrig.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -71,7 +71,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
 
     private LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
     private OpprettJournalpostService opprettJournalpostService;
-    private MetadataCounter metadataCounter;
+    private DokCounter dokCounter;
     private FilomraadeService filomraadeService;
 
     private int PORT = 2222;
@@ -106,8 +106,8 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
                 new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties),
                 new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties)
         );
-        metadataCounter = new MetadataCounter(new SimpleMeterRegistry());
-        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService, metadataCounter);
+        dokCounter = new DokCounter(new SimpleMeterRegistry());
+        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService, dokCounter);
         copyFileToSkanmotovrigFolder();
     }
 

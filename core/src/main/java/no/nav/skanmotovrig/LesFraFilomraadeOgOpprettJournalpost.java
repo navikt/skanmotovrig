@@ -14,7 +14,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
 import no.nav.skanmotovrig.mdc.MDCGenerate;
-import no.nav.skanmotovrig.metrics.MetadataCounter;
+import no.nav.skanmotovrig.metrics.DokCounter;
 import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
 import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
 import no.nav.skanmotovrig.utils.Utils;
@@ -34,20 +34,21 @@ public class LesFraFilomraadeOgOpprettJournalpost {
 
     private final FilomraadeService filomraadeService;
     private final OpprettJournalpostService opprettJournalpostService;
-    private final MetadataCounter metadataCounter;
+    private final DokCounter dokCounter;
 
     private final String TEMA = "tema";
     private final String STREKKODEPOSTBOKS = "strekkodePostboks";
     private final String FYSISKPOSTBOKS = "fysiskPostboks";
     private final String EMPTY = "empty";
 
+
     public LesFraFilomraadeOgOpprettJournalpost(FilomraadeService filomraadeService,
                                                 OpprettJournalpostService opprettJournalpostService,
-                                                MetadataCounter metadataCounter
+                                                DokCounter dokCounter
     ) {
         this.filomraadeService = filomraadeService;
         this.opprettJournalpostService = opprettJournalpostService;
-        this.metadataCounter = metadataCounter;
+        this.dokCounter = dokCounter;
     }
 
     @Scheduled(cron = "${skanmotovrig.ovrig.schedule}")
@@ -77,6 +78,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 } catch (Exception e){
                     filepairList = List.of();
                     safeToDeleteZipFile.set(false);
+                    dokCounter.incrementError(e);
                 }
                 numberOfFilePairs += filepairList.size();
 
@@ -95,6 +97,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                     } catch (Exception e) {
                         log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
                         safeToDeleteZipFile.set(false);
+                        dokCounter.incrementError(e);
                     } finally {
                         tearDownMDCforFile();
                     }
@@ -107,6 +110,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             }
         } catch(Exception e) {
             log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);
+            dokCounter.incrementError(e);
         } finally {
             // Feels like a leaky abstraction ...
             filomraadeService.disconnect();
@@ -121,6 +125,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
 
         Optional<Skanningmetadata> skanningmetadata = extractMetadata(filepair);
 
+
         if (skanningmetadata.isEmpty()) {
             return Optional.empty();
         }
@@ -132,12 +137,15 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             log.info("Skanmotovrig har opprettet journalpost, journalpostId={}, fil={}, batch={}", response.getJournalpostId(), filepair.getName(), batchNavn);
         } catch (AbstractSkanmotovrigFunctionalException e) {
             log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         } catch (AbstractSkanmotovrigTechnicalException e) {
             log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         } catch (Exception e) {
             log.error("Skanmotovrig feilet med ukjent feil ved oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         }
         return Optional.of(response);
@@ -147,7 +155,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         try {
             Skanningmetadata skanningmetadata = UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml());
 
-            metadataCounter.incrementMetadata(Map.of(
+            dokCounter.incrementCounter(Map.of(
                     TEMA, Optional.ofNullable(skanningmetadata)
                             .map(Skanningmetadata::getJournalpost)
                             .map(Journalpost::getTema)
@@ -164,21 +172,22 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                             .filter(Predicate.not(String::isBlank))
                             .orElse(EMPTY)
             ));
-
             skanningmetadata.verifyFields();
 
             return Optional.of(skanningmetadata);
         } catch (InvalidMetadataException e) {
             log.error("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperFunctionalException e) {
             log.error("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperTechnicalException | NullPointerException e) {
             log.error("Teknisk feil oppstod ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
+            dokCounter.incrementError(e);
             return Optional.empty();
         }
-
     }
 
     private void lastOppFilpar(Filepair filepair, String zipName) {
