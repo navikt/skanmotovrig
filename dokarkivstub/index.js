@@ -6,9 +6,9 @@ const expressPort = 3000;
 const app = express();
 
 app.all('/', (req, res) => {
-    res.status(500).send({
-        error: "foobar!"
-        //journalpostId: "MOCKJOURNALPOST"+uuidv4()
+    console.log("Oppretter journalpost")
+    res.status(200).send({
+        journalpostId: "MOCKJOURNALPOST"+uuidv4()
     })
 });
 

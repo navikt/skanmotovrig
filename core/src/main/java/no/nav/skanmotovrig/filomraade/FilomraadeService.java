@@ -25,12 +25,12 @@ public class FilomraadeService {
         this.filomraadeConsumer = filomraadeConsumer;
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getFileNames", }, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getFileNames"}, createErrorMetric = true)
     public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotovrigSftpTechnicalException {
         return filomraadeConsumer.listZipFiles();
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "uploadFileToFeilomrade", }, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "uploadFileToFeilomrade"}, createErrorMetric = true)
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
@@ -40,7 +40,7 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "moveZipFile", }, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "moveZipFile"}, createErrorMetric = true)
     public void moveZipFile(String file, String destination) {
         moveFile(file, destination, file + ".processed");
     }
@@ -61,7 +61,7 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getZipFile", }, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getZipFile"}, createErrorMetric = true)
     public byte[] getZipFile(String fileName) throws IOException {
         try {
             return filomraadeConsumer.getFile(fileName);
@@ -71,7 +71,7 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "disconnect", }, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "disconnect"}, createErrorMetric = true)
     public void disconnect() {
         filomraadeConsumer.disconnect();
     }
