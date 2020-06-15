@@ -39,7 +39,7 @@ public class PostboksHelseEnvelope {
     private byte[] ocr;
     private byte[] pdf;
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "validate"}, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "validate-helse"}, createErrorMetric = true)
     public void validate() {
         if (xml == null) {
             throw new ForsendelseNotCompleteException("Fant ikke filnavn=" + filebasename + ".xml i zip=" + zipname);

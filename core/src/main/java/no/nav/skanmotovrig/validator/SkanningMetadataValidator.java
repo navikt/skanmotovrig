@@ -6,10 +6,15 @@ import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
+import no.nav.skanmotovrig.metrics.Metrics;
+
+import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
+import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 @Slf4j
 public class SkanningMetadataValidator {
 
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "validate-ovrig"}, createErrorMetric = true)
     public static void validate(Skanningmetadata skanningmetadata) {
         verfiyMetadataIsValid(skanningmetadata);
     }
