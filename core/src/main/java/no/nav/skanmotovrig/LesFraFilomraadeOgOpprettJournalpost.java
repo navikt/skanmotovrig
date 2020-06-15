@@ -37,7 +37,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
-    //@Scheduled(cron = "${skanmotovrig.ovrig.schedule}")
+    @Scheduled(cron = "${skanmotovrig.ovrig.schedule}")
     public void scheduledJob() {
         lesOgLagre();
     }
