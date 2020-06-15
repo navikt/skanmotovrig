@@ -2,7 +2,6 @@ package no.nav.skanmotovrig.helse;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
 import org.apache.commons.io.IOUtils;
@@ -11,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static no.nav.skanmotovrig.helse.PostboksHelseRoute.PROPERTY_FORSENDELSE_ZIPNAME;
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -25,7 +22,6 @@ public class PostboksHelseSkanningAggregator implements AggregationStrategy {
     public static final String OCR_EXTENSION = "ocr";
     public static final String PDF_EXTENSION = "pdf";
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "aggregate"}, createErrorMetric = true)
     @Override
     public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
         try {

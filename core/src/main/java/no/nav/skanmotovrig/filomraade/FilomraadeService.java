@@ -3,16 +3,12 @@ package no.nav.skanmotovrig.filomraade;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigSftpTechnicalException;
 import no.nav.skanmotovrig.exceptions.functional.LesZipFilFuntionalException;
-import no.nav.skanmotovrig.metrics.Metrics;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
-
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 @Slf4j
 @Service
@@ -25,12 +21,10 @@ public class FilomraadeService {
         this.filomraadeConsumer = filomraadeConsumer;
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getFileNames"}, createErrorMetric = true)
     public List<String> getFileNames() throws LesZipFilFuntionalException, SkanmotovrigSftpTechnicalException {
         return filomraadeConsumer.listZipFiles();
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "uploadFileToFeilomrade"}, createErrorMetric = true)
     public void uploadFileToFeilomrade(byte[] file, String filename, String path) {
         try {
             filomraadeConsumer.uploadFileToFeilomrade(new ByteArrayInputStream(file), filename, path);
@@ -40,7 +34,6 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "moveZipFile"}, createErrorMetric = true)
     public void moveZipFile(String file, String destination) {
         moveFile(file, destination, file + ".processed");
     }
@@ -61,7 +54,6 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getZipFile"}, createErrorMetric = true)
     public byte[] getZipFile(String fileName) throws IOException {
         try {
             return filomraadeConsumer.getFile(fileName);
@@ -71,7 +63,6 @@ public class FilomraadeService {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "disconnect"}, createErrorMetric = true)
     public void disconnect() {
         filomraadeConsumer.disconnect();
     }

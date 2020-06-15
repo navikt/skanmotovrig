@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException;
 import no.nav.skanmotovrig.helse.domain.Skanningmetadata;
-import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -19,9 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -39,7 +35,6 @@ public class PostboksHelseEnvelope {
     private byte[] ocr;
     private byte[] pdf;
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "validate-helse"}, createErrorMetric = true)
     public void validate() {
         if (xml == null) {
             throw new ForsendelseNotCompleteException("Fant ikke filnavn=" + filebasename + ".xml i zip=" + zipname);
@@ -49,7 +44,6 @@ public class PostboksHelseEnvelope {
         }
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "createZip"}, createErrorMetric = true)
     public InputStream createZip() throws ArchiveException, IOException {
         ByteArrayOutputStream archiveStream = new ByteArrayOutputStream(4096);
         try (ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {

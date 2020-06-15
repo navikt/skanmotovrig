@@ -4,15 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
-import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -30,7 +26,6 @@ public class PostboksHelseService {
         this.opprettJournalpostService = opprettJournalpostService;
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "behandleForsendelse"}, percentiles = {0.5, 0.95}, histogram = true, createErrorMetric = true)
     @Handler
     public String behandleForsendelse(@Body PostboksHelseEnvelope envelope) {
         if (envelope.getOcr() == null) {

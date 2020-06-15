@@ -2,7 +2,7 @@ package no.nav.skanmotovrig.helse;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
-import no.nav.skanmotovrig.metrics.Metrics;
+import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -11,9 +11,6 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
-
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -29,18 +26,20 @@ public class PostboksHelseRoute extends RouteBuilder {
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
     private final PostboksHelseService postboksHelseService;
+    private final DokCounter dokCounter;
 
     @Inject
-    public PostboksHelseRoute(PostboksHelseService postboksHelseService) {
+    public PostboksHelseRoute(PostboksHelseService postboksHelseService, DokCounter dokCounter) {
         this.postboksHelseService = postboksHelseService;
+        this.dokCounter = dokCounter;
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "configure"}, createErrorMetric = true)
     @Override
     public void configure() throws Exception {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
+                .process(e -> dokCounter.incrementError(e.getException()))
                 .log(LoggingLevel.ERROR, log, "Skanmothelse feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:avvik")
@@ -50,6 +49,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         onException(AbstractSkanmotovrigFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
+                .process(e -> dokCounter.incrementError(e.getException()))
                 .log(LoggingLevel.WARN, log, "Skanmothelse feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-funksjonelt.zip"))
                 .to("direct:avvik")
