@@ -2,6 +2,7 @@ package no.nav.skanmotovrig.helse;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
+import no.nav.skanmotovrig.metrics.Metrics;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
+
+import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
+import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -31,6 +35,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         this.postboksHelseService = postboksHelseService;
     }
 
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "configure"}, createErrorMetric = true)
     @Override
     public void configure() throws Exception {
         onException(Exception.class)
