@@ -4,6 +4,7 @@ import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
+import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
@@ -29,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @EnableAutoConfiguration
 @EnableConfigurationProperties(SkanmotovrigProperties.class)
 @Import({OpprettJournalpostConsumer.class, STSConsumer.class, OpprettJournalpostService.class, HelseTestConfig.SshdSftpServerConfig.class,
-        HelseConfig.class})
+        HelseConfig.class, DokCounter.class})
 public class HelseTestConfig {
 
     private static final String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));

@@ -26,12 +26,12 @@ public class PostboksHelseRoute extends RouteBuilder {
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
     private final PostboksHelseService postboksHelseService;
-    private final DokCounter dokCounter;
+    private final ErrorMetricsProcessor errorMetricsProcessor;
 
     @Inject
     public PostboksHelseRoute(PostboksHelseService postboksHelseService, DokCounter dokCounter) {
         this.postboksHelseService = postboksHelseService;
-        this.dokCounter = dokCounter;
+        this.errorMetricsProcessor = new ErrorMetricsProcessor(dokCounter);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
-                .process(e -> dokCounter.incrementError(e.getException()))
+                .process(errorMetricsProcessor)
                 .log(LoggingLevel.ERROR, log, "Skanmothelse feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:avvik")
@@ -49,7 +49,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         onException(AbstractSkanmotovrigFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
-                .process(e -> dokCounter.incrementError(e.getException()))
+                .process(errorMetricsProcessor)
                 .log(LoggingLevel.WARN, log, "Skanmothelse feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-funksjonelt.zip"))
                 .to("direct:avvik")
