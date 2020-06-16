@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import static no.nav.skanmotovrig.config.LocalCacheConfig.STS_CACHE;
@@ -35,6 +36,8 @@ public class STSConsumer {
         this.restTemplate = restTemplateBuilder
                 .basicAuthentication(skanmotovrigProperties.getServiceuser().getUsername(),
                         skanmotovrigProperties.getServiceuser().getPassword())
+                .setReadTimeout(Duration.ofMillis(5000L))
+                .setConnectTimeout(Duration.ofMillis(5000L))
                 .build();
     }
 
