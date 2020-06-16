@@ -6,6 +6,7 @@ import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
 import no.nav.skanmotovrig.metrics.Metrics;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
+import static no.nav.skanmotovrig.config.LocalCacheConfig.STS_CACHE;
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 
@@ -36,7 +38,8 @@ public class STSConsumer {
                 .build();
     }
 
-    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true, createErrorMetric = true)
+    @Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true)
+    @Cacheable(STS_CACHE)
     public STSResponse getSTSToken() {
         try {
             HttpHeaders headers = createHeaders();
