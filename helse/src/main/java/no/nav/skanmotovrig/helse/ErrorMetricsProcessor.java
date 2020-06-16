@@ -16,7 +16,7 @@ public class ErrorMetricsProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         Object exception = exchange.getProperty(CAMEL_EXCEPTION_CAUGHT);
         if(exception instanceof Throwable){
-            dokCounter.incrementError((Throwable) exception);
+            dokCounter.incrementError((Throwable) exception, DokCounter.HELSE);
         }
     }
 }

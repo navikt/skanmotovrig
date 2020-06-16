@@ -78,7 +78,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                 } catch (Exception e){
                     filepairList = List.of();
                     safeToDeleteZipFile.set(false);
-                    dokCounter.incrementError(e);
+                    incrementErrorMetrics(e);
                 }
                 numberOfFilePairs += filepairList.size();
 
@@ -97,7 +97,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
                     } catch (Exception e) {
                         log.error("Skanmotovrig feilet ved opplasting til feilområde fil={} zipFil={} feilmelding={}", filepair.getName(), zipName, e.getMessage(), e);
                         safeToDeleteZipFile.set(false);
-                        dokCounter.incrementError(e);
+                        incrementErrorMetrics(e);
                     } finally {
                         tearDownMDCforFile();
                     }
@@ -110,7 +110,7 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             }
         } catch(Exception e) {
             log.error("Skanmotovrig ukjent feil oppstod i lesOgLagre, feilmelding={}", e.getMessage(), e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
         } finally {
             // Feels like a leaky abstraction ...
             filomraadeService.disconnect();
@@ -137,15 +137,15 @@ public class LesFraFilomraadeOgOpprettJournalpost {
             log.info("Skanmotovrig har opprettet journalpost, journalpostId={}, fil={}, batch={}", response.getJournalpostId(), filepair.getName(), batchNavn);
         } catch (AbstractSkanmotovrigFunctionalException e) {
             log.error("Skanmotovrig feilet funskjonelt med oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         } catch (AbstractSkanmotovrigTechnicalException e) {
             log.error("Skanmotovrig feilet teknisk med  oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         } catch (Exception e) {
             log.error("Skanmotovrig feilet med ukjent feil ved oppretting av journalpost fil={}, batch={}", filepair.getName(), batchNavn, e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         }
         return Optional.of(response);
@@ -154,38 +154,21 @@ public class LesFraFilomraadeOgOpprettJournalpost {
     private Optional<Skanningmetadata> extractMetadata(Filepair filepair){
         try {
             Skanningmetadata skanningmetadata = UnzipSkanningmetadataUtils.bytesToSkanningmetadata(filepair.getXml());
-
-            dokCounter.incrementCounter(Map.of(
-                    TEMA, Optional.ofNullable(skanningmetadata)
-                            .map(Skanningmetadata::getJournalpost)
-                            .map(Journalpost::getTema)
-                            .filter(Predicate.not(String::isBlank))
-                            .orElse(EMPTY),
-                    STREKKODEPOSTBOKS, Optional.ofNullable(skanningmetadata)
-                            .map(Skanningmetadata::getSkanningInfo)
-                            .map(SkanningInfo::getStrekkodePostboks)
-                            .filter(Predicate.not(String::isBlank))
-                            .orElse(EMPTY),
-                    FYSISKPOSTBOKS, Optional.ofNullable(skanningmetadata)
-                            .map(Skanningmetadata::getSkanningInfo)
-                            .map(SkanningInfo::getFysiskPostboks)
-                            .filter(Predicate.not(String::isBlank))
-                            .orElse(EMPTY)
-            ));
+            incrementMetadataMetrics(skanningmetadata);
             skanningmetadata.verifyFields();
 
             return Optional.of(skanningmetadata);
         } catch (InvalidMetadataException e) {
             log.error("Skanningmetadata hadde ugyldige verdier for fil {}. Skanmotovrig klarte ikke unmarshalle.", filepair.getName(), e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperFunctionalException e) {
             log.error("Kunne ikke hente metadata fra {}, feilmelding={}", filepair.getName(), e.getMessage(), e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         } catch (SkanmotovrigUnzipperTechnicalException | NullPointerException e) {
             log.error("Teknisk feil oppstod ved deserialisering av {}, feilmelding={}, cause={}", filepair.getName(), e.getMessage(), e.getCause().getMessage(), e);
-            dokCounter.incrementError(e);
+            incrementErrorMetrics(e);
             return Optional.empty();
         }
     }
@@ -209,5 +192,29 @@ public class LesFraFilomraadeOgOpprettJournalpost {
     private void tearDownMDCforFile(){
         MDCGenerate.clearFilename();
         MDCGenerate.clearCallId();
+    }
+
+    private void incrementMetadataMetrics(Skanningmetadata skanningmetadata){
+        dokCounter.incrementCounter(Map.of(
+                TEMA, Optional.ofNullable(skanningmetadata)
+                        .map(Skanningmetadata::getJournalpost)
+                        .map(Journalpost::getTema)
+                        .filter(Predicate.not(String::isBlank))
+                        .orElse(EMPTY),
+                STREKKODEPOSTBOKS, Optional.ofNullable(skanningmetadata)
+                        .map(Skanningmetadata::getSkanningInfo)
+                        .map(SkanningInfo::getStrekkodePostboks)
+                        .filter(Predicate.not(String::isBlank))
+                        .orElse(EMPTY),
+                FYSISKPOSTBOKS, Optional.ofNullable(skanningmetadata)
+                        .map(Skanningmetadata::getSkanningInfo)
+                        .map(SkanningInfo::getFysiskPostboks)
+                        .filter(Predicate.not(String::isBlank))
+                        .orElse(EMPTY)
+        ));
+    }
+
+    private void incrementErrorMetrics(Throwable e) {
+        dokCounter.incrementError(e, DokCounter.OVRIG);
     }
 }
