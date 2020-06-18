@@ -50,11 +50,7 @@ public class UnzipSkanningmetadataUtils {
             XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
             XMLStreamReader xmlStreamReader =  new MetadataStreamReaderDelegate(xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bytes)));
 
-            Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
-
-            skanningmetadata.verifyFields();
-
-            return skanningmetadata;
+            return (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
         } catch (JAXBException | XMLStreamException e) {
             log.error("Skanmotovrig klarte ikke lese metadata i zipfil, feilmedling={}",e.getMessage(), e);
             throw new SkanmotovrigUnzipperTechnicalException("Skanmotovrig klarte ikke lese metadata i zipfil", e);

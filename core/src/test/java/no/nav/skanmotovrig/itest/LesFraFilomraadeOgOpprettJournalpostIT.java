@@ -2,6 +2,7 @@ package no.nav.skanmotovrig.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Json;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.itest.config.TestConfig;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
@@ -10,6 +11,7 @@ import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
 import no.nav.skanmotovrig.LesFraFilomraadeOgOpprettJournalpost;
 import no.nav.skanmotovrig.filomraade.FilomraadeConsumer;
 import no.nav.skanmotovrig.filomraade.FilomraadeService;
+import no.nav.skanmotovrig.metrics.DokCounter;
 import no.nav.skanmotovrig.sftp.Sftp;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.config.keys.AuthorizedKeysAuthenticator;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -46,7 +49,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.mockito.ArgumentMatchers.any;
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfig.class,
@@ -63,9 +69,10 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     private final Path MOCKZIP = Path.of("src/test/resources/__files/inbound/mockDataSkanmotovrig.zip");
     private final Path SKANMOTOVRIG_ZIP_PATH = Path.of("src/test/resources/inbound/mockDataSkanmotovrig.zip");
 
-    LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
-    FilomraadeService filomraadeService;
-    OpprettJournalpostService opprettJournalpostService;
+    private LesFraFilomraadeOgOpprettJournalpost lesFraFilomraadeOgOpprettJournalpost;
+    private OpprettJournalpostService opprettJournalpostService;
+    private DokCounter dokCounter;
+    private FilomraadeService filomraadeService;
 
     private int PORT = 2222;
     private SshServer sshd = SshServer.setUpDefaultServer();
@@ -73,6 +80,7 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
 
     @Autowired
     SkanmotovrigProperties skanmotovrigeProperties;
+
 
     @BeforeAll
     void startSftpServer() throws IOException {
@@ -91,14 +99,15 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     }
 
     @BeforeEach
-    void setUpServices() throws IOException {
+    void setUpServices() {
         sftp = new Sftp(skanmotovrigeProperties);
-        filomraadeService = new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties));
+        filomraadeService = Mockito.spy(new FilomraadeService(new FilomraadeConsumer(sftp, skanmotovrigeProperties)));
         opprettJournalpostService = new OpprettJournalpostService(
                 new OpprettJournalpostConsumer(new RestTemplateBuilder(), skanmotovrigeProperties),
                 new STSConsumer(new RestTemplateBuilder(), skanmotovrigeProperties)
         );
-        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService);
+        dokCounter = new DokCounter(new SimpleMeterRegistry());
+        lesFraFilomraadeOgOpprettJournalpost = new LesFraFilomraadeOgOpprettJournalpost(filomraadeService, opprettJournalpostService, dokCounter);
         copyFileToSkanmotovrigFolder();
     }
 
@@ -140,19 +149,22 @@ public class LesFraFilomraadeOgOpprettJournalpostIT {
     @Test
     public void shouldLesOgLagreHappy() {
         setUpHappyStubs();
-        assertDoesNotThrow(() -> lesFraFilomraadeOgOpprettJournalpost.lesOgLagre());
-        verify(exactly(10), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        assertDoesNotThrow(() ->
+                assertEquals(lesFraFilomraadeOgOpprettJournalpost.lesOgLagre(),
+                        "#ZIPFILES=1, #FILEPAIRS=10, #FAILING=1"
+                        )
+        );
+        verify(exactly(9), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        Mockito.verify(filomraadeService, Mockito.times(2)).uploadFileToFeilomrade(any(), any(), any());
     }
 
-    /*
     @Test
     public void shouldMoveFilesWhenBadRequest() {
         setUpBadStubs();
-        lesFraFilomraadeOgOpprettJournalpost.lesOgLagre();
-        assertTrue("foo".equals("bar"));
+        assertEquals(lesFraFilomraadeOgOpprettJournalpost.lesOgLagre(), "#ZIPFILES=1, #FILEPAIRS=10, #FAILING=10");
+        Mockito.verify(filomraadeService, Mockito.times(20)).uploadFileToFeilomrade(any(), any(), any());
     }
 
-     */
 
     private void copyFileToSkanmotovrigFolder() {
         try {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -33,17 +34,6 @@ public class FilomraadeService {
         }
     }
 
-
-    public void deleteZipFiles(List<String> zipFiles) {
-        zipFiles.stream().forEach(this::deleteZipFile);
-    }
-
-    public void moveZipFiles(List<String> files, String destination) {
-        files.stream().forEach(file -> {
-            moveFile(file, destination, file + ".processed");
-        });
-    }
-
     public void moveZipFile(String file, String destination) {
         moveFile(file, destination, file + ".processed");
     }
@@ -64,12 +54,12 @@ public class FilomraadeService {
         }
     }
 
-    public byte[] getZipFile(String fileName) {
+    public byte[] getZipFile(String fileName) throws IOException {
         try {
             return filomraadeConsumer.getFile(fileName);
         } catch (Exception e) {
             log.error("Skanmotovrig klarte ikke hente filen {}", fileName, e);
-            return null;
+            throw e;
         }
     }
 
