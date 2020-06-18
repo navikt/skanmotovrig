@@ -3,9 +3,10 @@ package no.nav.skanmotovrig.validator;
 import java.util.Date;
 
 public class JournalpostValidator {
+    private static final String SKAN_IM = "SKAN_IM";
 
     public static boolean isValidMottakskanal(String mottakskanal) {
-        return "SKAN_IM".equals(mottakskanal);
+        return SKAN_IM.equals(mottakskanal);
     }
 
     public static boolean isValidDatoMottatt(Date datoMottatt) {

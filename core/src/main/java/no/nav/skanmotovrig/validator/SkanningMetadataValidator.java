@@ -10,11 +10,11 @@ import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 @Slf4j
 public class SkanningMetadataValidator {
 
-    public static void validate(Skanningmetadata skanningmetadata) {
+    public static void validate(Skanningmetadata skanningmetadata) throws InvalidMetadataException{
         verfiyMetadataIsValid(skanningmetadata);
     }
 
-    private static void verfiyMetadataIsValid(Skanningmetadata skanningmetadata) {
+    private static void verfiyMetadataIsValid(Skanningmetadata skanningmetadata) throws InvalidMetadataException{
         if (null == skanningmetadata) {
             throw new InvalidMetadataException("Skanningmetadata is null");
         }
@@ -23,7 +23,7 @@ public class SkanningMetadataValidator {
         verifySkanningInfoIsValid(skanningmetadata.getSkanningInfo());
     }
 
-    private static void verifyBrukerisValid(Bruker bruker) {
+    private static void verifyBrukerisValid(Bruker bruker) throws InvalidMetadataException{
         if(null != bruker){
             if(null == bruker.getBrukerId()){
                 throw new InvalidMetadataException("BrukerId is null");
@@ -40,7 +40,7 @@ public class SkanningMetadataValidator {
         }
     }
 
-    private static void verifyJournalpostIsValid(Journalpost journalpost) {
+    private static void verifyJournalpostIsValid(Journalpost journalpost) throws InvalidMetadataException {
         if (null == journalpost) {
             throw new InvalidMetadataException("Journalpost is null");
         }
@@ -71,7 +71,7 @@ public class SkanningMetadataValidator {
         }
     }
 
-    private static void verifySkanningInfoIsValid(SkanningInfo skanningInfo) {
+    private static void verifySkanningInfoIsValid(SkanningInfo skanningInfo) throws InvalidMetadataException {
         if (null == skanningInfo) {
             throw new InvalidMetadataException("SkanningInfo is null");
         }

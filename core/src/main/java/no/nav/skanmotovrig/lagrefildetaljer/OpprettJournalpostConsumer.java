@@ -16,8 +16,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
+
 
 @Component
 public class OpprettJournalpostConsumer {
@@ -29,6 +32,8 @@ public class OpprettJournalpostConsumer {
                                       SkanmotovrigProperties skanmotovrigProperties) {
         this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
         this.restTemplate = restTemplateBuilder
+                .setReadTimeout(Duration.ofMillis(5000L))
+                .setConnectTimeout(Duration.ofMillis(5000L))
                 .build();
     }
 
