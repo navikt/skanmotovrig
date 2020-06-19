@@ -1,6 +1,7 @@
 package no.nav.skanmotovrig.helse;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,16 +51,18 @@ public class PostboksHelseRouteIT {
     @BeforeEach
     void beforeEach() throws IOException {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
-        createDirectoryIfNotExists(inngaaende);
         final Path processed = inngaaende.resolve("processed");
-        createDirectoryIfNotExists(processed);
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
-        createDirectoryIfNotExists(feilmappe);
+        preparePath(inngaaende);
+        preparePath(processed);
+        preparePath(feilmappe);
     }
 
-    private void createDirectoryIfNotExists(Path processed) throws IOException {
-        if (!Files.exists(processed)) {
-            Files.createDirectory(processed);
+    private void preparePath(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            Files.createDirectory(path);
+        } else {
+            FileUtils.cleanDirectory(path.toFile());
         }
     }
 
@@ -91,6 +94,30 @@ public class PostboksHelseRouteIT {
                 "BHELSE-20200529-1-3-funksjonelt.zip",
                 "BHELSE-20200529-1-4-funksjonelt.zip",
                 "BHELSE-20200529-1-5-funksjonelt.zip");
+        verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldBehandlePostboksHelseZipWithMultipleDotsInFilenames() throws IOException {
+        // BHELSE.20200529-2.zip
+        // OK   - BHELSE.20200529-2-1 xml, pdf
+        // OK   - BHELSE.20200529-2-2 xml, pdf, ocr
+        // FEIL - BHELSE.20200529-2-3 xml, pdf, ocr (valideringsfeil xml)
+        // FEIL - BHELSE.20200529-2-4 xml, ocr (mangler pdf)
+        // FEIL - BHELSE.20200529-2-5 pdf, ocr (mangler xml)
+
+        copyFileFromClasspathToInngaaende("BHELSE.20200529-2.zip");
+        setUpHappyStubs();
+
+        await().atMost(5, SECONDS).untilAsserted(() ->
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                .collect(Collectors.toList());
+        assertThat(feilmappeContents).containsExactly(
+                "BHELSE.20200529-2-3-funksjonelt.zip",
+                "BHELSE.20200529-2-4-funksjonelt.zip",
+                "BHELSE.20200529-2-5-funksjonelt.zip");
         verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 

@@ -71,7 +71,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
-                .aggregate(simple("${file:name.noext}"), new PostboksHelseSkanningAggregator())
+                .aggregate(simple("${file:name.noext.single}"), new PostboksHelseSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(TimeUnit.SECONDS.toMillis(1))
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
