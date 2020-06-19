@@ -90,7 +90,7 @@ public class PostboksHelseRouteIT {
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
-        assertThat(feilmappeContents).containsExactly(
+        assertThat(feilmappeContents).containsExactlyInAnyOrder(
                 "BHELSE-20200529-1-3-funksjonelt.zip",
                 "BHELSE-20200529-1-4-funksjonelt.zip",
                 "BHELSE-20200529-1-5-funksjonelt.zip");
@@ -114,7 +114,7 @@ public class PostboksHelseRouteIT {
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
-        assertThat(feilmappeContents).containsExactly(
+        assertThat(feilmappeContents).containsExactlyInAnyOrder(
                 "BHELSE.20200529-2-3-funksjonelt.zip",
                 "BHELSE.20200529-2-4-funksjonelt.zip",
                 "BHELSE.20200529-2-5-funksjonelt.zip");
