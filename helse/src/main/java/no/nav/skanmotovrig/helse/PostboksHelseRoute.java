@@ -68,7 +68,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .routeId("read_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext}"))
+                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksHelseSkanningAggregator())
