@@ -60,7 +60,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
-                "&maxMessagesPerPoll=1" +
+                "&maxMessagesPerPoll=10" +
                 "&idempotent=true" +
                 "&move=processed" +
                 "&jailStartingDirectory=false"+
