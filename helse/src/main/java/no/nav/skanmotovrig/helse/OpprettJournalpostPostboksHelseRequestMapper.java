@@ -53,12 +53,14 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
         Journalpost journalpost = skanningmetadata.getJournalpost();
         Skanninginfo skanningInfo = skanningmetadata.getSkanninginfo();
         String eksternReferanseId = envelope.createEntryName(FILE_EXTENSION_PDF);
+        String batchnavn = journalpost.getBatchnavn();
 
         DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(FILTYPE_PDF)
                 .variantformat(VARIANTFORMAT_PDF)
                 .fysiskDokument(envelope.getPdf())
                 .filnavn(envelope.createEntryName(FILE_EXTENSION_PDF))
+                .batchnavn(batchnavn)
                 .build();
 
         DokumentVariant xml = DokumentVariant.builder()
@@ -66,9 +68,10 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 .variantformat(VARIANTFORMAT_XML)
                 .fysiskDokument(envelope.getXml())
                 .filnavn(envelope.createEntryName(FILE_EXTENSION_XML))
+                .batchnavn(batchnavn)
                 .build();
 
-        Dokument dokument = createDokument(envelope, postboks, pdf, xml);
+        Dokument dokument = createDokument(envelope, postboks, pdf, xml, batchnavn);
 
         Bruker bruker = Optional.ofNullable(journalpost.getBruker())
                 .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukerType()))
@@ -83,7 +86,6 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                 new Tilleggsopplysning(ENDORSERNR, journalpost.getEndorsernr()),
                 new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
                 new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
-                new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchnavn()),
                 new Tilleggsopplysning(ANTALL_SIDER, journalpost.getAntallSider())
         ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
@@ -107,7 +109,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
     }
 
     private Dokument createDokument(final PostboksHelseEnvelope envelope, final PostboksHelseTema.PostboksHelse postboks,
-                                    final DokumentVariant pdf, final DokumentVariant xml) {
+                                    final DokumentVariant pdf, final DokumentVariant xml, final String batchnavn) {
         if (envelope.getOcr() == null) {
             return Dokument.builder()
                     .brevkode(postboks.getBrevkode())
@@ -121,6 +123,7 @@ public class OpprettJournalpostPostboksHelseRequestMapper {
                     .variantformat(VARIANTFORMAT_OCR)
                     .fysiskDokument(envelope.getOcr())
                     .filnavn(envelope.createEntryName(FILE_EXTENSION_OCR))
+                    .batchnavn(batchnavn)
                     .build();
             return Dokument.builder()
                     .brevkode(postboks.getBrevkode())
