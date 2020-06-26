@@ -42,6 +42,7 @@ public class OpprettJournalpostRequestMapper {
         Journalpost journalpost = skanningmetadata.getJournalpost();
         SkanningInfo skanningInfo = skanningmetadata.getSkanningInfo();
         String eksternReferanseId = appendFileType(filepair.getName(), FILTYPE_PDF);
+        String batchnavn = journalpost.getBatchNavn();
 
         AvsenderMottaker avsenderMottaker = null;
         if(journalpost.getLand() != null) {
@@ -55,6 +56,7 @@ public class OpprettJournalpostRequestMapper {
                 .variantformat(VARIANTFORMAT_PDF)
                 .fysiskDokument(filepair.getPdf())
                 .filnavn(appendFileType(filepair.getName(), FILTYPE_PDF))
+                .batchnavn(batchnavn)
                 .build();
 
         DokumentVariant xml = DokumentVariant.builder()
@@ -62,6 +64,7 @@ public class OpprettJournalpostRequestMapper {
                 .variantformat(VARIANTFORMAT_XML)
                 .fysiskDokument(filepair.getXml())
                 .filnavn(appendFileType(filepair.getName(), FILTYPE_XML))
+                .batchnavn(batchnavn)
                 .build();
 
         Dokument dokument = Dokument.builder()
@@ -82,8 +85,7 @@ public class OpprettJournalpostRequestMapper {
         List<Tilleggsopplysning> tilleggsopplysninger = List.of(
                 new Tilleggsopplysning(ENDORSERNR, journalpost.getEndorsernr()),
                 new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
-                new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
-                new Tilleggsopplysning(BATCHNAVN, journalpost.getBatchNavn())
+                new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks())
         ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
         String datoMottatt = journalpost.getDatoMottatt() == null
