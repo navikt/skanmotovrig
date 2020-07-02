@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.unittest;
+package no.nav.skanmotovrig.lagrefildetaljer;
 
 import no.nav.skanmotovrig.domain.Bruker;
 import no.nav.skanmotovrig.domain.Filepair;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostRequestMapper.generateRequestBody;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
