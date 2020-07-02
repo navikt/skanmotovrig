@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <skanningmetadata>
     <journalpost>
-        <journalpostId>005</journalpostId>
+        <journalpostId>002</journalpostId>
         <mottakskanal>SKAN_IM</mottakskanal>
-        <datoMottatt>2019-10-31</datoMottatt>
-        <batchNavn>xml_pdf_pairs_testdata.zip</batchNavn>
-        <filNavn>data_005.pdf</filNavn>
+        <datoMottatt>2020-07-01</datoMottatt>
+        <batchNavn>01.07.2020_R123456789_1_1000.zip</batchNavn>
+        <filNavn>data_002.pdf</filNavn>
         <endorsernr>3110190003NAV743506</endorsernr>
     </journalpost>
     <skanningInfo>

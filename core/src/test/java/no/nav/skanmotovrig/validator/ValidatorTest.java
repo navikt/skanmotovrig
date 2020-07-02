@@ -1,22 +1,18 @@
-package no.nav.skanmotovrig.unittest;
+package no.nav.skanmotovrig.validator;
 
 import no.nav.skanmotovrig.domain.Bruker;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.domain.Skanningmetadata;
 import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
-import no.nav.skanmotovrig.validator.BrukerValidator;
-import no.nav.skanmotovrig.validator.JournalpostValidator;
-import no.nav.skanmotovrig.validator.SkanningInfoValidator;
-import no.nav.skanmotovrig.validator.SkanningMetadataValidator;
 import org.junit.Test;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ValidatorTest {
     private final String VALID_PERSONID = "***gammelt_fnr***";
@@ -54,23 +50,25 @@ public class ValidatorTest {
     private final String INVALID_STREKKODEPOSTBOKS = "1111";
 
     @Test
-    public void brukerValidatorSholdAcceptValidData(){
+    public void brukerValidatorSholdAcceptValidData() {
         assertTrue(BrukerValidator.isValidBrukerId(VALID_PERSONID));
         assertTrue(BrukerValidator.isValidBrukerId(VALID_ORGANISASJONID));
 
         assertTrue(BrukerValidator.isValidBrukerType(VALID_PERSONID, VALID_PERSON));
         assertTrue(BrukerValidator.isValidBrukerType(VALID_ORGANISASJONID, VALID_ORGANISASJON));
     }
+
     @Test
-    public void brukerValidatorShouldRejectInvalidData(){
+    public void brukerValidatorShouldRejectInvalidData() {
         assertFalse(BrukerValidator.isValidBrukerId(INVALID_PERSONID));
         assertFalse(BrukerValidator.isValidBrukerId(INVALID_ORGANISASJONID));
 
         assertFalse(BrukerValidator.isValidBrukerType(INVALID_PERSONID, INVALID_PERSON));
         assertFalse(BrukerValidator.isValidBrukerType(INVALID_ORGANISASJONID, INVALID_ORGANISASJON));
     }
+
     @Test
-    public void journalpostValidatorSholdAcceptValidData(){
+    public void journalpostValidatorSholdAcceptValidData() {
         assertTrue(JournalpostValidator.isValidReferansenummer(VALID_REFERANSENR));
         assertTrue(JournalpostValidator.isValidjournalpostId(VALID_JOURNALPOSTID));
         assertTrue(JournalpostValidator.isValidBatchNavn(VALID_BATCHNAVN));
@@ -80,8 +78,9 @@ public class ValidatorTest {
         assertTrue(JournalpostValidator.isValidJournalfoerendeEnhet(VALID_JOURNALFORENDEENHET));
         assertTrue(JournalpostValidator.isValidMottakskanal(VALID_MOTTAKSKANAL));
     }
+
     @Test
-    public void journalpostValidatorShouldRejectInvalidData(){
+    public void journalpostValidatorShouldRejectInvalidData() {
         assertFalse(JournalpostValidator.isValidReferansenummer(INVALID_REFERANSENR));
         assertFalse(JournalpostValidator.isValidjournalpostId(INVALID_JOURNALPOSTID));
         assertFalse(JournalpostValidator.isValidBatchNavn(INVALID_BATCHNAVN));
@@ -91,19 +90,21 @@ public class ValidatorTest {
         assertFalse(JournalpostValidator.isValidJournalfoerendeEnhet(INVALID_JOURNALFORENDEENHET));
         assertFalse(JournalpostValidator.isValidMottakskanal(INVALID_MOTTAKSKANAL));
     }
+
     @Test
-    public void skaninginfoValidatorSholdAcceptValidData(){
+    public void skaninginfoValidatorSholdAcceptValidData() {
         assertTrue(SkanningInfoValidator.isValidFysiskPostboks(VALID_FYSISKPOSTBOKS));
         assertTrue(SkanningInfoValidator.isValidStrekkodePostboks(VALID_STREKKODEPOSTBOKS));
     }
+
     @Test
-    public void skanninginfoValidatorShouldRejectInvalidData(){
+    public void skanninginfoValidatorShouldRejectInvalidData() {
         assertFalse(SkanningInfoValidator.isValidFysiskPostboks(INVALID_FYSISKPOSTBOKS));
         assertFalse(SkanningInfoValidator.isValidStrekkodePostboks(INVALID_STREKKODEPOSTBOKS));
     }
 
     @Test
-    public void skanningMetadataValidatorSholdAcceptValidData(){
+    public void skanningMetadataValidatorSholdAcceptValidData() {
         Skanningmetadata skanningmetadata = Skanningmetadata.builder()
                 .journalpost(Journalpost.builder()
                         .bruker(Bruker.builder()
@@ -125,8 +126,9 @@ public class ValidatorTest {
 
         assertDoesNotThrow(() -> SkanningMetadataValidator.validate(skanningmetadata));
     }
+
     @Test
-    public void skanningMetadataShouldRejectInvalidData(){
+    public void skanningMetadataShouldRejectInvalidData() {
         Skanningmetadata skanningmetadata = Skanningmetadata.builder()
                 .journalpost(Journalpost.builder()
                         .bruker(Bruker.builder()

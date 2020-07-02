@@ -1,13 +1,10 @@
-package no.nav.skanmotovrig.unittest;
+package no.nav.skanmotovrig.unzipskanningmetadata;
 
 import no.nav.skanmotovrig.domain.Filepair;
 import no.nav.skanmotovrig.domain.FilepairWithMetadata;
 import no.nav.skanmotovrig.domain.Journalpost;
 import no.nav.skanmotovrig.domain.SkanningInfo;
-import no.nav.skanmotovrig.exceptions.functional.InvalidMetadataException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigUnzipperTechnicalException;
-import no.nav.skanmotovrig.unzipskanningmetadata.UnzipSkanningmetadataUtils;
-import no.nav.skanmotovrig.unzipskanningmetadata.Unzipper;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,9 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnzipperTest {
 
-    private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDataSkanmotovrig.zip";
+    private final String ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_testdata.zip";
     private final String BROKEN_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_broken_testdata.zip";
-    private final String INVALID_ZIP_FILE_PATH = "src/test/resources/__files/xml_pdf_pairs/xml_pdf_pairs_invalid_testdata.zip";
     private final String PDF_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDokument.pdf";
     private final String XML_PATH = "src/test/resources/__files/xml_pdf_pairs/mockDokument.xml";
     private final String ZIPPED_PDF_NAME = "mockDokument-0.pdf";
