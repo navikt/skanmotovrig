@@ -1,6 +1,5 @@
-package no.nav.skanmotovrig.unittest;
+package no.nav.skanmotovrig.utils;
 
-import no.nav.skanmotovrig.utils.Utils;
 import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
