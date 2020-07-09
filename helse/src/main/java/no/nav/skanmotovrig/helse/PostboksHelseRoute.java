@@ -22,7 +22,6 @@ public class PostboksHelseRoute extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
     public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final String HEADER_FORSENDELSE_FILE_EXTENSION = "ForsendelseFileExtension";
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
     private final PostboksHelseService postboksHelseService;
@@ -61,7 +60,6 @@ public class PostboksHelseRoute extends RouteBuilder {
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
-                "&idempotent=true" +
                 "&move=processed" +
                 "&jailStartingDirectory=false"+
                 "&scheduler=spring&scheduler.cron={{skanmotovrig.helse.schedule}}")

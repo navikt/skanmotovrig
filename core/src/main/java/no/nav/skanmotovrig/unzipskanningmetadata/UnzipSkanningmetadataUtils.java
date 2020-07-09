@@ -49,7 +49,7 @@ public class UnzipSkanningmetadataUtils {
             jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            XMLInputFactory xmlInputFactory = createXEEProtectedXMLInputFactory();
             XMLStreamReader xmlStreamReader = new MetadataStreamReaderDelegate(xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bytes)));
 
             return (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
@@ -70,5 +70,13 @@ public class UnzipSkanningmetadataUtils {
         pdfNames.stream().forEach(name -> allNames.add(Utils.removeFileExtensionInFilename(name)));
         xmlNames.stream().forEach(name -> allNames.add(Utils.removeFileExtensionInFilename(name)));
         return allNames;
+    }
+
+    // https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+    private static XMLInputFactory createXEEProtectedXMLInputFactory() {
+        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        return xmlInputFactory;
     }
 }

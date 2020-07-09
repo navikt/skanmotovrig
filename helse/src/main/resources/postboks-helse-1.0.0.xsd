@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
-           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0.0">
     <xs:element name="skanningmetadata" type="skanningmetadataType"/>
     <xs:complexType name="skanningmetadataType">
         <xs:sequence>
