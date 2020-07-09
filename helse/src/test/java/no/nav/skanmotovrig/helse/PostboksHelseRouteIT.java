@@ -85,7 +85,7 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE-20200529-1.zip");
         setUpHappyStubs();
 
-        await().atMost(5, SECONDS).untilAsserted(() ->
+        await().atMost(10, SECONDS).untilAsserted(() ->
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
@@ -109,7 +109,7 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE.20200529-2.zip");
         setUpHappyStubs();
 
-        await().atMost(5, SECONDS).untilAsserted(() ->
+        await().atMost(10, SECONDS).untilAsserted(() ->
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))

@@ -1,10 +1,13 @@
 package no.nav.skanmotovrig.helse;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostConsumer;
 import no.nav.skanmotovrig.lagrefildetaljer.OpprettJournalpostService;
 import no.nav.skanmotovrig.lagrefildetaljer.STSConsumer;
 import no.nav.skanmotovrig.metrics.DokCounter;
+import org.apache.camel.CamelContext;
+import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
@@ -25,18 +28,49 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @Configuration
 @EnableAutoConfiguration
 @EnableConfigurationProperties(SkanmotovrigProperties.class)
 @Import({OpprettJournalpostConsumer.class, STSConsumer.class, OpprettJournalpostService.class, HelseTestConfig.SshdSftpServerConfig.class,
-        HelseConfig.class, DokCounter.class})
+        HelseTestConfig.CamelTestStartupConfig.class, HelseConfig.class, DokCounter.class})
 public class HelseTestConfig {
 
     private static final String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));
 
     static {
         System.setProperty("skanmotovrig.sftp.port", sftpPort);
+    }
+
+    @Configuration
+    static class CamelTestStartupConfig {
+
+        private final AtomicInteger sshServerStartupCounter = new AtomicInteger(0);
+        @Bean
+        CamelContextConfiguration contextConfiguration(SshServer sshServer) {
+            return new CamelContextConfiguration() {
+
+                @Override
+                public void beforeApplicationStart(CamelContext camelContext) {
+                    while(!sshServer.isStarted() && sshServerStartupCounter.get() <= 5) {
+                        try {
+                            // Busy wait
+                            Thread.sleep(1000);
+                            log.info("Forsøkt å starte sshserver. retry=" + sshServerStartupCounter.getAndIncrement());
+                        } catch (InterruptedException e) {
+                            // noop
+                        }
+                    }
+                }
+
+                @Override
+                public void afterApplicationStart(CamelContext camelContext) {
+
+                }
+            };
+        }
     }
 
     @Configuration
