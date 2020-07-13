@@ -21,6 +21,10 @@
 			<groupId>no.nav.skanmotovrig</groupId>
 			<artifactId>helse</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.skanmotovrig</groupId>
+			<artifactId>ovrig</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" version="2.0.1">
+    <xs:element name="skanningmetadata" type="skanningmetadataType"/>
+    <xs:complexType name="skanningmetadataType">
+        <xs:sequence>
+            <xs:element name="journalpost" type="journalpostType" minOccurs="1"/>
+            <xs:element name="skanningInfo" type="skanningInfoType" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="journalpostType">
+        <xs:sequence>
+            <xs:element name="bruker" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="brukerId" type="brukerIdType" minOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Strekkode 2, posisjon 2-12</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="brukertype" type="brukertypeType" minOccurs="1">
+                            <xs:annotation>
+                                <xs:documentation>Skal være "PERSON" når brukerid har 11 siffer, ellers "ORGANISASJON"
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="tema" type="temaType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 3, posisjon 2-3</xs:documentation>
+                    <xs:documentation>Mappes av Iron Mountain til tresifret bokstavkode ihht. egen kodeliste
+                    </xs:documentation>
+                    <xs:documentation>Om tema er ukjent skal verdien "UKJ" settes</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="brevKode" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 2, posisjon 13-18</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="journalforendeEnhet" type="journalforendeEnhetType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 3, posisjon 27-30</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="mottakskanal" type="xs:string" minOccurs="1" fixed="SKAN_IM"/>
+            <xs:element name="datoMottatt" type="xs:date" minOccurs="1"/>
+            <xs:element name="batchnavn" type="xs:string" minOccurs="1"/>
+            <xs:element name="filnavn" type="xs:string" minOccurs="0"/>
+            <xs:element name="endorsernr" type="xs:string" minOccurs="0"/>
+            <xs:element name="antallSider" type="xs:string" minOccurs="0"/>
+            <xs:element name="land" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Landkode på ISO 3166-1-alfa 2 format. Angis kun ved SED.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="skanningInfoType">
+        <xs:sequence>
+            <xs:element name="fysiskPostboks" type="xs:string" minOccurs="0"/>
+            <xs:element name="strekkodePostboks" type="strekkodePostboksType" minOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Strekkode 2, posisjon 19-22</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="temaType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z]{3}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="brukerIdType">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="11"/>
+            <xs:pattern value="[0-9]{9,11}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="brukertypeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PERSON"/>
+            <xs:enumeration value="ORGANISASJON"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="journalforendeEnhetType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{4}"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="strekkodePostboksType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1406"/>
+            <xs:enumeration value="1407"/>
+            <xs:enumeration value="1410"/>
+            <xs:enumeration value="1423"/>
+            <xs:enumeration value="1431"/>
+            <xs:enumeration value="1442"/>
+            <xs:enumeration value="1234"/>
+            <xs:enumeration value="0354"/>
+            <xs:enumeration value="0358"/>
+            <xs:enumeration value="0359"/>
+            <xs:enumeration value="1001"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
