@@ -1,9 +1,6 @@
 package no.nav.skanmotovrig.ovrig;
 
 import no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException;
-import no.nav.skanmotovrig.metrics.DokCounter;
-import no.nav.skanmotovrig.ovrig.domain.Journalpost;
-import no.nav.skanmotovrig.ovrig.domain.SkanningInfo;
 import no.nav.skanmotovrig.ovrig.domain.Skanningmetadata;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
@@ -22,9 +19,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
