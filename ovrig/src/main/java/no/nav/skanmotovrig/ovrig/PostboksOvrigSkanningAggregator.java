@@ -47,11 +47,11 @@ public class PostboksOvrigSkanningAggregator implements AggregationStrategy {
 
     private void applyOnEnvelope(Exchange newExchange, PostboksOvrigEnvelope envelope) throws IOException {
         final String extension = getExtension(newExchange.getIn().getHeader(Exchange.FILE_NAME, String.class));
-        if (XML_EXTENSION.equals(extension)) {
+        if (XML_EXTENSION.equalsIgnoreCase(extension)) {
             final InputStream inputStream = newExchange.getIn().getBody(InputStream.class);
             final byte[] xml = IOUtils.toByteArray(inputStream);
             envelope.setXml(xml);
-        } else if (PDF_EXTENSION.equals(extension)) {
+        } else if (PDF_EXTENSION.equalsIgnoreCase(extension)) {
             final InputStream inputStream = newExchange.getIn().getBody(InputStream.class);
             envelope.setPdf(IOUtils.toByteArray(inputStream));
         }
