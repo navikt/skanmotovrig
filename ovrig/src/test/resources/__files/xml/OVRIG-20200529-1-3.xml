@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_metadata.xsd">
+	<journalpost>
+		<bruker>
+			<brukerId></brukerId>
+			<brukertype></brukertype>
+		</bruker>
+		<tema></tema>
+            	<brevKode></brevKode>
+            	<journalforendeEnhet></journalforendeEnhet> 
+		<mottakskanal></mottakskanal>
+            	<datoMottatt></datoMottatt>
+            	<batchnavn></batchnavn>
+            	<filnavn></filnavn>
+            	<endorsernr></endorsernr>
+		<antallSider></antallSider>
+		<land></land>
+	</journalpost>
+	<skanningInfo>
+             <fysiskPostboks></fysiskPostboks>
+             <strekkodePostboks></strekkodePostboks>
+         </skanningInfo>
+</skanningmetadata>

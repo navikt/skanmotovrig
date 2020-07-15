@@ -78,7 +78,7 @@ public class PostboksOvrigRouteIT {
         // OVRIG-20200529-1.zip
         // OK   - OVRIG-20200529-1-1 alle felt
         // OK   - OVRIG-20200529-1-2 kun påkrevde felt
-        // FEIL - OVRIG-20200529-1-3 tomme påkrevde felt
+        // OK   - OVRIG-20200529-1-3 tomme valgfri felt
         // FEIL - OVRIG-20200529-1-4 xml (mangler pdf)
         // FEIL - OVRIG-20200529-1-5 pdf (mangler xml)
         // FEIL - OVRIG-20200529-1-6 malformet xml
@@ -87,16 +87,15 @@ public class PostboksOvrigRouteIT {
         setUpHappyStubs();
 
         await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(4));
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-20200529-1-3-funksjonelt.zip",
                 "OVRIG-20200529-1-4-funksjonelt.zip",
                 "OVRIG-20200529-1-5-funksjonelt.zip",
                 "OVRIG-20200529-1-6-funksjonelt.zip");
-        verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
@@ -104,7 +103,7 @@ public class PostboksOvrigRouteIT {
         // OVRIG.20200529-2.zip
         // OK   - OVRIG.20200529-2-1 alle felt
         // OK   - OVRIG.20200529-2-2 kun påkrevde felt
-        // FEIL - OVRIG.20200529-2-3 tomme påkrevde felt
+        // OK   - OVRIG.20200529-2-3 tomme valgfri felt
         // FEIL - OVRIG.20200529-2-4 xml (mangler pdf)
         // FEIL - OVRIG.20200529-2-5 pdf (mangler xml)
         // FEIL - OVRIG.20200529-2-6 malformet xml
@@ -113,16 +112,15 @@ public class PostboksOvrigRouteIT {
         setUpHappyStubs();
 
         await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(4));
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG.20200529-2-3-funksjonelt.zip",
                 "OVRIG.20200529-2-4-funksjonelt.zip",
                 "OVRIG.20200529-2-5-funksjonelt.zip",
                 "OVRIG.20200529-2-6-funksjonelt.zip");
-        verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+        verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

@@ -40,12 +40,12 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
         String eksternReferanseId = appendFileType(envelope.getFilebasename(), FILE_EXTENSION_PDF);
         String batchnavn = journalpost.getBatchnavn();
 
-        AvsenderMottaker avsenderMottaker = null;
-        if(journalpost.getLand() != null) {
-            avsenderMottaker = AvsenderMottaker.builder()
-                    .land(journalpost.getLand())
-                    .build();
-        }
+        String tema = mapToValueIfEmpty(journalpost.getTema(), UKJENT_TEMA);
+        String brevKode = mapToValueIfEmpty(journalpost.getBrevKode(), null);
+        String journalforendeEnhet = mapToValueIfEmpty(journalpost.getJournalforendeEnhet(), null);
+        String land = mapToValueIfEmpty(journalpost.getLand(), null);
+
+        AvsenderMottaker avsenderMottaker = (land == null) ? null : AvsenderMottaker.builder().land(land).build();
 
         DokumentVariant pdf = DokumentVariant.builder()
                 .filtype(FILTYPE_PDF)
@@ -64,7 +64,7 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
                 .build();
 
         Dokument dokument = Dokument.builder()
-                .brevkode(journalpost.getBrevKode())
+                .brevkode(brevKode)
                 .dokumentKategori(DOKUMENTKATEGORI)
                 .dokumentVarianter(List.of(pdf, xml))
                 .build();
@@ -89,10 +89,9 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
                 ? null
                 : journalpost.getDatoMottatt().toString();
 
-        String tema = notNullOrEmpty(journalpost.getTema())? journalpost.getTema() : UKJENT_TEMA;
 
         return OpprettJournalpostRequest.builder()
-                .journalfoerendeEnhet(journalpost.getJournalforendeEnhet())
+                .journalfoerendeEnhet(journalforendeEnhet)
                 .journalpostType(JOURNALPOSTTYPE)
                 .avsenderMottaker(avsenderMottaker)
                 .kanal(journalpost.getMottakskanal())
@@ -113,4 +112,7 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
         return string != null && !string.isBlank();
     }
 
+    private static String mapToValueIfEmpty(String string, String value) {
+        return notNullOrEmpty(string) ? string : value;
+    }
 }
