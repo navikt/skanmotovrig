@@ -31,7 +31,7 @@ public class SkanningmetadataUnmarshaller {
             JAXBContext jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
             SchemaFactory schemaFactory = createXEEProtectedSchemaFactory();
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-ovrig-2.0.1.xsd"))));
+            jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-ovrig-3.0.0.xsd"))));
             XMLInputFactory xmlInputFactory = createXEEProtectedXMLInputFactory();
             XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(envelope.getXml()));
             final Skanningmetadata skanningmetadata = (Skanningmetadata) jaxbUnmarshaller.unmarshal(xmlStreamReader);
