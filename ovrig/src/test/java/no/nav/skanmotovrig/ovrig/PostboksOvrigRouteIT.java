@@ -18,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -83,18 +85,26 @@ public class PostboksOvrigRouteIT {
         // FEIL - OVRIG-20200529-1-5 pdf (mangler xml)
         // FEIL - OVRIG-20200529-1-6 malformet xml
 
-        copyFileFromClasspathToInngaaende("OVRIG-20200529-1.zip");
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-1";
+
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+                try{
+                    assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                            .collect(Collectors.toList())).hasSize(3);
+                } catch(NoSuchFileException e) {
+                    fail();
+                }
+        });
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-20200529-1-4-funksjonelt.zip",
-                "OVRIG-20200529-1-5-funksjonelt.zip",
-                "OVRIG-20200529-1-6-funksjonelt.zip");
+                "OVRIG-20200529-1-4.zip",
+                "OVRIG-20200529-1-5.zip",
+                "OVRIG-20200529-1-6.zip");
         verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
@@ -108,18 +118,26 @@ public class PostboksOvrigRouteIT {
         // FEIL - OVRIG.20200529-2-5 pdf (mangler xml)
         // FEIL - OVRIG.20200529-2-6 malformet xml
 
-        copyFileFromClasspathToInngaaende("OVRIG.20200529-2.zip");
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-2";
+
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            try{
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch(NoSuchFileException e) {
+                fail();
+            }
+        });
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG.20200529-2-4-funksjonelt.zip",
-                "OVRIG.20200529-2-5-funksjonelt.zip",
-                "OVRIG.20200529-2-6-funksjonelt.zip");
+                "OVRIG.20200529-2-4.zip",
+                "OVRIG.20200529-2-5.zip",
+                "OVRIG.20200529-2-6.zip");
         verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
