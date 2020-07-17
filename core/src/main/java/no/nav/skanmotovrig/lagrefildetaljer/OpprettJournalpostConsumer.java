@@ -52,7 +52,6 @@ public class OpprettJournalpostConsumer {
         }
     }
 
-
     private HttpHeaders createHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
