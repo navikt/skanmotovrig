@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.helse;
+package no.nav.skanmotovrig.ovrig;
 
 import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.Exchange;
@@ -11,7 +11,7 @@ public class ErrorMetricsProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         Object exception = exchange.getProperty(CAMEL_EXCEPTION_CAUGHT);
         if(exception instanceof Throwable){
-            DokCounter.incrementError((Throwable) exception, DokCounter.HELSE);
+            DokCounter.incrementError((Throwable) exception, DokCounter.OVRIG);
         }
     }
 }

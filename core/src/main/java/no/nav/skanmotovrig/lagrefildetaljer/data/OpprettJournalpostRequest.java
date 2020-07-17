@@ -15,7 +15,6 @@ public class OpprettJournalpostRequest {
 
     private AvsenderMottaker avsenderMottaker;
 
-    @NotNull(message = "Mottakskanal kan ikke være null")
     private String journalpostType;
 
     private String tema;

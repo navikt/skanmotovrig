@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata>
+  <journalpost>
+    <!--Optional:-->
+    <brusker>
+      <brukerid>entotrefire</brukerid>
+      <brssukertype>PERSON</brssukertype>
+    </brusker>
+    <mottsakskanal>SKAN_IM</mottsakskanal>
+    <datosdMottatt>2020-06-04</datosdMottatt>
+    <batchqnavn>BHELSE-20200529-1.zip</batchqnavn>
+    <!--Optional:-->
+    <filnavn>BHELSE-20200529-1-1.pdf</filnavn>
+    <!--Optional:-->
+    <endorserwnr>string</endorserwnr>
+    <!--Optional:-->
+    <antallSider>1</antallSider>
+  </journalpost>
+  <skannindsginfo>
+    <fysiskPostssboks>9001</fysiskPostssboks>
+    <strekkodePostbosaks>9001</strekkodePostbosaks>
+  </skannindsginfo>
+  <skanningmetadata>

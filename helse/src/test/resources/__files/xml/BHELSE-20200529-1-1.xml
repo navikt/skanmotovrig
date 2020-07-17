@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata>
+  <journalpost>
+    <!--Optional:-->
+    <bruker>
+      <brukerid>***gammelt_fnr***</brukerid>
+      <brukertype>PERSON</brukertype>
+    </bruker>
+    <mottakskanal>SKAN_IM</mottakskanal>
+    <datoMottatt>2020-06-04</datoMottatt>
+    <batchnavn>BHELSE-20200529-1.zip</batchnavn>
+    <!--Optional:-->
+    <filnavn>BHELSE-20200529-1-1.pdf</filnavn>
+    <!--Optional:-->
+    <endorsernr>string</endorsernr>
+    <!--Optional:-->
+    <antallSider>1</antallSider>
+  </journalpost>
+  <skanninginfo>
+    <fysiskPostboks>1411</fysiskPostboks>
+    <strekkodePostboks>1411</strekkodePostboks>
+  </skanninginfo>
+</skanningmetadata>

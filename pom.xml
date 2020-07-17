@@ -20,6 +20,7 @@
         <module>app</module>
         <module>core</module>
         <module>helse</module>
+        <module>ovrig</module>
     </modules>
 
     <properties>
@@ -58,6 +59,11 @@
             <dependency>
                 <groupId>no.nav.skanmotovrig</groupId>
                 <artifactId>helse</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.skanmotovrig</groupId>
+                <artifactId>ovrig</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -221,6 +227,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

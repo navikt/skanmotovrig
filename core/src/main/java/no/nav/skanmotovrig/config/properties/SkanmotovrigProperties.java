@@ -57,6 +57,12 @@ public class SkanmotovrigProperties {
     @Validated
     public static class Ovrig {
         @NotEmpty
+        private String endpointuri;
+
+        @NotEmpty
+        private String endpointconfig;
+
+        @NotEmpty
         private String schedule;
 
         @NotNull

@@ -10,6 +10,7 @@ import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,12 +26,10 @@ public class PostboksHelseRoute extends RouteBuilder {
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 3;
 
     private final PostboksHelseService postboksHelseService;
-    private final ErrorMetricsProcessor errorMetricsProcessor;
 
     @Inject
     public PostboksHelseRoute(PostboksHelseService postboksHelseService, DokCounter dokCounter) {
         this.postboksHelseService = postboksHelseService;
-        this.errorMetricsProcessor = new ErrorMetricsProcessor(dokCounter);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
-                .process(errorMetricsProcessor)
+                .process(new ErrorMetricsProcessor())
                 .log(LoggingLevel.ERROR, log, "Skanmothelse feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:avvik")
@@ -48,7 +47,7 @@ public class PostboksHelseRoute extends RouteBuilder {
         onException(AbstractSkanmotovrigFunctionalException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
-                .process(errorMetricsProcessor)
+                .process(new ErrorMetricsProcessor())
                 .log(LoggingLevel.WARN, log, "Skanmothelse feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-funksjonelt.zip"))
                 .to("direct:avvik")
@@ -74,8 +73,10 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .completionTimeout(TimeUnit.SECONDS.toMillis(1))
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
+                .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.HELSE)))
                 .process(exchange -> exchange.getIn().getBody(PostboksHelseEnvelope.class).validate())
                 .bean(new SkanningmetadataUnmarshaller())
+                .bean(new SkanningmetadataCounter())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
                 .to("direct:process_helse")
                 .end() // aggregate
@@ -89,6 +90,7 @@ public class PostboksHelseRoute extends RouteBuilder {
                 .log(LoggingLevel.INFO, log, "Skanmothelse behandler " + KEY_LOGGING_INFO + ".")
                 .bean(postboksHelseService)
                 .log(LoggingLevel.INFO, log, "Skanmothelse journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
+                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.HELSE)))
                 .process(new MdcRemoverProcessor());
 
         from("direct:avvik")

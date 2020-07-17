@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_metadata.xsd">
+	<journalpost>
+		<Bruker>
+			<brukerid>***gammelt_fnr***</brukerid>
+			<brUkertype>PERSON</brUkertype>
+		</Bruker>
+		<tena></tena>
+		<brevKode>
+			<brevkode>
+		<journalforendeEnet></journalforendeEnet>
+		<mottsakskanal>SKAN_IM</mottsakskanal>
+		<datoMotatatt>2020-02-22</datoMotatatt>
+		<batchnovn>OVRIG-20200529-1.zip</batchnovn>
+		<filnevn></filnevn>
+		<endorssernr></endorssernr>
+		<antalSider></antalSider>
+		<lamd></lamd>
+	</journalpost>
+	<skanningInfo>
+		<fysiskEpost></fysiskEpost>
+		<strekkodePostkasse>1406</strekkodePostkasse>
+	</skanningInfo>
+</skanningmetadata>
