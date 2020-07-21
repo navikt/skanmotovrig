@@ -18,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -40,10 +42,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
 public class PostboksHelseRouteIT {
-    public static final String INNGAAENDE = "inngaaende";
-    public static final String FEILMAPPE = "feilmappe";
-    private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
-    private final String STS_URL = "/rest/v1/sts/token";
+    private static final String INNGAAENDE = "inngaaende";
+    private static final String FEILMAPPE = "feilmappe";
+    private static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
+    private static final String STS_URL = "/rest/v1/sts/token";
+    private static final String BATCHNAME_1 = "BHELSE-20200529-1";
+    private static final String BATCHNAME_2 = "BHELSE.20200529-2";
 
     @Inject
     private Path sshdPath;
@@ -85,15 +89,23 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE-20200529-1.zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_1))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+
+
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_1))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "BHELSE-20200529-1-3-funksjonelt.zip",
-                "BHELSE-20200529-1-4-funksjonelt.zip",
-                "BHELSE-20200529-1-5-funksjonelt.zip");
+                "BHELSE-20200529-1-3.zip",
+                "BHELSE-20200529-1-4.zip",
+                "BHELSE-20200529-1-5.zip");
         verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
@@ -109,20 +121,27 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE.20200529-2.zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() ->
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE)).collect(Collectors.toList())).hasSize(3));
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE))
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_2))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_2))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "BHELSE.20200529-2-3-funksjonelt.zip",
-                "BHELSE.20200529-2-4-funksjonelt.zip",
-                "BHELSE.20200529-2-5-funksjonelt.zip");
+                "BHELSE.20200529-2-3.zip",
+                "BHELSE.20200529-2-4.zip",
+                "BHELSE.20200529-2-5.zip");
         verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
-        Files.copy(new ClassPathResource("__files/" + zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
+        Files.copy(new ClassPathResource(zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
     }
 
     private void setUpHappyStubs() {

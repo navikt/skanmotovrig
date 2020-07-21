@@ -31,9 +31,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
@@ -91,12 +91,12 @@ public class PostboksOvrigRouteIT {
         setUpHappyStubs();
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-                try{
-                    assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                            .collect(Collectors.toList())).hasSize(3);
-                } catch(NoSuchFileException e) {
-                    fail();
-                }
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
         });
         final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
@@ -124,10 +124,10 @@ public class PostboksOvrigRouteIT {
         setUpHappyStubs();
 
         await().atMost(10, SECONDS).untilAsserted(() -> {
-            try{
+            try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(3);
-            } catch(NoSuchFileException e) {
+            } catch (NoSuchFileException e) {
                 fail();
             }
         });

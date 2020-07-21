@@ -28,7 +28,7 @@ public class SkanningmetadataUnmarshallerTest {
         //Journalpost
         final String TEMA = "PEN";
         final String BREVKODE = "Brevkode-1";
-        final Bruker BRUKER = new Bruker("***gammelt_fnr***", "PERSON");
+        final Bruker BRUKER = new Bruker("11111111111", "PERSON");
         final String JOURNALFORENDEENHET = "1234";
         final String MOTTAKSKANAL = "SKAN_IM";
         final LocalDate DATOMOTTATT = LocalDate.of(2020, 2, 22);

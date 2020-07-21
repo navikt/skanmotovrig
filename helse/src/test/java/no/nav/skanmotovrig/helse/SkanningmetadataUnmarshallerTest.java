@@ -25,7 +25,7 @@ public class SkanningmetadataUnmarshallerTest {
         final String FYSISKPOSTBOKS = "1411";
         final String STREKKODEPOSTBOKS = "1411";
         //Journalpost
-        final Bruker BRUKER = new Bruker("***gammelt_fnr***", "PERSON");
+        final Bruker BRUKER = new Bruker("11111111111", "PERSON");
         final String MOTTAKSKANAL = "SKAN_IM";
         final LocalDate DATOMOTTATT = LocalDate.of(2020, 6, 4);
         final String BATCHNAVN = "BHELSE-20200529-1.zip";
@@ -122,7 +122,7 @@ public class SkanningmetadataUnmarshallerTest {
         final String FYSISKPOSTBOKS = "1411";
         final String STREKKODEPOSTBOKS = "1411";
         //Journalpost
-        final Bruker BRUKER = new Bruker("***gammelt_fnr***", "PERSON");
+        final Bruker BRUKER = new Bruker("11111111111", "PERSON");
         final String MOTTAKSKANAL = "SKAN_IM";
         final LocalDate DATOMOTTATT = LocalDate.of(2020, 6, 4);
         final String BATCHNAVN = "BHELSE-20200529-1.zip";

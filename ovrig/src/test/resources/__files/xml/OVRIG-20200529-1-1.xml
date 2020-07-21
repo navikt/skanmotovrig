@@ -2,7 +2,7 @@
 <skanningmetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="skanning_metadata.xsd">
 	<journalpost>
 		<bruker>
-			<brukerId>***gammelt_fnr***</brukerId> 
+			<brukerId>11111111111</brukerId> 
 			<brukertype>PERSON</brukertype>
 		</bruker>
 		<tema>PEN</tema>
