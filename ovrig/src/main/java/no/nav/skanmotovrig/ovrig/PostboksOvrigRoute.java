@@ -1,6 +1,7 @@
 package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.Exchange;
@@ -25,10 +26,12 @@ public class PostboksOvrigRoute extends RouteBuilder {
     public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
     static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
+    private final SkanmotovrigProperties skanmotovrigProperties;
     private final PostboksOvrigService postboksOvrigService;
 
     @Inject
-    public PostboksOvrigRoute(PostboksOvrigService postboksOvrigService) {
+    public PostboksOvrigRoute(SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
+        this.skanmotovrigProperties = skanmotovrigProperties;
         this.postboksOvrigService = postboksOvrigService;
     }
 
@@ -70,7 +73,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .split(new ZipSplitter()).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(TimeUnit.SECONDS.toMillis(1))
+                .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
                 .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                 .process(new MdcSetterProcessor())
                 .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))

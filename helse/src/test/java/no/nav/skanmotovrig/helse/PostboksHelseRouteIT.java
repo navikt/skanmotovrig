@@ -57,9 +57,13 @@ public class PostboksHelseRouteIT {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
-        preparePath(inngaaende);
-        preparePath(processed);
-        preparePath(feilmappe);
+        try {
+            preparePath(inngaaende);
+            preparePath(processed);
+            preparePath(feilmappe);
+        } catch(Exception e) {
+            // noop
+        }
     }
 
     private void preparePath(Path path) throws IOException {
@@ -89,7 +93,7 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE-20200529-1.zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_1))
                         .collect(Collectors.toList())).hasSize(3);
@@ -121,7 +125,7 @@ public class PostboksHelseRouteIT {
         copyFileFromClasspathToInngaaende("BHELSE.20200529-2.zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(BATCHNAME_2))
                         .collect(Collectors.toList())).hasSize(3);
@@ -138,6 +142,41 @@ public class PostboksHelseRouteIT {
                 "BHELSE.20200529-2-4.zip",
                 "BHELSE.20200529-2-5.zip");
         verify(exactly(2), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
+    @Test
+    public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
+        // BHELSE-XML-ORDERED-FIRST-1.zip
+        // OK   - BHELSE-XML-ORDERED-FIRST-1-01 xml, pdf
+        // OK   - BHELSE-XML-ORDERED-FIRST-1-02 xml, pdf, ocr
+        // FEIL - BHELSE-XML-ORDERED-FIRST-1-03 xml, pdf, ocr (valideringsfeil xml)
+        // FEIL - BHELSE-XML-ORDERED-FIRST-1-04 xml, ocr (mangler pdf)
+        // FEIL - BHELSE-XML-ORDERED-FIRST-1-05 pdf, ocr (mangler xml)
+        // OK   - BHELSE-XML-ORDERED-FIRST-1-07 xml, pdf, ocr
+        // ...
+        // OK   - BHELSE-XML-ORDERED-FIRST-1-59 xml, pdf, ocr
+
+        String zipfilenamenoext = "BHELSE-XML-ORDERED-FIRST-1";
+        copyFileFromClasspathToInngaaende(zipfilenamenoext + ".zip");
+        setUpHappyStubs();
+
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(zipfilenamenoext))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(zipfilenamenoext))
+                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                .collect(Collectors.toList());
+        assertThat(feilmappeContents).containsExactlyInAnyOrder(
+                "BHELSE-XML-ORDERED-FIRST-1-03.zip",
+                "BHELSE-XML-ORDERED-FIRST-1-04.zip",
+                "BHELSE-XML-ORDERED-FIRST-1-05.zip");
+        verify(exactly(55), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

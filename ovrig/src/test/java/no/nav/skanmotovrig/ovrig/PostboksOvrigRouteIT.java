@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -55,9 +57,13 @@ public class PostboksOvrigRouteIT {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
-        preparePath(inngaaende);
-        preparePath(processed);
-        preparePath(feilmappe);
+        try {
+            preparePath(inngaaende);
+            preparePath(processed);
+            preparePath(feilmappe);
+        } catch (Exception e) {
+            // noop
+        }
     }
 
     private void preparePath(Path path) throws IOException {
@@ -90,7 +96,7 @@ public class PostboksOvrigRouteIT {
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(3);
@@ -123,7 +129,7 @@ public class PostboksOvrigRouteIT {
         copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
         setUpHappyStubs();
 
-        await().atMost(10, SECONDS).untilAsserted(() -> {
+        await().atMost(15, SECONDS).untilAsserted(() -> {
             try {
                 assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
                         .collect(Collectors.toList())).hasSize(3);
@@ -141,8 +147,44 @@ public class PostboksOvrigRouteIT {
         verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
+    @Test
+    public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
+        // OVRIG-XML-ORDERED-FIRST-1.zip
+        // OK   - OVRIG-XML-ORDERED-FIRST-1-01 alle felt
+        // OK   - OVRIG-XML-ORDERED-FIRST-1-02 kun påkrevde felt
+        // OK   - OVRIG-XML-ORDERED-FIRST-1-03 tomme valgfri felt
+        // FEIL - OVRIG-XML-ORDERED-FIRST-1-04 xml (mangler pdf)
+        // FEIL - OVRIG-XML-ORDERED-FIRST-1-05 pdf (mangler xml)
+        // FEIL - OVRIG-XML-ORDERED-FIRST-1-06 malformet xml
+        // OK   - OVRIG-XML-ORDERED-FIRST-1-07 alle felt
+        // ...
+        // OK   - OVRIG-XML-ORDERED-FIRST-1-59 alle felt
+
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-1";
+
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
+        setUpHappyStubs();
+
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            try {
+                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                        .collect(Collectors.toList())).hasSize(3);
+            } catch (NoSuchFileException e) {
+                fail();
+            }
+        });
+        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+                .collect(Collectors.toList());
+        assertThat(feilmappeContents).containsExactlyInAnyOrder(
+                "OVRIG-XML-ORDERED-FIRST-1-04.zip",
+                "OVRIG-XML-ORDERED-FIRST-1-05.zip",
+                "OVRIG-XML-ORDERED-FIRST-1-06.zip");
+        verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+    }
+
     private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
-        Files.copy(new ClassPathResource("__files/" + zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
+        Files.copy(new ClassPathResource(zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
     }
 
     private void setUpHappyStubs() {
