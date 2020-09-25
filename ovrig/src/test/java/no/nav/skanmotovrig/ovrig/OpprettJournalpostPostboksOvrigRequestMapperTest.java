@@ -3,11 +3,15 @@ package no.nav.skanmotovrig.ovrig;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
+import no.nav.skanmotovrig.ovrig.domain.SkanningInfo;
+import no.nav.skanmotovrig.ovrig.domain.Skanningmetadata;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.DOKUMENTKATEGORI;
 import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.FNR;
 import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.JOURNALPOSTTYPE;
+import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.UKJENT_BREVKODE;
+import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.UKJENT_JOURNALFOERENDE_ENHET;
 import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.VARIANTFORMAT_PDF;
 import static no.nav.skanmotovrig.ovrig.OpprettJournalpostPostboksOvrigRequestMapper.VARIANTFORMAT_XML;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.ANTALL_SIDER;
@@ -23,9 +27,12 @@ import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.LAND;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.MOTTAKSKANAL;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.PDF_FIL;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.STREKKODE_POSTBOKS;
+import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.SYVSIFRET_BREVKODE;
+import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.TEMA;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.UKJENT_TEMA;
 import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.XML_FIL;
-import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.TEMA;
+import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.ZIPNAME;
+import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.createFullJournalpost;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -76,7 +83,6 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
         });
     }
 
-
     @Test
     void shouldMapFullEnvelope() {
         final PostboksOvrigEnvelope envelope = PostboksOvrigEnvelopeTestObjects.createFullEnvelope().build();
@@ -121,5 +127,67 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
             assertThat(dokumentVariant.getVariantformat()).isEqualTo(VARIANTFORMAT_XML);
             assertThat(dokumentVariant.getFilnavn()).isEqualTo(FILEBASENAME + ".xml");
         });
+    }
+
+    @Test
+    void shouldMapJournalfoerendeEnhetAsNullWhen0000() {
+        PostboksOvrigEnvelope envelope = PostboksOvrigEnvelope.builder()
+                .filebasename(FILEBASENAME)
+                .zipname(ZIPNAME)
+                .skanningmetadata(Skanningmetadata.builder()
+                        .journalpost(createFullJournalpost()
+                                .journalforendeEnhet(UKJENT_JOURNALFOERENDE_ENHET)
+                                .build())
+                        .skanningInfo(SkanningInfo.builder()
+                                .strekkodePostboks(STREKKODE_POSTBOKS)
+                                .build())
+                        .build())
+                .xml(XML_FIL)
+                .pdf(PDF_FIL)
+                .build();
+        final OpprettJournalpostRequest request = mapper.mapRequest(envelope);
+        assertThat(request.getJournalfoerendeEnhet()).isEqualTo(null);
+    }
+
+    @Test
+    void shouldMapBrevkodeAsNullWhen000000() {
+        PostboksOvrigEnvelope envelope = PostboksOvrigEnvelope.builder()
+                .filebasename(FILEBASENAME)
+                .zipname(ZIPNAME)
+                .skanningmetadata(Skanningmetadata.builder()
+                        .journalpost(createFullJournalpost()
+                                .brevKode(UKJENT_BREVKODE)
+                                .build())
+                        .skanningInfo(SkanningInfo.builder()
+                                .strekkodePostboks(STREKKODE_POSTBOKS)
+                                .build())
+                        .build())
+                .xml(XML_FIL)
+                .pdf(PDF_FIL)
+                .build();
+        final OpprettJournalpostRequest request = mapper.mapRequest(envelope);
+        final Dokument hoveddokument = request.getDokumenter().get(0);
+        assertThat(hoveddokument.getBrevkode()).isNull();
+    }
+
+    @Test
+    void shouldMapBrevkodeAsNullWhen7Digits() {
+        PostboksOvrigEnvelope envelope = PostboksOvrigEnvelope.builder()
+                .filebasename(FILEBASENAME)
+                .zipname(ZIPNAME)
+                .skanningmetadata(Skanningmetadata.builder()
+                        .journalpost(createFullJournalpost()
+                                .brevKode(SYVSIFRET_BREVKODE)
+                                .build())
+                        .skanningInfo(SkanningInfo.builder()
+                                .strekkodePostboks(STREKKODE_POSTBOKS)
+                                .build())
+                        .build())
+                .xml(XML_FIL)
+                .pdf(PDF_FIL)
+                .build();
+        final OpprettJournalpostRequest request = mapper.mapRequest(envelope);
+        final Dokument hoveddokument = request.getDokumenter().get(0);
+        assertThat(hoveddokument.getBrevkode()).isNull();
     }
 }

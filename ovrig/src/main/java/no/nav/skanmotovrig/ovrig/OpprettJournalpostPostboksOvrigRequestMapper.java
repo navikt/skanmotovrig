@@ -12,10 +12,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class OpprettJournalpostPostboksOvrigRequestMapper {
+    static final String UKJENT_JOURNALFOERENDE_ENHET = "0000";
+    static final String UKJENT_BREVKODE = "000000";
+    static final Pattern SYVSIFRET_BREVKODE = Pattern.compile("^\\d{7}$");
     static final String FILTYPE_PDF = "PDFA";
     static final String FILTYPE_XML = "XML";
     static final String VARIANTFORMAT_PDF = "ARKIV";
@@ -40,10 +48,10 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
         String eksternReferanseId = appendFileType(envelope.getFilebasename(), FILE_EXTENSION_PDF);
         String batchnavn = journalpost.getBatchnavn();
 
-        String tema = mapToValueIfEmpty(journalpost.getTema(), UKJENT_TEMA);
-        String brevKode = mapToValueIfEmpty(journalpost.getBrevKode(), null);
-        String journalforendeEnhet = mapToValueIfEmpty(journalpost.getJournalforendeEnhet(), null);
-        String land = mapToValueIfEmpty(journalpost.getLand(), null);
+        String tema = defaultIfBlank(journalpost.getTema(), UKJENT_TEMA);
+        String brevKode = mapBrevkode(journalpost.getBrevKode());
+        String journalforendeEnhet = mapJournalfoerendeEnhet(journalpost.getJournalforendeEnhet());
+        String land = defaultIfBlank(journalpost.getLand(), null);
 
         AvsenderMottaker avsenderMottaker = (land == null) ? null : AvsenderMottaker.builder().land(land).build();
 
@@ -70,8 +78,8 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
                 .build();
 
         Bruker bruker = Optional.ofNullable(journalpost.getBruker())
-                .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukertype()))
-                .filter(jpBruker -> notNullOrEmpty(jpBruker.getBrukerId()))
+                .filter(jpBruker -> isNotBlank(jpBruker.getBrukertype()))
+                .filter(jpBruker -> isNotBlank(jpBruker.getBrukerId()))
                 .map(jpBruker -> Bruker.builder()
                         .idType(jpBruker.getBrukertype().equalsIgnoreCase(ORGANISASJON) ? ORGNR : FNR)
                         .id(jpBruker.getBrukerId())
@@ -83,7 +91,7 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
                 new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
                 new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
                 new Tilleggsopplysning(ANTALL_SIDER, journalpost.getAntallSider())
-        ).stream().filter(tilleggsopplysning -> notNullOrEmpty(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
+        ).stream().filter(tilleggsopplysning -> isNotBlank(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
 
         String datoMottatt = journalpost.getDatoMottatt() == null
                 ? null
@@ -104,15 +112,23 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
                 .build();
     }
 
-    private static String appendFileType(String filename, String filetype) {
+    private String appendFileType(String filename, String filetype) {
         return filename + "." + filetype;
     }
 
-    private static boolean notNullOrEmpty(String string) {
-        return string != null && !string.isBlank();
+    private String mapJournalfoerendeEnhet(final String journalfoerendeEnhet) {
+        if(isBlank(journalfoerendeEnhet) || UKJENT_JOURNALFOERENDE_ENHET.equals(journalfoerendeEnhet)) {
+            return null;
+        } else {
+            return journalfoerendeEnhet;
+        }
     }
 
-    private static String mapToValueIfEmpty(String string, String value) {
-        return notNullOrEmpty(string) ? string : value;
+    private String mapBrevkode(final String brevkode) {
+        if(isBlank(brevkode) || UKJENT_BREVKODE.equals(brevkode) || SYVSIFRET_BREVKODE.matcher(brevkode).matches()) {
+            return null;
+        } else {
+            return brevkode;
+        }
     }
 }
