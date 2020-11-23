@@ -1,12 +1,15 @@
 package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
+import no.nav.skanmotovrig.decrypt.ZipSplitterEncrypted;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.builder.SimpleBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class PostboksOvrigRoute extends RouteBuilder {
+public class PostboksOvrigRouteEncrypted extends RouteBuilder {
     public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
     public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
     public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
@@ -30,7 +33,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
     private final PostboksOvrigService postboksOvrigService;
 
     @Inject
-    public PostboksOvrigRoute(SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
+    public PostboksOvrigRouteEncrypted(SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
         this.skanmotovrigProperties = skanmotovrigProperties;
         this.postboksOvrigService = postboksOvrigService;
     }
@@ -43,8 +46,20 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .process(new ErrorMetricsProcessor())
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
-                .to("direct:avvik_ovrig")
+                .to("direct:encrypted_avvik_ovrig")
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+
+        onException(ZipException.class)
+                .handled(true)
+                .process(new MdcSetterProcessor())
+                .process(new ErrorMetricsProcessor())
+                .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
+                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
+                .to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
+                        "?{{skanmotovrig.ovrig.endpointconfig}}")
+                .log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .end()
+                .process(new MdcRemoverProcessor());
 
         // Kjente funksjonelle feil
         onException(AbstractSkanmotovrigFunctionalException.class)
@@ -53,25 +68,25 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .process(new ErrorMetricsProcessor())
                 .log(LoggingLevel.WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
                 .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
-                .to("direct:avvik_ovrig")
+                .to("direct:encrypted_avvik_ovrig")
                 .log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
                 "?{{skanmotovrig.ovrig.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antExclude=*enc.zip, *enc.ZIP" +
-                "&antInclude=*.zip,*.ZIP" +
+                "&antInclude=*.enc.zip,*.enc.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
                 "&move=processed" +
-                "&jailStartingDirectory=false"+
                 "&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.schedule}}")
-                .routeId("read_ovrig_zip_from_sftp")
+                .routeId("read_encrypted_ovrig_zip_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmotovrig starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
+                .process(exchange -> {
+                    exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange));
+                })
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitter()).streaming()
+                .split(new ZipSplitterEncrypted()).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
@@ -82,14 +97,14 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .bean(new SkanningmetadataUnmarshaller())
                 .bean(new SkanningmetadataCounter())
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_ovrig")
+                .to("direct:encrypted_process_ovrig")
                 .end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");
 
-        from("direct:process_ovrig")
-                .routeId("process_ovrig")
+        from("direct:encrypted_process_ovrig")
+                .routeId("encrypted_process_ovrig")
                 .process(new MdcSetterProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
                 .bean(postboksOvrigService)
@@ -97,8 +112,8 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
                 .process(new MdcRemoverProcessor());
 
-        from("direct:avvik_ovrig")
-                .routeId("avvik_ovrig")
+        from("direct:encrypted_avvik_ovrig")
+                .routeId("encrypted_avvik_ovrig")
                 .choice().when(body().isInstanceOf(PostboksOvrigEnvelope.class))
                 .setBody(simple("${body.createZip}"))
                 .to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
@@ -107,5 +122,13 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
+    }
+
+    private String cleanDotEncExtension(SimpleBuilder value1, Exchange exchange) {
+        String stringRepresentation = value1.evaluate(exchange, String.class);
+        if (stringRepresentation.contains(".enc")) {
+            return stringRepresentation.replace(".enc", "");
+        }
+        return stringRepresentation;
     }
 }
