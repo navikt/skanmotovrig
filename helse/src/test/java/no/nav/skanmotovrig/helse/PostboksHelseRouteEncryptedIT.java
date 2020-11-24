@@ -57,8 +57,7 @@ public class PostboksHelseRouteEncryptedIT {
     private Path sshdPath;
 
     @BeforeEach
-    void beforeEach() throws IOException {
-        System.setProperty("skantmotovrig.vault.passphrase","changeme");
+    void beforeEach() {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);

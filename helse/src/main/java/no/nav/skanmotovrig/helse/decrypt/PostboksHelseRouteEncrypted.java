@@ -1,15 +1,24 @@
-package no.nav.skanmotovrig.helse;
+package no.nav.skanmotovrig.helse.decrypt;
 
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.decrypt.ZipSplitterEncrypted;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
+import no.nav.skanmotovrig.helse.ErrorMetricsProcessor;
+import no.nav.skanmotovrig.helse.MdcRemoverProcessor;
+import no.nav.skanmotovrig.helse.MdcSetterProcessor;
+import no.nav.skanmotovrig.helse.PostboksHelseEnvelope;
+import no.nav.skanmotovrig.helse.PostboksHelseService;
+import no.nav.skanmotovrig.helse.PostboksHelseSkanningAggregator;
+import no.nav.skanmotovrig.helse.SkanningmetadataCounter;
+import no.nav.skanmotovrig.helse.SkanningmetadataUnmarshaller;
 import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.SimpleBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -30,11 +39,14 @@ public class PostboksHelseRouteEncrypted extends RouteBuilder {
 
     private final SkanmotovrigProperties skanmotovrigProperties;
     private final PostboksHelseService postboksHelseService;
+    private final String passphrase;
 
     @Inject
-    public PostboksHelseRouteEncrypted(PostboksHelseService postboksHelseService, SkanmotovrigProperties skanmotovrigProperties) {
+    public PostboksHelseRouteEncrypted(@Value("${skanmotovrig.secret.passphrase}") String passphrase,
+                                       PostboksHelseService postboksHelseService, SkanmotovrigProperties skanmotovrigProperties) {
         this.postboksHelseService = postboksHelseService;
         this.skanmotovrigProperties = skanmotovrigProperties;
+        this.passphrase = passphrase;
     }
 
     @Override
@@ -81,11 +93,9 @@ public class PostboksHelseRouteEncrypted extends RouteBuilder {
                 .routeId("read_encrypted_helse_from_sftp")
                 .log(LoggingLevel.INFO, log, "Skanmothelse starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
-                .process(exchange -> {
-                    exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange));
-                })
+                .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange)))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitterEncrypted()).streaming()
+                .split(new ZipSplitterEncrypted(passphrase)).streaming()
                 .aggregate(simple("${file:name.noext.single}"), new PostboksHelseSkanningAggregator())
                 .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                 .completionTimeout(skanmotovrigProperties.getHelse().getCompletiontimeout().toMillis())

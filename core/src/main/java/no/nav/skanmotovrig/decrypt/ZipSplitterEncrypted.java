@@ -21,18 +21,26 @@ import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.springframework.beans.factory.annotation.Value;
 
+import javax.inject.Inject;
 import java.io.InputStream;
 
-import static no.nav.skanmotovrig.vault.SkanmotovrigVaultConfig.SKANMOTOVRIG_PASSPHRASE;
 
 @Slf4j
 public class ZipSplitterEncrypted extends ZipSplitter {
 
+    private final String passphrase;
+
+    @Inject
+    public ZipSplitterEncrypted(@Value("${skanmotovrig.secret.passphrase}") String passphrase) {
+        this.passphrase = passphrase;
+    }
+
     @Override
     public ZipIteratorEncrypted evaluate(Exchange exchange) {
         Message inputMessage = exchange.getIn();
-        ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), getPassphrase(SKANMOTOVRIG_PASSPHRASE).toCharArray());
+        ZipInputStream zip = new ZipInputStream(inputMessage.getBody(InputStream.class), passphrase.toCharArray());
         return new ZipIteratorEncrypted(exchange, zip);
     }
 
@@ -42,7 +50,4 @@ public class ZipSplitterEncrypted extends ZipSplitter {
         return exchange.getContext().getTypeConverter().convertTo(type, exchange, result);
     }
 
-    private static String getPassphrase(String propertyName) {
-        return System.getProperty(propertyName, System.getenv(propertyName));
-    }
 }
