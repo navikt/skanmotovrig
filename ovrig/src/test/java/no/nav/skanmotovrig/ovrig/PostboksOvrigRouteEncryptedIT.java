@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -40,10 +39,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = OvrigTestConfig.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,properties = "spring.cloud.vault.token=123456")
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.cloud.vault.token=123456")
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-public class PostboksOvrigRouteIT {
+public class PostboksOvrigRouteEncryptedIT {
     public static final String INNGAAENDE = "inngaaende";
     public static final String FEILMAPPE = "feilmappe";
     private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
@@ -53,7 +52,7 @@ public class PostboksOvrigRouteIT {
     private Path sshdPath;
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach() {
         final Path inngaaende = sshdPath.resolve(INNGAAENDE);
         final Path processed = inngaaende.resolve("processed");
         final Path feilmappe = sshdPath.resolve(FEILMAPPE);
@@ -83,17 +82,17 @@ public class PostboksOvrigRouteIT {
 
     @Test
     public void shouldBehandlePostboksOvrigZip() throws IOException {
-        // OVRIG-20200529-1.zip
-        // OK   - OVRIG-20200529-1-1 alle felt
-        // OK   - OVRIG-20200529-1-2 kun påkrevde felt
-        // OK   - OVRIG-20200529-1-3 tomme valgfri felt
-        // FEIL - OVRIG-20200529-1-4 xml (mangler pdf)
-        // FEIL - OVRIG-20200529-1-5 pdf (mangler xml)
-        // FEIL - OVRIG-20200529-1-6 malformet xml
+        // OVRIG-20200529-2.enc.zip
+        // OK   - OVRIG-20200529-2-1 alle felt
+        // OK   - OVRIG-20200529-2-2 kun påkrevde felt
+        // OK   - OVRIG-20200529-2-3 tomme valgfri felt
+        // FEIL - OVRIG-20200529-2-4 xml (mangler pdf)
+        // FEIL - OVRIG-20200529-2-5 pdf (mangler xml)
+        // FEIL - OVRIG-20200529-2-6 malformet xml
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-1";
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-2";
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
         setUpHappyStubs();
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -108,25 +107,25 @@ public class PostboksOvrigRouteIT {
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-20200529-1-4.zip",
-                "OVRIG-20200529-1-5.zip",
-                "OVRIG-20200529-1-6.zip");
+                "OVRIG-20200529-2-4.zip",
+                "OVRIG-20200529-2-5.zip",
+                "OVRIG-20200529-2-6.zip");
         verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
     public void shouldBehandlePostboksOvrigZipWithMultipleDotsInFilenames() throws IOException {
-        // OVRIG.20200529-2.zip
-        // OK   - OVRIG.20200529-2-1 alle felt
-        // OK   - OVRIG.20200529-2-2 kun påkrevde felt
-        // OK   - OVRIG.20200529-2-3 tomme valgfri felt
-        // FEIL - OVRIG.20200529-2-4 xml (mangler pdf)
-        // FEIL - OVRIG.20200529-2-5 pdf (mangler xml)
-        // FEIL - OVRIG.20200529-2-6 malformet xml
+        // OVRIG.20200529-3.enc.enc.zip
+        // OK   - OVRIG.20200529-3-1 alle felt
+        // OK   - OVRIG.20200529-3-2 kun påkrevde felt
+        // OK   - OVRIG.20200529-3-3 tomme valgfri felt
+        // FEIL - OVRIG.20200529-3-4 xml (mangler pdf)
+        // FEIL - OVRIG.20200529-3-5 pdf (mangler xml)
+        // FEIL - OVRIG.20200529-3-6 malformet xml
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-2";
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-3";
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
         setUpHappyStubs();
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -141,28 +140,28 @@ public class PostboksOvrigRouteIT {
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG.20200529-2-4.zip",
-                "OVRIG.20200529-2-5.zip",
-                "OVRIG.20200529-2-6.zip");
+                "OVRIG.20200529-3-4.zip",
+                "OVRIG.20200529-3-5.zip",
+                "OVRIG.20200529-3-6.zip");
         verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
     @Test
     public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
-        // OVRIG-XML-ORDERED-FIRST-1.zip
-        // OK   - OVRIG-XML-ORDERED-FIRST-1-01 alle felt
-        // OK   - OVRIG-XML-ORDERED-FIRST-1-02 kun påkrevde felt
-        // OK   - OVRIG-XML-ORDERED-FIRST-1-03 tomme valgfri felt
-        // FEIL - OVRIG-XML-ORDERED-FIRST-1-04 xml (mangler pdf)
-        // FEIL - OVRIG-XML-ORDERED-FIRST-1-05 pdf (mangler xml)
-        // FEIL - OVRIG-XML-ORDERED-FIRST-1-06 malformet xml
-        // OK   - OVRIG-XML-ORDERED-FIRST-1-07 alle felt
+        // OVRIG-XML-ORDERED-FIRST-2.enc.zip
+        // OK   - OVRIG-XML-ORDERED-FIRST-2-01 alle felt
+        // OK   - OVRIG-XML-ORDERED-FIRST-2-02 kun påkrevde felt
+        // OK   - OVRIG-XML-ORDERED-FIRST-2-03 tomme valgfri felt
+        // FEIL - OVRIG-XML-ORDERED-FIRST-2-04 xml (mangler pdf)
+        // FEIL - OVRIG-XML-ORDERED-FIRST-2-05 pdf (mangler xml)
+        // FEIL - OVRIG-XML-ORDERED-FIRST-2-06 malformet xml
+        // OK   - OVRIG-XML-ORDERED-FIRST-2-07 alle felt
         // ...
         // OK   - OVRIG-XML-ORDERED-FIRST-1-59 alle felt
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-1";
+        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-2";
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
+        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
         setUpHappyStubs();
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -177,9 +176,9 @@ public class PostboksOvrigRouteIT {
                 .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
                 .collect(Collectors.toList());
         assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-XML-ORDERED-FIRST-1-04.zip",
-                "OVRIG-XML-ORDERED-FIRST-1-05.zip",
-                "OVRIG-XML-ORDERED-FIRST-1-06.zip");
+                "OVRIG-XML-ORDERED-FIRST-2-04.zip",
+                "OVRIG-XML-ORDERED-FIRST-2-05.zip",
+                "OVRIG-XML-ORDERED-FIRST-2-06.zip");
         verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
     }
 
