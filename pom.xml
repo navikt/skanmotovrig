@@ -33,7 +33,7 @@
         <javax.activation.version>1.1.1</javax.activation.version>
         <javax.inject.version>1</javax.inject.version>
         <javax.bind.version>2.3.1</javax.bind.version>
-        <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <lombok.version>1.18.16</lombok.version>
         <spring-cloud-contract-wiremock.version>2.2.4.RELEASE</spring-cloud-contract-wiremock.version>
         <apache.commons.version>1.20</apache.commons.version>
