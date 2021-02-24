@@ -34,7 +34,6 @@ spec:
     enabled: true
     path: /actuator/prometheus
   readiness:
-    path: /isReady
     port: 8080
     initialDelay: 30
     timeout: 3
@@ -44,9 +43,9 @@ spec:
   resources:
     limits:
       cpu: 2000m
-      memory: 2048Mi
+      memory: 3584Mi
     requests:
-      memory: 1024Mi
+      memory: 2560Mi
   vault:
     enabled: true
     paths:
