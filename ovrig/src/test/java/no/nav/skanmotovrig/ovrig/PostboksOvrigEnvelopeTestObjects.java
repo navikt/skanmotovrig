@@ -23,6 +23,7 @@ public class PostboksOvrigEnvelopeTestObjects {
     public static final String MOTTAKSKANAL = "SKAN_IM";
     public static final String ENDORSERNR = "12345";
     public static final String BRUKER_ID = "11111111111";
+    public static final String UKJENT_BRUKER_ID = "000000000";
     public static final String BRUKER_TYPE = "PERSON";
     public static final LocalDate DATO_MOTTATT = LocalDate.parse("2020-04-06");
     public static final String TEMA = "PEN";
