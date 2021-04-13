@@ -131,7 +131,7 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
 	}
 
 	private Bruker mapBruker(no.nav.skanmotovrig.ovrig.domain.Bruker jpBruker) {
-		if (jpBruker.getBrukertype().equalsIgnoreCase(ORGANISASJON) && UKJENT_BRUKER.equals(jpBruker.getBrukerId())) {
+		if (ORGANISASJON.equalsIgnoreCase(jpBruker.getBrukertype()) && UKJENT_BRUKER.equals(jpBruker.getBrukerId())) {
 			return null;
 		}
 
