@@ -1,13 +1,13 @@
 {
-  "NAMESPACE": "q1",
+  "NAMESPACE": "teamdokumenthandtering",
   "SRVSKANMOTOVRIG": "/serviceuser/data/dev/srvskanmotovrig",
-  "VAULT": "kv/preprod/fss/skanmotovrig/q1",
+  "VAULT": "kv/preprod/fss/skanmotovrig/teamdokumenthandtering",
   "SFTP_KEYS": "kv/preprod/fss/skanmotovrig/keys",
-  "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv-q1.nais.preprod.local/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
+  "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.dev.intern.nav.no/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "SKANMOTOVRIG_OVRIG_SCHEDULE": "0+*/5+*+*+*+*",
   "SKANMOTOVRIG_HELSE_SCHEDULE": "0+*/5+*+*+*+*",
   "INGRESSES": [
-    "https://skanmotovrig-q1.nais.preprod.local"
+    "https://skanmotovrig.dev.intern.nav.no"
   ]
 }
