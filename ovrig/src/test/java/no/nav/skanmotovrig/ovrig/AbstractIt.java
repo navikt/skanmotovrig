@@ -3,16 +3,25 @@ package no.nav.skanmotovrig.ovrig;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.rules.TemporaryFolder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -35,8 +44,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @ActiveProfiles("itest")
 public class AbstractIt {
 
-	static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
+	public static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
 	private static final String STS_URL = "/rest/v1/sts/token";
+	private static File privateKeyFile;
+	static Path keysFolder;
 
 	@BeforeEach
 	void settUpMocks() {
@@ -47,6 +58,30 @@ public class AbstractIt {
 		);
 	}
 
+
+	static Path copyFileToKeysFolder(String relativePath) throws IOException {
+		Path pathFromRelativePath = getPathFromRelativePath(relativePath);
+		return Files.copy(pathFromRelativePath, keysFolder.resolve(pathFromRelativePath.getFileName()));
+	}
+
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		keysFolder = inputTempFolder.newFolder("skanmotovrig").toPath();
+
+		privateKeyFile = copyFileToKeysFolder("pgp/privateKeyRSA.gpg").toFile();
+
+		String privateKeyFileAbsolutePath = privateKeyFile.getAbsolutePath();
+
+		// To remove the possibility for escaped characters in the the path, like ...\t.. or ...\n...
+		System.setProperty("pgp.privateKey", privateKeyFileAbsolutePath.replace("\\", "/"));
+
+	}
+
+	@ClassRule
+	public static TemporaryFolder inputTempFolder = new TemporaryFolder();
+
+
 	@BeforeEach
 	void resetMocks() {
 		WireMock.reset();
@@ -54,7 +89,7 @@ public class AbstractIt {
 		WireMock.removeAllMappings();
 	}
 
-	void setUpHappyStubs() {
+	public void setUpHappyStubs() {
 		stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -78,5 +113,11 @@ public class AbstractIt {
 	private static String classpathToString(String classpathResource) {
 		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
 		return IOUtils.toString(inputStream, UTF_8);
+	}
+
+
+	protected static Path getPathFromRelativePath(String relativePath) throws IOException {
+		Resource onClasspath = new ClassPathResource(relativePath);
+		return Paths.get(onClasspath.getFile().getAbsolutePath());
 	}
 }

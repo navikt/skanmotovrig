@@ -33,6 +33,7 @@
         <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
         <apache.commons.version>1.21</apache.commons.version>
         <commons-io.version>2.11.0</commons-io.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
 
         <!-- Nyere versjoner av sshd-core vil gi feilmeldingen "JSchException: reject HostKey: localhost" -->
         <sshd-core.version>2.5.1</sshd-core.version>
@@ -82,6 +83,18 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
+            </dependency>
+
+            <!-- decrypt pgp-->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpg-jdk15on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
 
             <!-- Test -->
