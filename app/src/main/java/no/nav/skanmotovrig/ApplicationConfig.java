@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.retry.annotation.EnableRetry;
 
 @ComponentScan
 @EnableAutoConfiguration
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
         SkanmotovrigProperties.class,
         SkanmotovrigVaultProperties.class
 })
+@EnableRetry
 @Configuration
 public class ApplicationConfig {
 
