@@ -22,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_DELAY;
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_RETRIES;
+import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.MAX_RETRIES;
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 import static org.springframework.http.HttpMethod.POST;
@@ -45,12 +45,12 @@ public class OpprettJournalpostConsumer {
 		this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
 		this.mapper = mapper;
 		this.restTemplate = restTemplateBuilder
-				.setReadTimeout(Duration.ofMillis(10000L))
-				.setConnectTimeout(Duration.ofMillis(10000L))
+				.setReadTimeout(Duration.ofSeconds(150))
+				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
 	}
 
-	@Retryable(maxAttempts = RETRY_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
+	@Retryable(maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
 	@Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "opprettJournalpost"}, percentiles = {0.5, 0.95}, histogram = true)
 	public OpprettJournalpostResponse opprettJournalpost(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
 		try {
@@ -58,10 +58,12 @@ public class OpprettJournalpostConsumer {
 			HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);
 			return restTemplate.exchange(dokarkivJournalpostUrl, POST, requestEntity, OpprettJournalpostResponse.class).getBody();
 		} catch (HttpClientErrorException e) {
-			if (CONFLICT.value() == e.getRawStatusCode()) {
+			if (CONFLICT == e.getStatusCode()) {
 				try {
 					OpprettJournalpostResponse journalpost = mapper.readValue(e.getResponseBodyAsString(), OpprettJournalpostResponse.class);
-					log.info("Det eksisterer allerede en journalpost i dokarkiv med JournalpostId: {}", journalpost.getJournalpostId());
+					log.info("Det eksisterer allerede en journalpost i dokarkiv med fil={}. Denne har journalpostId={}. Oppretter ikke ny journalpost.",
+							opprettJournalpostRequest.getEksternReferanseId(),
+							journalpost.getJournalpostId());
 					return journalpost;
 				} catch (JsonProcessingException jsonProcessingException) {
 					throw new SkanmotovrigFunctionalException("Ikke mulig å konvertere respons ifra dokarkiv.", e);

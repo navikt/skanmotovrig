@@ -9,8 +9,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,7 @@ import java.time.Duration;
 import static java.util.Collections.singletonList;
 import static no.nav.skanmotovrig.config.LocalCacheConfig.STS_CACHE;
 import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_DELAY;
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_RETRIES;
+import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.MAX_RETRIES;
 import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
 import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 import static org.springframework.http.HttpMethod.POST;
@@ -51,7 +49,7 @@ public class STSConsumer {
 	}
 
 	@Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true)
-	@Retryable(maxAttempts = RETRY_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
+	@Retryable(maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
 	@Cacheable(STS_CACHE)
 	public STSResponse getSTSToken() {
 		try {
