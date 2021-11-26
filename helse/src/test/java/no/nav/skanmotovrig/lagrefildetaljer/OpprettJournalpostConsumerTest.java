@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.helse.HelseTestConfig;
+import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,8 +65,9 @@ class OpprettJournalpostConsumerTest  {
 	@Test
 	public void shouldGetJournalpostWhenResponseIs () {
 		this.StubOpprettJournalpostResponseConflictWithValidResponse();
+		OpprettJournalpostRequest request = OpprettJournalpostRequest.builder().build();
 
-		OpprettJournalpostResponse response = opprettJournalpostConsumer.opprettJournalpost("token", null);
+		OpprettJournalpostResponse response = opprettJournalpostConsumer.opprettJournalpost("token", request);
 		assertEquals("567010363", response.getJournalpostId());
 	}
 
