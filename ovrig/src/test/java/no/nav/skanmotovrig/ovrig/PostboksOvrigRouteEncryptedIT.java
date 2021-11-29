@@ -37,164 +37,146 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = OvrigTestConfig.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.cloud.vault.token=123456")
-@AutoConfigureWireMock(port = 0)
-@ActiveProfiles("itest")
-public class PostboksOvrigRouteEncryptedIT {
-    public static final String INNGAAENDE = "inngaaende";
-    public static final String FEILMAPPE = "feilmappe";
-    private final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
-    private final String STS_URL = "/rest/v1/sts/token";
 
-    @Inject
-    private Path sshdPath;
+public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
+	public static final String INNGAAENDE = "inngaaende";
+	public static final String FEILMAPPE = "feilmappe";
 
-    @BeforeEach
-    void beforeEach() {
-        final Path inngaaende = sshdPath.resolve(INNGAAENDE);
-        final Path processed = inngaaende.resolve("processed");
-        final Path feilmappe = sshdPath.resolve(FEILMAPPE);
-        try {
-            preparePath(inngaaende);
-            preparePath(processed);
-            preparePath(feilmappe);
-        } catch (Exception e) {
-            // noop
-        }
-    }
+	@Inject
+	private Path sshdPath;
 
-    private void preparePath(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectory(path);
-        } else {
-            FileUtils.cleanDirectory(path.toFile());
-        }
-    }
+	@BeforeEach
+	void beforeEach() {
+		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
+		final Path processed = inngaaende.resolve("processed");
+		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
+		try {
+			preparePath(inngaaende);
+			preparePath(processed);
+			preparePath(feilmappe);
+		} catch (Exception e) {
+			// noop
+		}
+	}
 
-    @AfterEach
-    void tearDown() {
-        WireMock.reset();
-        WireMock.resetAllRequests();
-        WireMock.removeAllMappings();
-    }
+	private void preparePath(Path path) throws IOException {
+		if (!Files.exists(path)) {
+			Files.createDirectory(path);
+		} else {
+			FileUtils.cleanDirectory(path.toFile());
+		}
+	}
 
-    @Test
-    public void shouldBehandlePostboksOvrigZip() throws IOException {
-        // OVRIG-20200529-2.enc.zip
-        // OK   - OVRIG-20200529-2-1 alle felt
-        // OK   - OVRIG-20200529-2-2 kun påkrevde felt
-        // OK   - OVRIG-20200529-2-3 tomme valgfri felt
-        // FEIL - OVRIG-20200529-2-4 xml (mangler pdf)
-        // FEIL - OVRIG-20200529-2-5 pdf (mangler xml)
-        // FEIL - OVRIG-20200529-2-6 malformet xml
+	@AfterEach
+	void tearDown() {
+		WireMock.reset();
+		WireMock.resetAllRequests();
+		WireMock.removeAllMappings();
+	}
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-2";
+	@Test
+	public void shouldBehandlePostboksOvrigZip() throws IOException {
+		// OVRIG-20200529-2.enc.zip
+		// OK   - OVRIG-20200529-2-1 alle felt
+		// OK   - OVRIG-20200529-2-2 kun påkrevde felt
+		// OK   - OVRIG-20200529-2-3 tomme valgfri felt
+		// FEIL - OVRIG-20200529-2-4 xml (mangler pdf)
+		// FEIL - OVRIG-20200529-2-5 pdf (mangler xml)
+		// FEIL - OVRIG-20200529-2-6 malformet xml
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-        setUpHappyStubs();
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-2";
 
-        await().atMost(15, SECONDS).untilAsserted(() -> {
-            try {
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                        .collect(Collectors.toList())).hasSize(3);
-            } catch (NoSuchFileException e) {
-                fail();
-            }
-        });
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-                .collect(Collectors.toList());
-        assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-20200529-2-4.zip",
-                "OVRIG-20200529-2-5.zip",
-                "OVRIG-20200529-2-6.zip");
-        verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
+		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
+		setUpHappyStubs();
 
-    @Test
-    public void shouldBehandlePostboksOvrigZipWithMultipleDotsInFilenames() throws IOException {
-        // OVRIG.20200529-3.enc.enc.zip
-        // OK   - OVRIG.20200529-3-1 alle felt
-        // OK   - OVRIG.20200529-3-2 kun påkrevde felt
-        // OK   - OVRIG.20200529-3-3 tomme valgfri felt
-        // FEIL - OVRIG.20200529-3-4 xml (mangler pdf)
-        // FEIL - OVRIG.20200529-3-5 pdf (mangler xml)
-        // FEIL - OVRIG.20200529-3-6 malformet xml
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+			try {
+				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+						.collect(Collectors.toList())).hasSize(3);
+			} catch (NoSuchFileException e) {
+				fail();
+			}
+		});
+		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.collect(Collectors.toList());
+		assertThat(feilmappeContents).containsExactlyInAnyOrder(
+				"OVRIG-20200529-2-4.zip",
+				"OVRIG-20200529-2-5.zip",
+				"OVRIG-20200529-2-6.zip");
+		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+	}
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-3";
+	@Test
+	public void shouldBehandlePostboksOvrigZipWithMultipleDotsInFilenames() throws IOException {
+		// OVRIG.20200529-3.enc.enc.zip
+		// OK   - OVRIG.20200529-3-1 alle felt
+		// OK   - OVRIG.20200529-3-2 kun påkrevde felt
+		// OK   - OVRIG.20200529-3-3 tomme valgfri felt
+		// FEIL - OVRIG.20200529-3-4 xml (mangler pdf)
+		// FEIL - OVRIG.20200529-3-5 pdf (mangler xml)
+		// FEIL - OVRIG.20200529-3-6 malformet xml
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-        setUpHappyStubs();
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-3";
 
-        await().atMost(15, SECONDS).untilAsserted(() -> {
-            try {
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                        .collect(Collectors.toList())).hasSize(3);
-            } catch (NoSuchFileException e) {
-                fail();
-            }
-        });
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-                .collect(Collectors.toList());
-        assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG.20200529-3-4.zip",
-                "OVRIG.20200529-3-5.zip",
-                "OVRIG.20200529-3-6.zip");
-        verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
+		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
+		setUpHappyStubs();
 
-    @Test
-    public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
-        // OVRIG-XML-ORDERED-FIRST-2.enc.zip
-        // OK   - OVRIG-XML-ORDERED-FIRST-2-01 alle felt
-        // OK   - OVRIG-XML-ORDERED-FIRST-2-02 kun påkrevde felt
-        // OK   - OVRIG-XML-ORDERED-FIRST-2-03 tomme valgfri felt
-        // FEIL - OVRIG-XML-ORDERED-FIRST-2-04 xml (mangler pdf)
-        // FEIL - OVRIG-XML-ORDERED-FIRST-2-05 pdf (mangler xml)
-        // FEIL - OVRIG-XML-ORDERED-FIRST-2-06 malformet xml
-        // OK   - OVRIG-XML-ORDERED-FIRST-2-07 alle felt
-        // ...
-        // OK   - OVRIG-XML-ORDERED-FIRST-1-59 alle felt
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+			try {
+				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+						.collect(Collectors.toList())).hasSize(3);
+			} catch (NoSuchFileException e) {
+				fail();
+			}
+		});
+		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.collect(Collectors.toList());
+		assertThat(feilmappeContents).containsExactlyInAnyOrder(
+				"OVRIG.20200529-3-4.zip",
+				"OVRIG.20200529-3-5.zip",
+				"OVRIG.20200529-3-6.zip");
+		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+	}
 
-        final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-2";
+	@Test
+	public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
+		// OVRIG-XML-ORDERED-FIRST-2.enc.zip
+		// OK   - OVRIG-XML-ORDERED-FIRST-2-01 alle felt
+		// OK   - OVRIG-XML-ORDERED-FIRST-2-02 kun påkrevde felt
+		// OK   - OVRIG-XML-ORDERED-FIRST-2-03 tomme valgfri felt
+		// FEIL - OVRIG-XML-ORDERED-FIRST-2-04 xml (mangler pdf)
+		// FEIL - OVRIG-XML-ORDERED-FIRST-2-05 pdf (mangler xml)
+		// FEIL - OVRIG-XML-ORDERED-FIRST-2-06 malformet xml
+		// OK   - OVRIG-XML-ORDERED-FIRST-2-07 alle felt
+		// ...
+		// OK   - OVRIG-XML-ORDERED-FIRST-1-59 alle felt
 
-        copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-        setUpHappyStubs();
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-2";
 
-        await().atMost(15, SECONDS).untilAsserted(() -> {
-            try {
-                assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                        .collect(Collectors.toList())).hasSize(3);
-            } catch (NoSuchFileException e) {
-                fail();
-            }
-        });
-        final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
-                .map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-                .collect(Collectors.toList());
-        assertThat(feilmappeContents).containsExactlyInAnyOrder(
-                "OVRIG-XML-ORDERED-FIRST-2-04.zip",
-                "OVRIG-XML-ORDERED-FIRST-2-05.zip",
-                "OVRIG-XML-ORDERED-FIRST-2-06.zip");
-        verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-    }
+		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
+		setUpHappyStubs();
 
-    private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
-        Files.copy(new ClassPathResource(zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
-    }
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+			try {
+				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+						.collect(Collectors.toList())).hasSize(3);
+			} catch (NoSuchFileException e) {
+				fail();
+			}
+		});
+		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
+				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.collect(Collectors.toList());
+		assertThat(feilmappeContents).containsExactlyInAnyOrder(
+				"OVRIG-XML-ORDERED-FIRST-2-04.zip",
+				"OVRIG-XML-ORDERED-FIRST-2-05.zip",
+				"OVRIG-XML-ORDERED-FIRST-2-06.zip");
+		verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+	}
 
-    private void setUpHappyStubs() {
-        stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
-                .willReturn(aResponse().withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBodyFile("journalpostapi/success.json")));
-        stubFor(post(urlMatching(STS_URL))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBodyFile("sts/token.json"))
-        );
-    }
+	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {
+		Files.copy(new ClassPathResource(zipfilename).getInputStream(), sshdPath.resolve(INNGAAENDE).resolve(zipfilename));
+	}
 }
