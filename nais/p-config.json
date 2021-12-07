@@ -6,7 +6,6 @@
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.intern.nav.no/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SKANMOTOVRIG_OVRIG_SCHEDULE": "0+5/15+*+*+*+*",
-  "SKANMOTOVRIG_HELSE_SCHEDULE": "0+0/15+*+*+*+*",
   "INGRESSES": [
     "https://skanmotovrig.intern.nav.no"
   ]

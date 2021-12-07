@@ -27,7 +27,6 @@ public class SkanmotovrigProperties {
     private final ServiceUserProperties serviceuser = new ServiceUserProperties();
     private final FilomraadeProperties filomraade = new FilomraadeProperties();
     private final Ovrig ovrig = new Ovrig();
-    private final Helse helse = new Helse();
     private final SftpProperties sftp = new SftpProperties();
 
     @Getter
@@ -58,26 +57,6 @@ public class SkanmotovrigProperties {
     @Setter
     @Validated
     public static class Ovrig {
-        @NotEmpty
-        private String endpointuri;
-
-        @NotEmpty
-        private String endpointconfig;
-
-        @NotEmpty
-        private String schedule;
-
-        @NotNull
-        private Duration completiontimeout;
-
-        @NotNull
-        private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    }
-
-    @Getter
-    @Setter
-    @Validated
-    public static class Helse {
         @NotEmpty
         private String endpointuri;
 

@@ -22,7 +22,6 @@ public class DokCounter {
     private static final String TECHNICAL_ERROR = "technical";
     public static final String DOMAIN = "domain";
     public static final String CORE = "core";
-    public static final String HELSE = "helse";
     public static final String OVRIG = "ovrig";
 
     private static MeterRegistry meterRegistry;
