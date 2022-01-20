@@ -50,7 +50,5 @@ spec:
     paths:
       - kvPath: {{ SRVSKANMOTOVRIG }}
         mountPath: /var/run/secrets/nais.io/srvskanmotovrig
-      - kvPath: {{ VAULT }}
-        mountPath: /var/run/secrets/nais.io/vault
       - kvPath: {{ SFTP_KEYS }}
         mountPath: /var/run/secrets/nais.io/keys
