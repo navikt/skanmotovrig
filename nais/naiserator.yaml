@@ -17,6 +17,10 @@ spec:
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
       value: /var/run/secrets/nais.io/keys/hostkey
+    - name: SKANMOTOVRIG_VAULT_BACKEND
+      value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
+    - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
+      value: {{ SKANMOTOVRIG_VAULT_KUBERNETESPATH }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
