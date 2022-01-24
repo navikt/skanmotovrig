@@ -2,12 +2,10 @@ package no.nav.skanmotovrig.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +23,8 @@ public class DokCounter {
     public static final String OVRIG = "ovrig";
 
     private static MeterRegistry meterRegistry;
-    @Inject
+
+    @Autowired
     public DokCounter(MeterRegistry meterRegistry){
         DokCounter.meterRegistry = meterRegistry;
     }
