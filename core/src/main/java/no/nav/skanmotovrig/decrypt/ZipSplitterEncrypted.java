@@ -21,9 +21,9 @@ import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.inject.Inject;
 import java.io.InputStream;
 
 
@@ -32,8 +32,8 @@ public class ZipSplitterEncrypted extends ZipSplitter {
 
     private final String passphrase;
 
-    @Inject
-    public ZipSplitterEncrypted(@Value("${skanmotovrig.secret.passphrase}") String passphrase) {
+    @Autowired
+    public ZipSplitterEncrypted(@Value("${passphrase}") String passphrase) {
         this.passphrase = passphrase;
     }
 

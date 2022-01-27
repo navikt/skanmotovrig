@@ -24,11 +24,11 @@ import org.springframework.context.annotation.Import;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.nio.file.Path.of;
+import static java.util.Collections.singletonList;
 
 @Slf4j
 @Configuration
@@ -81,15 +81,24 @@ public class OvrigTestConfig {
         }
 
         @Bean(initMethod = "start", destroyMethod = "stop")
-        public SshServer sshServer(final Path sshdPath,
-                final SkanmotovrigProperties skanmotovrigProperties) throws IOException {
+        public SshServer sshServer(
+                final Path sshdPath,
+                final SkanmotovrigProperties skanmotovrigProperties
+        ) {
             SshServer sshd = SshServer.setUpDefaultServer();
             sshd.setPort(Integer.parseInt(skanmotovrigProperties.getSftp().getPort()));
-            sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Path.of("src/test/resources/sftp/itest.ser")));
+            sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(of("src/test/resources/sftp/itest.ser")));
+
+            // To support SCP
             sshd.setCommandFactory(new ScpCommandFactory());
-            sshd.setSubsystemFactories(List.of(new SftpSubsystemFactory()));
-            sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(Paths.get("src/test/resources/sftp/itest_valid.pub")));
-            sshd.setUserAuthFactories(Collections.singletonList(new UserAuthNoneFactory()));
+
+            // Sftp
+            sshd.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
+
+            // Server side security setup - key based authentication
+            sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(of("src/test/resources/sftp/itest_valid.pub")));
+
+            sshd.setUserAuthFactories(singletonList(new UserAuthNoneFactory()));
             sshd.setFileSystemFactory(new VirtualFileSystemFactory(sshdPath));
             return sshd;
         }

@@ -16,14 +16,9 @@ import javax.validation.constraints.NotBlank;
 public class SkanmotovrigVaultProperties {
 
     @NotBlank
-    private String secretpath;
-
-    @NotBlank
     private String backend;
 
     @NotBlank
     private String kubernetespath;
 
-    @NotBlank
-    private String defaultcontext;
 }

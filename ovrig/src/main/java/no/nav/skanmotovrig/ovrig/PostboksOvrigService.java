@@ -6,9 +6,8 @@ import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -19,7 +18,7 @@ public class PostboksOvrigService {
     private final OpprettJournalpostPostboksOvrigRequestMapper mapper;
     private final OpprettJournalpostService opprettJournalpostService;
 
-    @Inject
+    @Autowired
     public PostboksOvrigService(OpprettJournalpostPostboksOvrigRequestMapper mapper,
                                 OpprettJournalpostService opprettJournalpostService) {
         this.mapper = mapper;

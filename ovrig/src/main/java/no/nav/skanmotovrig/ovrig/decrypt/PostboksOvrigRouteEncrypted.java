@@ -18,11 +18,11 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.SimpleBuilder;
-import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.apache.camel.builder.ValueBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +42,8 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
     private final PostboksOvrigService postboksOvrigService;
     private final String passphrase;
 
-    @Inject
-    public PostboksOvrigRouteEncrypted(@Value("${skanmotovrig.secret.passphrase}") String passphrase,
+    @Autowired
+    public PostboksOvrigRouteEncrypted(@Value("${passphrase}") String passphrase,
                                        SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
         this.skanmotovrigProperties = skanmotovrigProperties;
         this.postboksOvrigService = postboksOvrigService;
@@ -134,7 +134,7 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .process(new MdcRemoverProcessor());
     }
 
-    private String cleanDotEncExtension(SimpleBuilder value1, Exchange exchange) {
+    private String cleanDotEncExtension(ValueBuilder value1, Exchange exchange) {
         String stringRepresentation = value1.evaluate(exchange, String.class);
         if (stringRepresentation.contains(".enc")) {
             return stringRepresentation.replace(".enc", "");

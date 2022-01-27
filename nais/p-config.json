@@ -5,6 +5,8 @@
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.intern.nav.no/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SKANMOTOVRIG_OVRIG_SCHEDULE": "0+5/15+*+*+*+*",
+  "SKANMOTOVRIG_VAULT_BACKEND": "kv/prod/fss",
+  "SKANMOTOVRIG_VAULT_KUBERNETESPATH": "kubernetes/prod/fss",
   "INGRESSES": [
     "https://skanmotovrig.intern.nav.no"
   ]
