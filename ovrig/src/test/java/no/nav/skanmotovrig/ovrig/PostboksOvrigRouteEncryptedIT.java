@@ -1,9 +1,7 @@
 package no.nav.skanmotovrig.ovrig;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,13 +53,6 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 		}
 	}
 
-	@AfterEach
-	void tearDown() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-	}
-
 	@Test
 	public void shouldBehandlePostboksOvrigZip() throws IOException {
 		// OVRIG-20200529-2.enc.zip
@@ -73,9 +64,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 		// FEIL - OVRIG-20200529-2-6 malformet xml
 
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-2";
-
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
@@ -85,6 +74,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 				fail();
 			}
 		});
+
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());
@@ -106,9 +96,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 		// FEIL - OVRIG.20200529-3-6 malformet xml
 
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-3";
-
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
@@ -118,6 +106,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 				fail();
 			}
 		});
+
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());
@@ -142,9 +131,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 		// OK   - OVRIG-XML-ORDERED-FIRST-1-59 alle felt
 
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-2";
-
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".enc.zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
@@ -154,6 +141,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 				fail();
 			}
 		});
+
 		final List<String> feilmappeContents = Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());

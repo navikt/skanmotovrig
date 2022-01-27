@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.ovrig.decrypt;
+package no.nav.skanmotovrig.pgpDecrypt;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
+// Metoder som er lite bearbeidet, men praktiske for testformål
 public class PGPKeyUtil {
 
 	/**
@@ -54,14 +55,12 @@ public class PGPKeyUtil {
 		PGPPublicKeyRingCollection pgpPub = new PGPPublicKeyRingCollection(
 				PGPUtil.getDecoderStream(input), new JcaKeyFingerprintCalculator());
 
-		//
 		// we just loop through the collection till we find a key suitable for encryption, in the real
 		// world you would probably want to be a bit smarter about this.
-		//TODO: be smarter
-		//
 
 		Iterator keyRingIter = pgpPub.getKeyRings();
 		while (keyRingIter.hasNext()) {
+
 			PGPPublicKeyRing keyRing = (PGPPublicKeyRing) keyRingIter.next();
 
 			Iterator keyIter = keyRing.getPublicKeys();

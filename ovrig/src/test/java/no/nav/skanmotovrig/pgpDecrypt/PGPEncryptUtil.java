@@ -20,13 +20,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 
-import static no.nav.skanmotovrig.ovrig.decrypt.PGPKeyUtil.readPublicKey;
+import static no.nav.skanmotovrig.pgpDecrypt.PGPKeyUtil.readPublicKey;
 
+// Metoder som er lite bearbeidet, men praktiske for testformål
 public class PGPEncryptUtil {
 
-	/*
-	Metoder som er lite bearbeidet, men praktiske for testformål
-*/
 	public static void encryptFile(
 			File inputFile,
 			File outputFile,

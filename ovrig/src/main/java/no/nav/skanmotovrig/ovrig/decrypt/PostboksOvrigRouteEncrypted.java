@@ -17,7 +17,6 @@ import no.nav.skanmotovrig.ovrig.SkanningmetadataUnmarshaller;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.SimpleBuilder;
 import org.apache.camel.builder.ValueBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +50,7 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -96,7 +95,7 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange)))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitter()).streaming()
+                .split(new ZipSplitterEncrypted(passphrase)).streaming()
                     .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                         .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                         .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())

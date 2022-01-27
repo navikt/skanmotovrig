@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static no.nav.skanmotovrig.ovrig.decrypt.PGPDecryptUtil.decryptFile;
+import static no.nav.skanmotovrig.pgpDecrypt.PGPDecryptUtil.decryptFile;
 import static no.nav.skanmotovrig.pgpDecrypt.PGPEncryptUtil.encryptFile;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class PGPDecryptUtilTest {
+public class PGPManualTest {
 
 	@BeforeAll
 	static void beforeAll() {
@@ -46,8 +46,9 @@ public class PGPDecryptUtilTest {
 		FileUtils.copyInputStreamToFile(decryptedInputStream, targetFile);
 	}
 
+	@Disabled
 	@Test
-	void shouldDecryptFile() throws PGPException, IOException, NoSuchProviderException {
+	void shouldDecryptFile() throws IOException, NoSuchProviderException {
 		// encrypted.zip.pgp er den PGP-krypterte mappen som kommer fra IM
 		//FileInputStream encryptedZipAsStream = getEncryptedFilesFromIM();
 		FileInputStream encryptedZipAsStream = new FileInputStream("src/test/resources/OVRIG-20200529-2.pgp.zip");
@@ -82,16 +83,17 @@ public class PGPDecryptUtilTest {
 	}
 
 	@Test
+	@Disabled
 	public void generateEncryptedFile() throws Exception {
 		// encrypted.zip.pgp er den PGP-krypterte mappen som kommer fra IM
 		FileInputStream encryptedZipAsStream = getEncryptedFilesFromIM();
 	}
 
 	private FileInputStream getEncryptedFilesFromIM() throws IOException, PGPException {
-		String filToEncrypt = "OVRIG-20200529-2";
-		//		// På Iron Mountain sin side
+		String filToEncrypt = "OVRIG-20200529-1";
+		// På Iron Mountain sin side
 		File skannedeDokumenterZip = new File("src/test/resources/"+filToEncrypt+".zip");
-		String filnavnKryptertZip = "src/test/resources/test/"+filToEncrypt+".pgp.zip";
+		String filnavnKryptertZip = "src/test/resources/"+filToEncrypt+".zip.pgp";
 		File outputfil = new File(filnavnKryptertZip);
 
 		// Skriv krypterte data til spesifisert outputfil, og returner som FileInputStream

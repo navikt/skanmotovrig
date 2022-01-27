@@ -3,7 +3,6 @@ package no.nav.skanmotovrig.ovrig.decrypt;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.decrypt.ZipSplitterEncrypted;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.metrics.DokCounter;
 import no.nav.skanmotovrig.ovrig.ErrorMetricsProcessor;
@@ -14,25 +13,17 @@ import no.nav.skanmotovrig.ovrig.PostboksOvrigService;
 import no.nav.skanmotovrig.ovrig.PostboksOvrigSkanningAggregator;
 import no.nav.skanmotovrig.ovrig.SkanningmetadataCounter;
 import no.nav.skanmotovrig.ovrig.SkanningmetadataUnmarshaller;
-import no.nav.skanmotovrig.ovrig.decrypt.pgpDecryptNew.PgpDecryptService;
-import no.nav.skanmotovrig.ovrig.decrypt.pgpDecryptNew.PgpZipSplitter;
-import no.nav.skanmotovrig.ovrig.decrypt.pgpDecryptNew.ZipSplitterEncryptedPgp;
-import no.nav.skanmotovrig.ovrig.decrypt.pgpDecryptNew.ZipSplitterPgpEncrypted_new;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.SimpleBuilder;
+import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Slf4j
 @Component
 public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
@@ -40,28 +31,27 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
 	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
 	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-	private static String PROCESS_PGP_ENCRYPTED = "direct:pgp_encrypted_process_ovrig";
-	private static String PGP_AVVIK = "direct:pgp_encrypted_avvik_ovrig";
 	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
 	private final SkanmotovrigProperties skanmotovrigProperties;
 	private final PostboksOvrigService postboksOvrigService;
 	private final PgpDecryptService pgpDecryptService;
-	//TODO: Fjern
-	private final String password;
 
-	@Inject
-	public PostboksOvrigRoutePGPEncrypted(@Value("${pgp.password}") String password,
-										  SkanmotovrigProperties skanmotovrigProperties,
-										  PostboksOvrigService postboksOvrigService, PgpDecryptService pgpDecryptService) {
+	@Autowired
+	public PostboksOvrigRoutePGPEncrypted(
+			SkanmotovrigProperties skanmotovrigProperties,
+			PostboksOvrigService postboksOvrigService,
+			PgpDecryptService pgpDecryptService) {
 		this.skanmotovrigProperties = skanmotovrigProperties;
 		this.postboksOvrigService = postboksOvrigService;
 		this.pgpDecryptService = pgpDecryptService;
-		this.password = password;
 	}
 
 	@Override
 	public void configure() {
+		String PGP_AVVIK = "direct:pgp_encrypted_avvik_ovrig";
+		String PROCESS_PGP_ENCRYPTED = "direct:pgp_encrypted_process_ovrig";
+
 		onException(Exception.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
@@ -96,7 +86,7 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
 				"&delay=" + TimeUnit.SECONDS.toMillis(60) +
-				"&antInclude=*pgp.zip,*pgp.ZIP" +
+				"&antInclude=*zip.pgp,*ZIP.pgp" +
 				"&initialDelay=1000" +
 				"&maxMessagesPerPoll=10" +
 				"&move=processed" +
@@ -145,11 +135,11 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new MdcRemoverProcessor());
 	}
 
-	private String cleanDotPgpExtension(SimpleBuilder value1, Exchange exchange) {
+	// Input blir .zip siden .pgp er strippet bort
+	private String cleanDotPgpExtension(ValueBuilder value1, Exchange exchange) {
 		String stringRepresentation = value1.evaluate(exchange, String.class);
-		if (stringRepresentation.contains(".pgp")) {
-			log.info("\n\n\n\n\n\n\n----------------------------------------------------------------------Inneholder! \n\n\n\n\n");
-			return stringRepresentation.replace(".pgp", "");
+		if (stringRepresentation.contains(".zip")) {
+			return stringRepresentation.replace(".zip", "");
 		}
 		return stringRepresentation;
 	}

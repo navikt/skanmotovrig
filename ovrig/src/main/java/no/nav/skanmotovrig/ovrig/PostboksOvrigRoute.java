@@ -36,7 +36,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -60,7 +60,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 "?{{skanmotovrig.ovrig.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
                 "&antExclude=*enc.zip, *enc.ZIP" +
-                "&antExclude=*pgp.zip, *pgp.ZIP" +
+                "&antExclude=*zip.pgp, *ZIP.pgp" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
@@ -68,7 +68,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 "&jailStartingDirectory=false"+
                 "&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.schedule}}")
                 .routeId("read_ovrig_zip_from_sftp")
-                .log(LoggingLevel.INFO, log, "Skanmotovrig-2 starter behandling av fil=${file:absolute.path}.")
+                .log(LoggingLevel.INFO, log, "Skanmotovrig starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())

@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.ovrig.decrypt;
+package no.nav.skanmotovrig.pgpDecrypt;
 
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import org.bouncycastle.openpgp.PGPCompressedData;
@@ -21,8 +21,9 @@ import java.io.InputStream;
 import java.security.NoSuchProviderException;
 import java.util.Iterator;
 
-import static no.nav.skanmotovrig.ovrig.decrypt.PGPKeyUtil.findSecretKey;
+import static no.nav.skanmotovrig.pgpDecrypt.PGPKeyUtil.findSecretKey;
 
+// Metoder som er lite bearbeidet, men praktiske for testformål
 public class PGPDecryptUtil {
 
 	/**
@@ -54,16 +55,6 @@ public class PGPDecryptUtil {
 			} else {
 				throw new PGPException("Message is not a simple encrypted file - type unknown.");
 			}
-			/*
-			if (publicKeyEncryptedData.isIntegrityProtected()) {
-				if (!publicKeyEncryptedData.verify()) {
-					System.err.println("message failed integrity check");
-				} else {
-					System.err.println("message integrity check passed");
-				}
-			} else {
-				System.err.println("no message integrity check");
-			}*/
 		} catch (PGPException e) {
 			System.err.println(e);
 			if (e.getUnderlyingException() != null) {
