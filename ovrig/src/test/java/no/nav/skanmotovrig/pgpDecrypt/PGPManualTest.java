@@ -86,7 +86,7 @@ public class PGPManualTest {
 	@Disabled
 	public void generateEncryptedFile() throws Exception {
 		// encrypted.zip.pgp er den PGP-krypterte mappen som kommer fra IM
-		FileInputStream encryptedZipAsStream = getEncryptedFilesFromIM();
+		getEncryptedFilesFromIM();
 	}
 
 	private FileInputStream getEncryptedFilesFromIM() throws IOException, PGPException {

@@ -30,25 +30,18 @@ public class AbstractIt {
 	public static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
 	private static final String STS_URL = "/rest/v1/sts/token";
 
-	@BeforeEach
-	void setUpMocks() {
+	public void setUpMocks() {
 		stubFor(post(urlMatching(STS_URL))
 				.willReturn(aResponse()
 						.withHeader("Content-Type", "application/json")
+						.withHeader("Connection", "close")
 						.withBodyFile("sts/token.json"))
 		);
 
 		stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader("Connection", "close")
 						.withBodyFile("journalpostapi/success.json")));
-	}
-
-	@AfterEach
-	void resetMocks() {
-		// Reset mocks
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
 	}
 }

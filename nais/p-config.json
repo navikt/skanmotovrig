@@ -1,5 +1,4 @@
 {
-  "NAMESPACE": "teamdokumenthandtering",
   "SRVSKANMOTOVRIG": "/serviceuser/data/prod/srvskanmotovrig",
   "SFTP_KEYS": "kv/prod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "https://dokarkiv.intern.nav.no/rest/journalpostapi/v1/journalpost?foersoekFerdigstill=false",

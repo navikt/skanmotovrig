@@ -33,6 +33,7 @@ public class PostboksOvrigRouteEncryptedIT extends AbstractIt {
 
 	@BeforeEach
 	void beforeEach() {
+		super.setUpMocks();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
