@@ -74,9 +74,9 @@ public class PgpDecryptService {
 			if (message instanceof PGPLiteralData literalDataMessage) {
 				return literalDataMessage.getDataStream();
 			} else if (message instanceof PGPOnePassSignatureList) {
-				throw new PGPException("Encrypted message contains a signed message - not literal data.");
+				throw new PGPException("PGP-kryptert melding inneholder en signert melding - ingen faktiske data.");
 			} else {
-				throw new PGPException("Message is not a simple encrypted file - type unknown.");
+				throw new PGPException("PGP-kryptert melding har en ukjent datatype.");
 			}
 
 		} catch (PGPException e) {
@@ -103,13 +103,13 @@ public class PgpDecryptService {
 		}
 
 		if (pgpPrivateKey == null) {
-			throw new IllegalArgumentException("Secret key (gyldig privatnøkkel) for melding ikke funnet.");
+			throw new IllegalArgumentException("Gyldig privatnøkkel for melding ble ikke funnet.");
 		}
 
 		return publicKeyEncryptedData.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(pgpPrivateKey));
 	}
 
-	private static PGPEncryptedDataList getPgpEncryptedData(InputStream in) throws IOException {
+	private PGPEncryptedDataList getPgpEncryptedData(InputStream in) throws IOException {
 		JcaPGPObjectFactory pgpFactory = new JcaPGPObjectFactory(in);
 
 		// The first object might be a PGP marker packet.

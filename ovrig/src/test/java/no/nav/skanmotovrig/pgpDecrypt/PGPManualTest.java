@@ -48,7 +48,7 @@ public class PGPManualTest {
 
 	@Disabled
 	@Test
-	void shouldDecryptFile() throws IOException, NoSuchProviderException {
+	void shouldDecryptFile() throws IOException, NoSuchProviderException, PGPException {
 		// encrypted.zip.pgp er den PGP-krypterte mappen som kommer fra IM
 		//FileInputStream encryptedZipAsStream = getEncryptedFilesFromIM();
 		FileInputStream encryptedZipAsStream = new FileInputStream("src/test/resources/OVRIG-20200529-2.pgp.zip");

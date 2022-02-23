@@ -1,5 +1,6 @@
 package no.nav.skanmotovrig.pgpDecrypt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPCompressedDataGenerator;
@@ -23,6 +24,7 @@ import java.security.SecureRandom;
 import static no.nav.skanmotovrig.pgpDecrypt.PGPKeyUtil.readPublicKey;
 
 // Metoder som er lite bearbeidet, men praktiske for testformål
+@Slf4j
 public class PGPEncryptUtil {
 
 	public static void encryptFile(
@@ -43,7 +45,7 @@ public class PGPEncryptUtil {
 			File inputFile,
 			PGPPublicKey encKey,
 			boolean armor,
-			boolean withIntegrityCheck) throws IOException {
+			boolean withIntegrityCheck) throws IOException, PGPException {
 		if (armor) {
 			out = new ArmoredOutputStream(out);
 		}
@@ -67,10 +69,8 @@ public class PGPEncryptUtil {
 				out.close();
 			}
 		} catch (PGPException e) {
-			System.err.println(e);
-			if (e.getUnderlyingException() != null) {
-				e.getUnderlyingException().printStackTrace();
-			}
+			log.error(e.getMessage(), e);
+			throw e;
 		}
 	}
 }

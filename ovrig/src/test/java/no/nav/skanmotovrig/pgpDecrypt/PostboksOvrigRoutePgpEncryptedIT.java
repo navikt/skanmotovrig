@@ -57,13 +57,13 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 	@Test
 	public void shouldBehandlePostboksOvrigZip() throws IOException {
-		// OVRIG-20200529-2.enc.zip
-		// OK   - OVRIG-20200529-2-1 alle felt
-		// OK   - OVRIG-20200529-2-2 kun påkrevde felt
-		// OK   - OVRIG-20200529-2-3 tomme valgfri felt
-		// FEIL - OVRIG-20200529-2-4 xml (mangler pdf)
-		// FEIL - OVRIG-20200529-2-5 pdf (mangler xml)
-		// FEIL - OVRIG-20200529-2-6 malformet xml
+		// OVRIG-20200529-1.enc.zip
+		// OK   - OVRIG-20200529-1-1 alle felt
+		// OK   - OVRIG-20200529-1-2 kun påkrevde felt
+		// OK   - OVRIG-20200529-1-3 tomme valgfri felt
+		// FEIL - OVRIG-20200529-1-4 xml (mangler pdf)
+		// FEIL - OVRIG-20200529-1-5 pdf (mangler xml)
+		// FEIL - OVRIG-20200529-1-6 malformet xml
 
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-1";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
@@ -89,13 +89,13 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 	@Test
 	public void shouldBehandlePostboksOvrigZipWithMultipleDotsInFilenames() throws IOException {
-		// OVRIG.20200529-3.enc.enc.zip
-		// OK   - OVRIG.20200529-3-1 alle felt
-		// OK   - OVRIG.20200529-3-2 kun påkrevde felt
-		// OK   - OVRIG.20200529-3-3 tomme valgfri felt
-		// FEIL - OVRIG.20200529-3-4 xml (mangler pdf)
-		// FEIL - OVRIG.20200529-3-5 pdf (mangler xml)
-		// FEIL - OVRIG.20200529-3-6 malformet xml
+		// OVRIG.20200529-2.enc.enc.zip
+		// OK   - OVRIG.20200529-2-1 alle felt
+		// OK   - OVRIG.20200529-2-2 kun påkrevde felt
+		// OK   - OVRIG.20200529-2-3 tomme valgfri felt
+		// FEIL - OVRIG.20200529-2-4 xml (mangler pdf)
+		// FEIL - OVRIG.20200529-2-5 pdf (mangler xml)
+		// FEIL - OVRIG.20200529-2-6 malformet xml
 
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-2";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
