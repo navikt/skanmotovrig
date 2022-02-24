@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.pgpDecrypt.manuelltesting;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static no.nav.skanmotovrig.pgpDecrypt.PGPDecryptUtil.decryptFile;
-import static no.nav.skanmotovrig.pgpDecrypt.PGPEncryptUtil.encryptFile;
+import static no.nav.skanmotovrig.pgpDecrypt.manuelltesting.PGPDecryptUtil.decryptFile;
+import static no.nav.skanmotovrig.pgpDecrypt.manuelltesting.PGPEncryptUtil.encryptFile;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PGPManualTest {

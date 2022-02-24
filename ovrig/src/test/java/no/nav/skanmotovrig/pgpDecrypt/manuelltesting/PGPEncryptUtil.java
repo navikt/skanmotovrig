@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.pgpDecrypt.manuelltesting;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 
-import static no.nav.skanmotovrig.pgpDecrypt.PGPKeyUtil.readPublicKey;
+import static no.nav.skanmotovrig.pgpDecrypt.manuelltesting.PGPKeyUtil.readPublicKey;
 
 // Metoder som er lite bearbeidet, men praktiske for testformål
 @Slf4j

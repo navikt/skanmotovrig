@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.pgpDecrypt.manuelltesting;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.openpgp.PGPCompressedData;
@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.security.NoSuchProviderException;
 import java.util.Iterator;
 
-import static no.nav.skanmotovrig.pgpDecrypt.PGPKeyUtil.findSecretKey;
+import static no.nav.skanmotovrig.pgpDecrypt.manuelltesting.PGPKeyUtil.findSecretKey;
 
 // Metoder som er lite bearbeidet, men praktiske for testformål
 @Slf4j

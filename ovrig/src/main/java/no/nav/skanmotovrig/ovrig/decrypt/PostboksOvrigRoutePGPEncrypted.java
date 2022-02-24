@@ -18,6 +18,7 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,12 +62,14 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.to(PGP_AVVIK)
 				.log(LoggingLevel.ERROR, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
-		onException(ZipException.class)
+
+		// Får ikke dekryptert .pgp.zip - mest sannsynlig mismatch mellom private key og public key
+		onException(PGPException.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
-				.setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.pgp.zip"))
+				.log(LoggingLevel.WARN, log, "Skanmotovrig feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
+				.setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
 				.to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
 						"?{{skanmotovrig.ovrig.endpointconfig}}")
 				.log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")

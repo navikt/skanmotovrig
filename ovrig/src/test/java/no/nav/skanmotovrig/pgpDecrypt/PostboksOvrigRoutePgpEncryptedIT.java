@@ -1,5 +1,6 @@
 package no.nav.skanmotovrig.pgpDecrypt;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.ovrig.AbstractIt;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -22,9 +23,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
+@Slf4j
 public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 	public static final String INNGAAENDE = "inngaaende";
 	public static final String FEILMAPPE = "feilmappe";
@@ -152,6 +155,21 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				"OVRIG-XML-ORDERED-FIRST-1-05.zip",
 				"OVRIG-XML-ORDERED-FIRST-1-06.zip");
 		verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+	}
+
+
+	@Test
+	public void shouldFailWhenPrivateKeyDoesNotMatchPublicKey() throws IOException {
+		// OVRIG-XML-ORDERED-FIRST-1_WRONG_PRIVATE_KEY.zip.pgp er kryptert med publicKeyElGamal (i stedet for publicKeyRSA)
+		// Korresponderende RSA-private key vil da feile i forsøket på dekryptering
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-1_WRONG_PRIVATE_KEY";
+		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
+
+		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+			assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+		});
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

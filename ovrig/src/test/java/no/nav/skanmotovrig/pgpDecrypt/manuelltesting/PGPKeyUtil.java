@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.pgpDecrypt.manuelltesting;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
