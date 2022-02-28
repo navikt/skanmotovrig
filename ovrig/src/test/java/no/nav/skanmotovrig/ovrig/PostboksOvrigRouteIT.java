@@ -1,9 +1,7 @@
 package no.nav.skanmotovrig.ovrig;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,7 @@ public class PostboksOvrigRouteIT extends AbstractIt {
 
 	@BeforeEach
 	void beforeEach() {
+		super.setUpMocks();
 		final Path inngaaende = sshdPath.resolve(INNGAAENDE);
 		final Path processed = inngaaende.resolve("processed");
 		final Path feilmappe = sshdPath.resolve(FEILMAPPE);
@@ -55,13 +54,6 @@ public class PostboksOvrigRouteIT extends AbstractIt {
 		}
 	}
 
-	@AfterEach
-	void tearDown() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-	}
-
 	@Test
 	public void shouldBehandlePostboksOvrigZip() throws IOException {
 		// OVRIG-20200529-1.zip
@@ -75,7 +67,6 @@ public class PostboksOvrigRouteIT extends AbstractIt {
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-1";
 
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
@@ -108,7 +99,6 @@ public class PostboksOvrigRouteIT extends AbstractIt {
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-2";
 
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {
@@ -144,7 +134,6 @@ public class PostboksOvrigRouteIT extends AbstractIt {
 		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-XML-ORDERED-FIRST-1";
 
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip");
-		setUpHappyStubs();
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			try {

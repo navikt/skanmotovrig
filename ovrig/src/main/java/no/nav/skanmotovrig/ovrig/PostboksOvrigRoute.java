@@ -36,7 +36,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -60,6 +60,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 "?{{skanmotovrig.ovrig.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
                 "&antExclude=*enc.zip, *enc.ZIP" +
+                "&antExclude=*zip.pgp, *ZIP.pgp" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +
                 "&maxMessagesPerPoll=10" +
@@ -71,19 +72,20 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
+                //.dekrypter
                 .split(new ZipSplitter()).streaming()
-                .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
-                .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
-                .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
-                .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
-                .process(new MdcSetterProcessor())
-                .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
-                .process(exchange -> exchange.getIn().getBody(PostboksOvrigEnvelope.class).validate())
-                .bean(new SkanningmetadataUnmarshaller())
-                .bean(new SkanningmetadataCounter())
-                .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
-                .to("direct:process_ovrig")
-                .end() // aggregate
+                    .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
+                        .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
+                        .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
+                        .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
+                        .process(new MdcSetterProcessor())
+                        .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
+                        .process(exchange -> exchange.getIn().getBody(PostboksOvrigEnvelope.class).validate())
+                        .bean(new SkanningmetadataUnmarshaller())
+                        .bean(new SkanningmetadataCounter())
+                        .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${body.skanningmetadata.journalpost.batchnavn}"))
+                        .to("direct:process_ovrig")
+                    .end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
                 .log(LoggingLevel.INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");

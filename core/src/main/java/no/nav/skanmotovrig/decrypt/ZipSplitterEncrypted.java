@@ -23,11 +23,13 @@ import org.apache.camel.Message;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
 
 @Slf4j
+@Component
 public class ZipSplitterEncrypted extends ZipSplitter {
 
     private final String passphrase;

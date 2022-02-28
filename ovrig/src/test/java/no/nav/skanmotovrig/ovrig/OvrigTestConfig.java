@@ -38,12 +38,6 @@ import static java.util.Collections.singletonList;
         OvrigTestConfig.CamelTestStartupConfig.class, OvrigConfig.class, DokCounter.class})
 public class OvrigTestConfig {
 
-    private static final String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));
-
-    static {
-        System.setProperty("skanmotovrig.sftp.port", sftpPort);
-    }
-
     @Configuration
     static class CamelTestStartupConfig {
 
@@ -82,22 +76,17 @@ public class OvrigTestConfig {
 
         @Bean(initMethod = "start", destroyMethod = "stop")
         public SshServer sshServer(
-                final Path sshdPath,
-                final SkanmotovrigProperties skanmotovrigProperties
+                final Path sshdPath
         ) {
+            String sftpPort = String.valueOf(ThreadLocalRandom.current().nextInt(2000, 2999));
+            System.setProperty("skanmotovrig.sftp.port", sftpPort);
+
             SshServer sshd = SshServer.setUpDefaultServer();
-            sshd.setPort(Integer.parseInt(skanmotovrigProperties.getSftp().getPort()));
+            sshd.setPort(Integer.parseInt(sftpPort));
             sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(of("src/test/resources/sftp/itest.ser")));
-
-            // To support SCP
             sshd.setCommandFactory(new ScpCommandFactory());
-
-            // Sftp
             sshd.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
-
-            // Server side security setup - key based authentication
             sshd.setPublickeyAuthenticator(new AuthorizedKeysAuthenticator(of("src/test/resources/sftp/itest_valid.pub")));
-
             sshd.setUserAuthFactories(singletonList(new UserAuthNoneFactory()));
             sshd.setFileSystemFactory(new VirtualFileSystemFactory(sshdPath));
             return sshd;

@@ -2,7 +2,7 @@ kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
   name: skanmotovrig
-  namespace: {{ NAMESPACE }}
+  namespace: teamdokumenthandtering
   labels:
     team: teamdokumenthandtering
 spec:
@@ -17,6 +17,8 @@ spec:
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
       value: /var/run/secrets/nais.io/keys/hostkey
+    - name: SKANMOTOVRIG_PGP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/keys/pgpprivatekey
     - name: SKANMOTOVRIG_VAULT_BACKEND
       value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
     - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
