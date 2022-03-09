@@ -20,23 +20,25 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class PostboksOvrigRoute extends RouteBuilder {
-    public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-    public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
-    private final SkanmotovrigProperties skanmotovrigProperties;
-    private final PostboksOvrigService postboksOvrigService;
+	private final SkanmotovrigProperties skanmotovrigProperties;
+	private final PostboksOvrigService postboksOvrigService;
 
-    @Autowired
-    public PostboksOvrigRoute(SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
-        this.skanmotovrigProperties = skanmotovrigProperties;
-        this.postboksOvrigService = postboksOvrigService;
-    }
+	@Autowired
+	public PostboksOvrigRoute(SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
+		this.skanmotovrigProperties = skanmotovrigProperties;
+		this.postboksOvrigService = postboksOvrigService;
+	}
 
-    @Override
-    public void configure() {
+	@Override
+	public void configure() {
+
+		// @formatter:off
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -72,7 +74,6 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, simple("${file:name.noext.single}"))
                 .process(new MdcSetterProcessor())
-                //.dekrypter
                 .split(new ZipSplitter()).streaming()
                     .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                         .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
@@ -109,5 +110,7 @@ public class PostboksOvrigRoute extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-    }
+
+        // @formatter:on
+	}
 }

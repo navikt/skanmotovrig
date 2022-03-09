@@ -1,7 +1,6 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotovrig.ovrig.AbstractIt;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +59,7 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 	@Test
 	public void shouldBehandlePostboksOvrigZip() throws IOException {
-		// OVRIG-20200529-1.enc.zip
+		// OVRIG-20200529-1.zip.pgp
 		// OK   - OVRIG-20200529-1-1 alle felt
 		// OK   - OVRIG-20200529-1-2 kun påkrevde felt
 		// OK   - OVRIG-20200529-1-3 tomme valgfri felt

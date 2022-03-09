@@ -31,26 +31,28 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class PostboksOvrigRouteEncrypted extends RouteBuilder {
-    public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-    public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
-    private final SkanmotovrigProperties skanmotovrigProperties;
-    private final PostboksOvrigService postboksOvrigService;
-    private final String passphrase;
+	private final SkanmotovrigProperties skanmotovrigProperties;
+	private final PostboksOvrigService postboksOvrigService;
+	private final String aesPassphrase;
 
-    @Autowired
-    public PostboksOvrigRouteEncrypted(@Value("${passphrase}") String passphrase,
-                                       SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
-        this.skanmotovrigProperties = skanmotovrigProperties;
-        this.postboksOvrigService = postboksOvrigService;
-        this.passphrase = passphrase;
-    }
+	@Autowired
+	public PostboksOvrigRouteEncrypted(@Value("${aes.passphrase}") String aesPassphrase,
+									   SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
+		this.skanmotovrigProperties = skanmotovrigProperties;
+		this.postboksOvrigService = postboksOvrigService;
+		this.aesPassphrase = aesPassphrase;
+	}
 
-    @Override
-    public void configure() {
+	@Override
+	public void configure() {
+
+		// @formatter:off
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
@@ -95,7 +97,7 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange)))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitterEncrypted(passphrase)).streaming()
+                .split(new ZipSplitterEncrypted(aesPassphrase)).streaming()
                     .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                         .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                         .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
@@ -131,13 +133,15 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-    }
 
-    private String cleanDotEncExtension(ValueBuilder value1, Exchange exchange) {
-        String stringRepresentation = value1.evaluate(exchange, String.class);
-        if (stringRepresentation.contains(".enc")) {
-            return stringRepresentation.replace(".enc", "");
-        }
-        return stringRepresentation;
-    }
+		// @formatter:on
+	}
+
+	private String cleanDotEncExtension(ValueBuilder value1, Exchange exchange) {
+		String stringRepresentation = value1.evaluate(exchange, String.class);
+		if (stringRepresentation.contains(".enc")) {
+			return stringRepresentation.replace(".enc", "");
+		}
+		return stringRepresentation;
+	}
 }

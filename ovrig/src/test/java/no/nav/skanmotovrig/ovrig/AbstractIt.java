@@ -1,8 +1,5 @@
 package no.nav.skanmotovrig.ovrig;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;

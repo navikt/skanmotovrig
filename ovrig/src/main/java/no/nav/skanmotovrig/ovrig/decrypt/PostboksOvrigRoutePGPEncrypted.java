@@ -1,7 +1,6 @@
 package no.nav.skanmotovrig.ovrig.decrypt;
 
 import lombok.extern.slf4j.Slf4j;
-import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.metrics.DokCounter;
@@ -50,9 +49,11 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 
 	@Override
 	public void configure() {
+
 		String PGP_AVVIK = "direct:pgp_encrypted_avvik_ovrig";
 		String PROCESS_PGP_ENCRYPTED = "direct:pgp_encrypted_process_ovrig";
 
+		// @formatter:off
 		onException(Exception.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
@@ -136,6 +137,8 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
 				.end()
 				.process(new MdcRemoverProcessor());
+
+		// @formatter:on
 	}
 
 	// Input blir .zip siden .pgp er strippet bort
