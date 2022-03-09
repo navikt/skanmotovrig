@@ -13,7 +13,6 @@ import no.nav.skanmotovrig.ovrig.PostboksOvrigSkanningAggregator;
 import no.nav.skanmotovrig.ovrig.SkanningmetadataCounter;
 import no.nav.skanmotovrig.ovrig.SkanningmetadataUnmarshaller;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
@@ -23,6 +22,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static no.nav.skanmotovrig.metrics.DokCounter.DOMAIN;
+import static no.nav.skanmotovrig.metrics.DokCounter.OVRIG;
+import static org.apache.camel.Exchange.FILE_NAME;
+import static org.apache.camel.Exchange.FILE_NAME_PRODUCED;
+import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
+import static org.apache.camel.LoggingLevel.WARN;
 
 @Slf4j
 @Component
@@ -58,10 +65,10 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(LoggingLevel.ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
-				.setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
+				.log(ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
+				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
 				.to(PGP_AVVIK)
-				.log(LoggingLevel.ERROR, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
 
 		// Får ikke dekryptert .pgp.zip - mest sannsynlig mismatch mellom private key og public key
@@ -69,11 +76,11 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(LoggingLevel.WARN, log, "Skanmotovrig feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
-				.setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
+				.log(ERROR, log, "Skanmotovrig feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
+				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
 				.to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
 						"?{{skanmotovrig.ovrig.endpointconfig}}")
-				.log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
 				.end()
 				.process(new MdcRemoverProcessor());
 
@@ -82,10 +89,10 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.handled(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(LoggingLevel.WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
-				.setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
+				.log(WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
+				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
 				.to(PGP_AVVIK)
-				.log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+				.log(WARN, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
@@ -96,7 +103,7 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				"&move=processed" +
 				"&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.schedule}}")
 				.routeId("read_encrypted_PGP_ovrig_zip_from_sftp")
-				.log(LoggingLevel.INFO, log, "Skanmotovrig-pgp starter behandling av fil=${file:absolute.path}.")
+				.log(INFO, log, "Skanmotovrig-pgp starter behandling av fil=${file:absolute.path}.")
 				.setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
 				.process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotPgpExtension(simple("${file:name.noext.single}"), exchange)))
 				.process(new MdcSetterProcessor())
@@ -107,7 +114,7 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 						.completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
 						.setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
 						.process(new MdcSetterProcessor())
-						.process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
+						.process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DOMAIN, OVRIG)))
 						.process(exchange -> exchange.getIn().getBody(PostboksOvrigEnvelope.class).validate())
 						.bean(new SkanningmetadataUnmarshaller())
 						.bean(new SkanningmetadataCounter())
@@ -116,15 +123,15 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 					.end() // aggregate
 				.end() // split
 				.process(new MdcRemoverProcessor())
-				.log(LoggingLevel.INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");
+				.log(INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");
 
 		from(PROCESS_PGP_ENCRYPTED)
 				.routeId(PROCESS_PGP_ENCRYPTED)
 				.process(new MdcSetterProcessor())
-				.log(LoggingLevel.INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
+				.log(INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
 				.bean(postboksOvrigService)
-				.log(LoggingLevel.INFO, log, "Skanmotovrig journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
-				.process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
+				.log(INFO, log, "Skanmotovrig journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
+				.process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, OVRIG)))
 				.process(new MdcRemoverProcessor());
 
 		from(PGP_AVVIK)
@@ -134,7 +141,7 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
 						"?{{skanmotovrig.ovrig.endpointconfig}}")
 				.otherwise()
-				.log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
+				.log(ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
 				.end()
 				.process(new MdcRemoverProcessor());
 
