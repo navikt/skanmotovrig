@@ -1,7 +1,6 @@
-package no.nav.skanmotovrig.pgpDecrypt;
+package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotovrig.ovrig.AbstractIt;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,15 +59,15 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 	@Test
 	public void shouldBehandlePostboksOvrigZip() throws IOException {
-		// OVRIG-20200529-1.enc.zip
-		// OK   - OVRIG-20200529-1-1 alle felt
-		// OK   - OVRIG-20200529-1-2 kun påkrevde felt
-		// OK   - OVRIG-20200529-1-3 tomme valgfri felt
-		// FEIL - OVRIG-20200529-1-4 xml (mangler pdf)
-		// FEIL - OVRIG-20200529-1-5 pdf (mangler xml)
-		// FEIL - OVRIG-20200529-1-6 malformet xml
+		// OVRIG-20200529-4.zip.pgp
+		// OK   - OVRIG-20200529-4-1 alle felt
+		// OK   - OVRIG-20200529-4-2 kun påkrevde felt
+		// OK   - OVRIG-20200529-4-3 tomme valgfri felt
+		// FEIL - OVRIG-20200529-4-4 xml (mangler pdf)
+		// FEIL - OVRIG-20200529-4-5 pdf (mangler xml)
+		// FEIL - OVRIG-20200529-4-6 malformet xml
 
-		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-1";
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG-20200529-4";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -84,23 +83,23 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());
 		assertThat(feilmappeContents).containsExactlyInAnyOrder(
-				"OVRIG-20200529-1-4.zip",
-				"OVRIG-20200529-1-5.zip",
-				"OVRIG-20200529-1-6.zip");
+				"OVRIG-20200529-4-4.zip",
+				"OVRIG-20200529-4-5.zip",
+				"OVRIG-20200529-4-6.zip");
 		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 	@Test
 	public void shouldBehandlePostboksOvrigZipWithMultipleDotsInFilenames() throws IOException {
-		// OVRIG.20200529-2.enc.enc.zip
-		// OK   - OVRIG.20200529-2-1 alle felt
-		// OK   - OVRIG.20200529-2-2 kun påkrevde felt
-		// OK   - OVRIG.20200529-2-3 tomme valgfri felt
-		// FEIL - OVRIG.20200529-2-4 xml (mangler pdf)
-		// FEIL - OVRIG.20200529-2-5 pdf (mangler xml)
-		// FEIL - OVRIG.20200529-2-6 malformet xml
+		// OVRIG.20200529-4.zip.pgp
+		// OK   - OVRIG.20200529-4-1 alle felt
+		// OK   - OVRIG.20200529-4-2 kun påkrevde felt
+		// OK   - OVRIG.20200529-4-3 tomme valgfri felt
+		// FEIL - OVRIG.20200529-4-4 xml (mangler pdf)
+		// FEIL - OVRIG.20200529-4-5 pdf (mangler xml)
+		// FEIL - OVRIG.20200529-4-6 malformet xml
 
-		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-2";
+		final String ZIP_FILE_NAME_NO_EXTENSION = "OVRIG.20200529-4";
 		copyFileFromClasspathToInngaaende(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp");
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
@@ -116,15 +115,15 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());
 		assertThat(feilmappeContents).containsExactlyInAnyOrder(
-				"OVRIG.20200529-2-4.zip",
-				"OVRIG.20200529-2-5.zip",
-				"OVRIG.20200529-2-6.zip");
+				"OVRIG.20200529-4-4.zip",
+				"OVRIG.20200529-4-5.zip",
+				"OVRIG.20200529-4-6.zip");
 		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 	@Test
 	public void shouldBehandleZipXmlOrderedLastWithinCompletionTimeout() throws IOException {
-		// OVRIG-XML-ORDERED-FIRST-1.enc.zip
+		// OVRIG-XML-ORDERED-FIRST-1.zip.pgp
 		// OK   - OVRIG-XML-ORDERED-FIRST-1-01 alle felt
 		// OK   - OVRIG-XML-ORDERED-FIRST-1-02 kun påkrevde felt
 		// OK   - OVRIG-XML-ORDERED-FIRST-1-03 tomme valgfri felt

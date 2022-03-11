@@ -26,14 +26,15 @@
         <java.version>17</java.version>
 
         <!-- Både camel og spring-cloud bruker Spring Boot 2.6.1 -->
-        <camel.version>3.14.0</camel.version>
-        <spring-cloud.version>3.1.0</spring-cloud.version>
+        <camel.version>3.15.0</camel.version>
+        <spring-cloud-contract-wiremock.version>3.1.1</spring-cloud-contract-wiremock.version>
+        <spring-cloud-starter-vault-config.version>3.1.0</spring-cloud-starter-vault-config.version>
 
         <zip4j.version>2.9.1</zip4j.version>
         <logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
         <apache.commons.version>1.21</apache.commons.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <bouncycastle.version>1.69</bouncycastle.version>
+        <bouncycastle.version>1.70</bouncycastle.version>
 
         <!-- Nyere versjoner av sshd-core vil gi feilmeldingen "JSchException: reject HostKey: localhost" -->
         <sshd-core.version>2.5.1</sshd-core.version>
@@ -67,7 +68,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-vault-config</artifactId>
-                <version>${spring-cloud.version}</version>
+                <version>${spring-cloud-starter-vault-config.version}</version>
             </dependency>
             <dependency>
                 <groupId>net.lingala.zip4j</groupId>
@@ -101,7 +102,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-contract-wiremock</artifactId>
-                <version>${spring-cloud.version}</version>
+                <version>${spring-cloud-contract-wiremock.version}</version>
                 <scope>test</scope>
             </dependency>
 

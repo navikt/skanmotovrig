@@ -25,50 +25,59 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static no.nav.skanmotovrig.metrics.DokCounter.DOMAIN;
+import static no.nav.skanmotovrig.metrics.DokCounter.OVRIG;
+import static org.apache.camel.Exchange.FILE_NAME;
+import static org.apache.camel.Exchange.FILE_NAME_PRODUCED;
+import static org.apache.camel.LoggingLevel.INFO;
+import static org.apache.camel.LoggingLevel.WARN;
+
 /**
  * @author Joakim Bjørnstad, Jbit AS
  */
 @Slf4j
 @Component
 public class PostboksOvrigRouteEncrypted extends RouteBuilder {
-    public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-    public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-    public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-    public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-    static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
-    private final SkanmotovrigProperties skanmotovrigProperties;
-    private final PostboksOvrigService postboksOvrigService;
-    private final String passphrase;
+	private final SkanmotovrigProperties skanmotovrigProperties;
+	private final PostboksOvrigService postboksOvrigService;
+	private final String aesPassphrase;
 
-    @Autowired
-    public PostboksOvrigRouteEncrypted(@Value("${passphrase}") String passphrase,
-                                       SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
-        this.skanmotovrigProperties = skanmotovrigProperties;
-        this.postboksOvrigService = postboksOvrigService;
-        this.passphrase = passphrase;
-    }
+	@Autowired
+	public PostboksOvrigRouteEncrypted(@Value("${aes.passphrase}") String aesPassphrase,
+									   SkanmotovrigProperties skanmotovrigProperties, PostboksOvrigService postboksOvrigService) {
+		this.skanmotovrigProperties = skanmotovrigProperties;
+		this.postboksOvrigService = postboksOvrigService;
+		this.aesPassphrase = aesPassphrase;
+	}
 
-    @Override
-    public void configure() {
+	@Override
+	public void configure() {
+
+		// @formatter:off
         onException(Exception.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(new ErrorMetricsProcessor())
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
+                .setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
                 .to("direct:encrypted_avvik_ovrig")
-                .log(LoggingLevel.ERROR, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(LoggingLevel.ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         onException(ZipException.class)
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(new ErrorMetricsProcessor())
-                .log(LoggingLevel.WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
+                .log(WARN, log, "Feil passord for en fil " + KEY_LOGGING_INFO + ". ${exception}")
+                .setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.enc.zip"))
                 .to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
                         "?{{skanmotovrig.ovrig.endpointconfig}}")
-                .log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
+                .log(WARN, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
                 .end()
                 .process(new MdcRemoverProcessor());
 
@@ -77,10 +86,10 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .handled(true)
                 .process(new MdcSetterProcessor())
                 .process(new ErrorMetricsProcessor())
-                .log(LoggingLevel.WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
-                .setHeader(Exchange.FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
+                .log(WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
+                .setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
                 .to("direct:encrypted_avvik_ovrig")
-                .log(LoggingLevel.WARN, log, "Skanmotovrig skrev feiletzip=${header." + Exchange.FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+                .log(WARN, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
         from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
                 "?{{skanmotovrig.ovrig.endpointconfig}}" +
@@ -91,17 +100,17 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 "&move=processed" +
                 "&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.schedule}}")
                 .routeId("read_encrypted_ovrig_zip_from_sftp")
-                .log(LoggingLevel.INFO, log, "Skanmotovrig starter behandling av fil=${file:absolute.path}.")
+                .log(INFO, log, "Skanmotovrig starter behandling av fil=${file:absolute.path}.")
                 .setProperty(PROPERTY_FORSENDELSE_ZIPNAME, simple("${file:name}"))
                 .process(exchange -> exchange.setProperty(PROPERTY_FORSENDELSE_BATCHNAVN, cleanDotEncExtension(simple("${file:name.noext.single}"),exchange)))
                 .process(new MdcSetterProcessor())
-                .split(new ZipSplitterEncrypted(passphrase)).streaming()
+                .split(new ZipSplitterEncrypted(aesPassphrase)).streaming()
                     .aggregate(simple("${file:name.noext.single}"), new PostboksOvrigSkanningAggregator())
                         .completionSize(FORVENTET_ANTALL_PER_FORSENDELSE)
                         .completionTimeout(skanmotovrigProperties.getOvrig().getCompletiontimeout().toMillis())
                         .setProperty(PROPERTY_FORSENDELSE_FILEBASENAME, simple("${exchangeProperty.CamelAggregatedCorrelationKey}"))
                         .process(new MdcSetterProcessor())
-                        .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
+                        .process(exchange -> DokCounter.incrementCounter("antall_innkommende", List.of(DOMAIN, OVRIG)))
                         .process(exchange -> exchange.getIn().getBody(PostboksOvrigEnvelope.class).validate())
                         .bean(new SkanningmetadataUnmarshaller())
                         .bean(new SkanningmetadataCounter())
@@ -110,15 +119,15 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                     .end() // aggregate
                 .end() // split
                 .process(new MdcRemoverProcessor())
-                .log(LoggingLevel.INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");
+                .log(INFO, log, "Skanmotovrig behandlet ferdig fil=${file:absolute.path}.");
 
         from("direct:encrypted_process_ovrig")
                 .routeId("encrypted_process_ovrig")
                 .process(new MdcSetterProcessor())
-                .log(LoggingLevel.INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
+                .log(INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
                 .bean(postboksOvrigService)
-                .log(LoggingLevel.INFO, log, "Skanmotovrig journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
-                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DokCounter.DOMAIN, DokCounter.OVRIG)))
+                .log(INFO, log, "Skanmotovrig journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
+                .process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, OVRIG)))
                 .process(new MdcRemoverProcessor());
 
         from("direct:encrypted_avvik_ovrig")
@@ -131,13 +140,15 @@ public class PostboksOvrigRouteEncrypted extends RouteBuilder {
                 .log(LoggingLevel.ERROR, log, "Skanmotovrig teknisk feil der " + KEY_LOGGING_INFO + ". ikke ble flyttet til feilområde. Må analyseres.")
                 .end()
                 .process(new MdcRemoverProcessor());
-    }
 
-    private String cleanDotEncExtension(ValueBuilder value1, Exchange exchange) {
-        String stringRepresentation = value1.evaluate(exchange, String.class);
-        if (stringRepresentation.contains(".enc")) {
-            return stringRepresentation.replace(".enc", "");
-        }
-        return stringRepresentation;
-    }
+		// @formatter:on
+	}
+
+	private String cleanDotEncExtension(ValueBuilder value1, Exchange exchange) {
+		String stringRepresentation = value1.evaluate(exchange, String.class);
+		if (stringRepresentation.contains(".enc")) {
+			return stringRepresentation.replace(".enc", "");
+		}
+		return stringRepresentation;
+	}
 }
