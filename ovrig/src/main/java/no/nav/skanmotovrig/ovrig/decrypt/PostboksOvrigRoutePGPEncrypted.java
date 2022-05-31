@@ -128,7 +128,9 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 		from(PROCESS_PGP_ENCRYPTED)
 				.routeId(PROCESS_PGP_ENCRYPTED)
 				.process(new MdcSetterProcessor())
+				.log(INFO, log, "Skanmotovrig behandler " + KEY_LOGGING_INFO + ".")
 				.bean(postboksOvrigService)
+				.log(INFO, log, "Skanmotovrig journalførte journalpostId=${body}. " + KEY_LOGGING_INFO + ".")
 				.process(exchange -> DokCounter.incrementCounter("antall_vellykkede", List.of(DOMAIN, OVRIG)))
 				.process(new MdcRemoverProcessor());
 
