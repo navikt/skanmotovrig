@@ -8,9 +8,6 @@ import no.nav.skanmotovrig.ovrig.domain.Skanningmetadata;
 
 import java.time.LocalDate;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 public class PostboksOvrigEnvelopeTestObjects {
     public static final String FILEBASENAME = "pb1406";
     public static final String ZIPNAME = "pb1406.zip";

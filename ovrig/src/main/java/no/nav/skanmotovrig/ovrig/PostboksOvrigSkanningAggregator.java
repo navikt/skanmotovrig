@@ -13,9 +13,6 @@ import static no.nav.skanmotovrig.ovrig.PostboksOvrigRoute.PROPERTY_FORSENDELSE_
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Slf4j
 public class PostboksOvrigSkanningAggregator implements AggregationStrategy {
     public static final String XML_EXTENSION = "xml";

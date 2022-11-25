@@ -2,9 +2,6 @@ package no.nav.skanmotovrig.ovrig.domain;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @XmlRegistry
 public class ObjectFactory {
     public ObjectFactory() {

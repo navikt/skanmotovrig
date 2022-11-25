@@ -8,7 +8,7 @@ public class ErrorMetricsProcessor implements Processor {
     private final String CAMEL_EXCEPTION_CAUGHT = "CamelExceptionCaught";
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) {
         Object exception = exchange.getProperty(CAMEL_EXCEPTION_CAUGHT);
         if(exception instanceof Throwable){
             DokCounter.incrementError((Throwable) exception, DokCounter.OVRIG);
