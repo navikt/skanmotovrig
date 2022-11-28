@@ -13,19 +13,10 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>net.lingala.zip4j</groupId>
-            <artifactId>zip4j</artifactId>
-        </dependency>
-
         <!-- Camel -->
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-zipfile-starter</artifactId>
         </dependency>
 
         <!-- Spring Boot -->

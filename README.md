@@ -14,7 +14,6 @@ Du finn meir informasjon om  [skanmotovrig på Confluence](https://confluence.ad
 
 Dekryptering av filer frå Iron Mountain kan skje på to måtar:
 
-- dekryptering av aes-krypterte filer
 - dekryptering av pgp-krypterte filer
 
 I fylgjande lenke finn

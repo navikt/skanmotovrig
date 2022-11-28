@@ -41,9 +41,6 @@ import static no.nav.skanmotovrig.ovrig.PostboksOvrigEnvelopeTestObjects.createM
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 class OpprettJournalpostPostboksOvrigRequestMapperTest {
 	private final OpprettJournalpostPostboksOvrigRequestMapper mapper = new OpprettJournalpostPostboksOvrigRequestMapper();
 

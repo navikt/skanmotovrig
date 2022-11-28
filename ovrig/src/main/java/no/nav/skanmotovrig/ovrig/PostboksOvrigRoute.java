@@ -20,9 +20,6 @@ import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
-/**
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Slf4j
 @Component
 public class PostboksOvrigRoute extends RouteBuilder {
@@ -67,7 +64,6 @@ public class PostboksOvrigRoute extends RouteBuilder {
         from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
                 "?{{skanmotovrig.ovrig.endpointconfig}}" +
                 "&delay=" + TimeUnit.SECONDS.toMillis(60) +
-                "&antExclude=*enc.zip, *enc.ZIP" +
                 "&antExclude=*zip.pgp, *ZIP.pgp" +
                 "&antInclude=*.zip,*.ZIP" +
                 "&initialDelay=1000" +

@@ -2,7 +2,6 @@ package no.nav.skanmotovrig.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import net.lingala.zip4j.exception.ZipException;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import org.bouncycastle.openpgp.PGPException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +59,7 @@ public class DokCounter {
     }
 
     private static boolean isFunctionalException(Throwable e) {
-        return e instanceof AbstractSkanmotovrigFunctionalException
-                || e instanceof PGPException // Feil for PGP-kryptering
-                || e instanceof ZipException; // Feil for AES-kryptering
+        return e instanceof AbstractSkanmotovrigFunctionalException || e instanceof PGPException; // Feil for PGP-kryptering
     }
 
     private static boolean isEmptyString(String string) {
