@@ -6,11 +6,10 @@
     <parent>
         <artifactId>skanmotovrig</artifactId>
         <groupId>no.nav.skanmotovrig</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>core</artifactId>
-    <packaging>jar</packaging>
 
     <dependencies>
         <!-- Camel -->

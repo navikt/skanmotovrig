@@ -1,7 +1,5 @@
 # Skanmotovrig
-
 Skanmotovrig arkiverer inngåande dokument frå ulike kjelder:
-
 * Dokument med fyrsteside produsert av Arena
 * Dokument med fyrsteside produsert av Infotrygd
 * Dokument med fyrsteside produsert av Pesys
@@ -12,17 +10,13 @@ Skanmotovrig arkiverer inngåande dokument frå ulike kjelder:
 
 Du finn meir informasjon om  [skanmotovrig på Confluence](https://confluence.adeo.no/display/BOA/skanmotovrig).
 
-Dekryptering av filer frå Iron Mountain kan skje på to måtar:
+Filene vi mottek frå Iron Mountain er krypterte med PGP-kryptering.
 
-- dekryptering av pgp-krypterte filer
-
-I fylgjande lenke finn
-du [oppskrift for skifte av pgp-nøkkelpar](https://confluence.adeo.no/display/BOA/PGP-kryptering+for+filer).
+I fylgjande lenke finn du [oppskrift for skifte av pgp-nøkkelpar](https://confluence.adeo.no/display/BOA/PGP-kryptering+for+filer).
 
 ## Testing
 
 ### Oppskrift for testing av pgp-dekryptering i dev
-
 To måtar som er nyttige, der dette er måte nr. 1:
 
 * Få tilgang til mappa /inbound/skanmotovrig på sftpserveren sftp-irmo-q.nav.no (devmiljøet).
@@ -41,6 +35,5 @@ Måte nr. 2:
   praktisk å maile denne til seg sjølv dersom ein arbeider lokalt og skal hente den ut på utviklarimage.
 
 ## Førespurnadar
-
-Spørsmål om koda eller prosjektet kan stillast på Slack-kanalen til Team Dokumentløsninger:
-[\#Team Dokumentløsninger](https://nav-it.slack.com/client/T5LNAMWNA/C6W9E5GPJ)
+Spørsmål om koda eller prosjektet kan stillast
+på [Slack-kanalen for \#Team Dokumentløysingar](https://nav-it.slack.com/archives/C6W9E5GPJ)
