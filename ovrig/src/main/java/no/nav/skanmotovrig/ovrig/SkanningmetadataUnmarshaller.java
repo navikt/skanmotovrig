@@ -1,6 +1,7 @@
 package no.nav.skanmotovrig.ovrig;
 
 import no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException;
+import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.ovrig.domain.Skanningmetadata;
 import org.apache.camel.Body;
 import org.apache.camel.Handler;
@@ -9,7 +10,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -20,12 +20,27 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayInputStream;
 
+import static javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD;
+import static javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA;
+import static javax.xml.stream.XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES;
+import static javax.xml.stream.XMLInputFactory.SUPPORT_DTD;
+import static javax.xml.stream.XMLInputFactory.newInstance;
+import static javax.xml.validation.SchemaFactory.newDefaultInstance;
+
 public class SkanningmetadataUnmarshaller {
+    private final JAXBContext jaxbContext;
+
+    public SkanningmetadataUnmarshaller() {
+        try {
+            jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
+        } catch (JAXBException e) {
+            throw new SkanmotovrigTechnicalException("Klarte ikke instansiere JAXBContext", e);
+        }
+    }
 
     @Handler
     PostboksOvrigEnvelope unmarshal(@Body PostboksOvrigEnvelope envelope) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Skanningmetadata.class);
             SchemaFactory schemaFactory = createXEEProtectedSchemaFactory();
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             jaxbUnmarshaller.setSchema(schemaFactory.newSchema(new StreamSource(this.getClass().getResourceAsStream("/postboks-ovrig-3.0.0.xsd"))));
@@ -42,17 +57,17 @@ public class SkanningmetadataUnmarshaller {
 
     // https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
     private XMLInputFactory createXEEProtectedXMLInputFactory() {
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        XMLInputFactory xmlInputFactory = newInstance();
+        xmlInputFactory.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        xmlInputFactory.setProperty(SUPPORT_DTD, false);
         return xmlInputFactory;
     }
 
     // https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
     private SchemaFactory createXEEProtectedSchemaFactory() throws SAXNotRecognizedException, SAXNotSupportedException {
-        SchemaFactory schemaFactory = SchemaFactory.newDefaultInstance();
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        SchemaFactory schemaFactory = newDefaultInstance();
+        schemaFactory.setProperty(ACCESS_EXTERNAL_DTD, "");
+        schemaFactory.setProperty(ACCESS_EXTERNAL_SCHEMA, "");
         return schemaFactory;
     }
 }
