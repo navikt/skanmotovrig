@@ -1,39 +1,39 @@
 package no.nav.skanmotovrig.lagrefildetaljer.data;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Value
 @Builder
 @AllArgsConstructor
 public class OpprettJournalpostRequest {
-    private String tittel;
+	String tittel;
 
-    private AvsenderMottaker avsenderMottaker;
+	AvsenderMottaker avsenderMottaker;
 
-    private String journalpostType;
+	String journalpostType;
 
-    private String tema;
+	String tema;
 
-    private String behandlingstema;
+	String behandlingstema;
 
-    private String kanal;
+	String kanal;
 
-    private String datoMottatt;
+	String datoMottatt;
 
-    private String journalfoerendeEnhet;
+	String journalfoerendeEnhet;
 
-    private String eksternReferanseId;
+	String eksternReferanseId;
 
-    private List<Tilleggsopplysning> tilleggsopplysninger;
+	List<Tilleggsopplysning> tilleggsopplysninger;
 
-    private Bruker bruker;
+	Bruker bruker;
 
 
-    @NotNull(message = "dokumenter kan ikke være null")
-    private List<Dokument> dokumenter;
+	@NotNull(message = "dokumenter kan ikke være null")
+	List<Dokument> dokumenter;
 }
