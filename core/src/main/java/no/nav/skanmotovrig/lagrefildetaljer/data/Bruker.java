@@ -3,13 +3,13 @@ package no.nav.skanmotovrig.lagrefildetaljer.data;
 import lombok.Builder;
 import lombok.Value;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @Value
 @Builder
 public class Bruker {
     @NotNull(message = "id kan ikke være null")
-    private String id;
+    String id;
     @NotNull(message = "idType kan ikke være null")
-    private String idType;
+    String idType;
 }

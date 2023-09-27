@@ -1,16 +1,14 @@
 package no.nav.skanmotovrig.ovrig.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import no.nav.skanmotovrig.utils.LocalDateAdapter;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Getter
 @Builder
@@ -18,16 +16,16 @@ import java.util.Date;
 @AllArgsConstructor
 public class Journalpost {
 
-    @XmlElement(required = false, name = "tema")
+    @XmlElement(name = "tema")
     private String tema;
 
-    @XmlElement(required = false, name = "brevKode")
+    @XmlElement(name = "brevKode")
     private String brevKode;
 
-    @XmlElement(required = false, name = "bruker")
+    @XmlElement(name = "bruker")
     private Bruker bruker;
 
-    @XmlElement(required = false, name = "journalforendeEnhet")
+    @XmlElement(name = "journalforendeEnhet")
     private String journalforendeEnhet;
 
     @XmlElement(required = true, name = "mottakskanal")
@@ -40,15 +38,15 @@ public class Journalpost {
     @XmlElement(required = true, name = "batchnavn")
     private String batchnavn;
 
-    @XmlElement(required = false, name = "filnavn")
+    @XmlElement(name = "filnavn")
     private String filnavn;
 
-    @XmlElement(required = false, name = "endorsernr")
+    @XmlElement(name = "endorsernr")
     private String endorsernr;
 
-    @XmlElement(required = false, name = "land")
+    @XmlElement(name = "land")
     private String land;
 
-    @XmlElement(required = false, name = "antallSider")
+    @XmlElement(name = "antallSider")
     private String antallSider;
 }
