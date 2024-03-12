@@ -47,10 +47,9 @@ spec:
     max: 1
   resources:
     limits:
-      cpu: 2000m
-      memory: 5160Mi
+      memory: 6250Mi
     requests:
-      memory: 3684Mi
+      memory: 5000Mi
   vault:
     enabled: true
     paths:
