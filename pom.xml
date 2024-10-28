@@ -34,7 +34,7 @@
 
         <!-- test -->
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
-        <sshd-core.version>2.13.1</sshd-core.version>
+        <sshd-core.version>2.14.0</sshd-core.version>
 
         <!-- Plugins -->
         <maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
