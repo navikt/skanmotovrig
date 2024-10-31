@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.lagrefildetaljer;
+package no.nav.skanmotovrig.utils;
 
 import no.nav.skanmotovrig.mdc.MDCConstants;
 import org.slf4j.MDC;

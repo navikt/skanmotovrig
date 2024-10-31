@@ -1,19 +1,18 @@
-package no.nav.skanmotovrig.lagrefildetaljer;
+package no.nav.skanmotovrig.consumer.journalpost;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
+import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostRequest;
+import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostResponse;
+import no.nav.skanmotovrig.consumer.sts.STSConsumer;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
-import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostResponse;
-import no.nav.skanmotovrig.metrics.Metrics;
+import no.nav.skanmotovrig.utils.NavHeaders;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -21,42 +20,39 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_DELAY;
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.MAX_RETRIES;
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
-public class OpprettJournalpostConsumer {
+public class JournalpostConsumer {
 
 	private final RestTemplate restTemplate;
 	private final String dokarkivJournalpostUrl;
 	private final ObjectMapper mapper;
+	private final STSConsumer stsConsumer;
 
-	public OpprettJournalpostConsumer(
+	public JournalpostConsumer(
 			RestTemplateBuilder restTemplateBuilder,
 			SkanmotovrigProperties skanmotovrigProperties,
-			ObjectMapper mapper
+			ObjectMapper mapper,
+			STSConsumer stsConsumer
 	) {
 		this.dokarkivJournalpostUrl = skanmotovrigProperties.getDokarkivjournalposturl();
 		this.mapper = mapper;
+		this.stsConsumer = stsConsumer;
 		this.restTemplate = restTemplateBuilder
 				.setReadTimeout(Duration.ofSeconds(150))
 				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
 	}
 
-	@Retryable(maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
-	@Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "opprettJournalpost"}, percentiles = {0.5, 0.95}, histogram = true)
-	public OpprettJournalpostResponse opprettJournalpost(String token, OpprettJournalpostRequest opprettJournalpostRequest) {
+	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		try {
-			HttpHeaders headers = createHeaders(token);
+			HttpHeaders headers = createHeaders();
 			HttpEntity<OpprettJournalpostRequest> requestEntity = new HttpEntity<>(opprettJournalpostRequest, headers);
-			return restTemplate.exchange(dokarkivJournalpostUrl, POST, requestEntity, OpprettJournalpostResponse.class).getBody();
+			return restTemplate.exchange(dokarkivJournalpostUrl + "/journalpost?foersoekFerdigstill=false", POST, requestEntity, OpprettJournalpostResponse.class).getBody();
 		} catch (HttpClientErrorException e) {
 			if (CONFLICT == e.getStatusCode()) {
 				try {
@@ -77,10 +73,10 @@ public class OpprettJournalpostConsumer {
 		}
 	}
 
-	private HttpHeaders createHeaders(String token) {
+	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_JSON);
-		headers.setBearerAuth(token);
+		headers.setBearerAuth(stsConsumer.getSTSToken().getAccess_token());
 		headers.addAll(NavHeaders.createNavCustomHeaders());
 		return headers;
 	}

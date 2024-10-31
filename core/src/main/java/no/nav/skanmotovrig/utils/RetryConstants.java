@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.lagrefildetaljer;
+package no.nav.skanmotovrig.utils;
 
 public final class RetryConstants {
 	public static final int MAX_RETRIES = 5;
