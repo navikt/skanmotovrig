@@ -1,4 +1,4 @@
-package no.nav.skanmotovrig.lagrefildetaljer.data;
+package no.nav.skanmotovrig.consumer.journalpost.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

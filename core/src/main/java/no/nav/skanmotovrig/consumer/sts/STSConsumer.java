@@ -1,10 +1,9 @@
-package no.nav.skanmotovrig.lagrefildetaljer;
+package no.nav.skanmotovrig.consumer.sts;
 
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
-import no.nav.skanmotovrig.lagrefildetaljer.data.STSResponse;
-import no.nav.skanmotovrig.metrics.Metrics;
+import no.nav.skanmotovrig.utils.NavHeaders;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -20,10 +19,8 @@ import java.time.Duration;
 
 import static java.util.Collections.singletonList;
 import static no.nav.skanmotovrig.config.LocalCacheConfig.STS_CACHE;
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.RETRY_DELAY;
-import static no.nav.skanmotovrig.lagrefildetaljer.RetryConstants.MAX_RETRIES;
-import static no.nav.skanmotovrig.metrics.MetricLabels.DOK_METRIC;
-import static no.nav.skanmotovrig.metrics.MetricLabels.PROCESS_NAME;
+import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
+import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -48,7 +45,6 @@ public class STSConsumer {
 				.build();
 	}
 
-	@Metrics(value = DOK_METRIC, extraTags = {PROCESS_NAME, "getSTSToken"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
 	@Cacheable(STS_CACHE)
 	public STSResponse getSTSToken() {

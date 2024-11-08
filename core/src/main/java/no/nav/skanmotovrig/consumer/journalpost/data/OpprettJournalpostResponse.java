@@ -1,11 +1,9 @@
-package no.nav.skanmotovrig.lagrefildetaljer.data;
+package no.nav.skanmotovrig.consumer.journalpost.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @Builder

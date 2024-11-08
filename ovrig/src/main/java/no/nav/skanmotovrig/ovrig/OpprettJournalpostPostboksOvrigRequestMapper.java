@@ -1,11 +1,11 @@
 package no.nav.skanmotovrig.ovrig;
 
-import no.nav.skanmotovrig.lagrefildetaljer.data.AvsenderMottaker;
-import no.nav.skanmotovrig.lagrefildetaljer.data.Bruker;
-import no.nav.skanmotovrig.lagrefildetaljer.data.Dokument;
-import no.nav.skanmotovrig.lagrefildetaljer.data.DokumentVariant;
-import no.nav.skanmotovrig.lagrefildetaljer.data.OpprettJournalpostRequest;
-import no.nav.skanmotovrig.lagrefildetaljer.data.Tilleggsopplysning;
+import no.nav.skanmotovrig.consumer.journalpost.data.AvsenderMottaker;
+import no.nav.skanmotovrig.consumer.journalpost.data.Bruker;
+import no.nav.skanmotovrig.consumer.journalpost.data.Dokument;
+import no.nav.skanmotovrig.consumer.journalpost.data.DokumentVariant;
+import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostRequest;
+import no.nav.skanmotovrig.consumer.journalpost.data.Tilleggsopplysning;
 import no.nav.skanmotovrig.ovrig.domain.Journalpost;
 import no.nav.skanmotovrig.ovrig.domain.SkanningInfo;
 import org.springframework.stereotype.Component;
