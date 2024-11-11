@@ -13,6 +13,8 @@ spec:
       value: {{ SKANMOTOVRIG_STSURL }}
     - name: SKANMOTOVRIG_OVRIG_SCHEDULE
       value: {{ SKANMOTOVRIG_OVRIG_SCHEDULE }}
+    - name: SKANMOTOVRIG_OVRIG_AVSTEMSCHEDULE
+      value: {{ SKANMOTOVRIG_OVRIG_AVSTEMSCHEDULE }}
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
@@ -23,6 +25,8 @@ spec:
       value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
     - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
       value: {{ SKANMOTOVRIG_VAULT_KUBERNETESPATH }}
+    - name: SKANMOTOVRIG_JIRA_URL
+      value: {{ SKANMOTOVRIG_JIRA_URL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -50,6 +54,9 @@ spec:
       memory: 6250Mi
     requests:
       memory: 5000Mi
+  accessPolicy:
+    external:
+      - host: slack.com
   vault:
     enabled: true
     paths:
@@ -57,3 +64,5 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvskanmotovrig
       - kvPath: {{ SFTP_KEYS }}
         mountPath: /var/run/secrets/nais.io/keys
+      - kvPath: {{ SRVJIRADOKDISTAVSTEMMING }}
+        mountPath: /var/run/secrets/nais.io/srvjiradokdistavstemming

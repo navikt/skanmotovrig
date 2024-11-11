@@ -1,13 +1,13 @@
 package no.nav.skanmotovrig.config.properties;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 
 @Getter
@@ -17,86 +17,106 @@ import java.time.Duration;
 @Validated
 public class SkanmotovrigProperties {
 
-    @NotNull
-    private String dokarkivjournalposturl;
+	@NotNull
+	private String dokarkivjournalposturl;
 
-    @NotNull
-    private String stsurl;
+	@NotNull
+	private String stsurl;
 
-    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
-    private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    private final Ovrig ovrig = new Ovrig();
-    private final SftpProperties sftp = new SftpProperties();
+	private final ServiceUserProperties serviceuser = new ServiceUserProperties();
+	private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	private final Ovrig ovrig = new Ovrig();
+	private final SftpProperties sftp = new SftpProperties();
+	private final JiraProperties jira = new JiraProperties();
 
-    @Getter
-    @Setter
-    @Validated
-    public static class ServiceUserProperties {
-        @ToString.Exclude
-        @NotEmpty
-        private String username;
+	@Getter
+	@Setter
+	@Validated
+	public static class ServiceUserProperties {
+		@ToString.Exclude
+		@NotEmpty
+		private String username;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String password;
-    }
+		@ToString.Exclude
+		@NotEmpty
+		private String password;
+	}
 
-    @Getter
-    @Setter
-    @Validated
-    public static class FilomraadeProperties {
-        @NotEmpty
-        private String inngaaendemappe;
+	@Getter
+	@Setter
+	@Validated
+	public static class FilomraadeProperties {
+		@NotEmpty
+		private String inngaaendemappe;
 
-        @NotEmpty
-        private String feilmappe;
-    }
+		@NotEmpty
+		private String feilmappe;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class Ovrig {
-        @NotEmpty
-        private String endpointuri;
+		@NotEmpty
+		private String avstemmappe;
+	}
 
-        @NotEmpty
-        private String endpointconfig;
+	@Getter
+	@Setter
+	@Validated
+	public static class Ovrig {
+		@NotEmpty
+		private String endpointuri;
 
-        @NotEmpty
-        private String schedule;
+		@NotEmpty
+		private String endpointconfig;
 
-        @NotNull
-        private Duration completiontimeout;
+		@NotEmpty
+		private String schedule;
 
-        @NotNull
-        private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    }
+		@NotEmpty
+		private String avstemschedule;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class SftpProperties {
-        @ToString.Exclude
-        @NotEmpty
-        private String host;
+		@NotNull
+		private Duration completiontimeout;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String privateKey;
+		@NotNull
+		private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	}
 
-        @ToString.Exclude
-        @NotEmpty
-        private String hostKey;
+	@Getter
+	@Setter
+	@Validated
+	public static class SftpProperties {
+		@ToString.Exclude
+		@NotEmpty
+		private String host;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String username;
+		@ToString.Exclude
+		@NotEmpty
+		private String privateKey;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String port;
-    }
+		@ToString.Exclude
+		@NotEmpty
+		private String hostKey;
 
+		@ToString.Exclude
+		@NotEmpty
+		private String username;
+
+		@ToString.Exclude
+		@NotEmpty
+		private String port;
+	}
+
+	@Getter
+	@Setter
+	@Validated
+	public static class JiraProperties {
+		@NotEmpty
+		private String username;
+
+		@NotEmpty
+		private String password;
+
+		@NotEmpty
+		private String url;
+	}
 }
 
 

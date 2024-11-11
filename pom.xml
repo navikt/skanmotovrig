@@ -19,7 +19,8 @@
         <module>app</module>
         <module>core</module>
         <module>ovrig</module>
-    </modules>
+		<module>avstemjobb</module>
+	</modules>
 
     <properties>
         <java.version>21</java.version>
@@ -31,6 +32,7 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-io.version>2.17.0</commons-io.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
+        <jiraapi.version>1.1.0</jiraapi.version>
 
         <!-- test -->
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
@@ -52,7 +54,17 @@
                 <artifactId>ovrig</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.skanmotovrig</groupId>
+                <artifactId>avstemjobb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>no.nav.dok-common</groupId>
+                <artifactId>jiraapi</artifactId>
+                <version>${jiraapi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-dependencies</artifactId>
@@ -99,6 +111,12 @@
                 <artifactId>spring-cloud-contract-wiremock</artifactId>
                 <version>${spring-cloud-contract-wiremock.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-test-spring-junit5</artifactId>
+                <scope>test</scope>
+                <version>${camel.version}</version>
             </dependency>
 
             <!-- Apache sshd -->
