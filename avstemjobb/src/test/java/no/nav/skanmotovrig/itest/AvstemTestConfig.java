@@ -19,6 +19,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +35,7 @@ import static java.util.Collections.singletonList;
 @EnableConfigurationProperties(SkanmotovrigProperties.class)
 @Import({JournalpostConsumer.class, STSConsumer.class, AvstemTestConfig.SshdSftpServerConfig.class,
 		AvstemTestConfig.CamelTestStartupConfig.class, AvstemJobbConfig.class})
+@Profile("itest")
 public class AvstemTestConfig {
 
 	@Configuration
