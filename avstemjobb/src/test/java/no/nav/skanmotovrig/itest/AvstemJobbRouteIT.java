@@ -13,13 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -96,7 +94,6 @@ public class AvstemJobbRouteIT extends AbstractIT {
 	}
 
 	private void copyFileFromClasspathToAvstem(final String txtFilename) throws IOException {
-		List<String> fileNames = Stream.of(new ClassPathResource(txtFilename).getContentAsString(UTF_8).split("\n")).toList();
 		Files.copy(new ClassPathResource(txtFilename).getInputStream(), sshdPath.resolve(AVSTEM).resolve(txtFilename));
 	}
 
