@@ -26,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
+import static no.nav.skanmotovrig.utils.RetryConstants.MULTIPLIER_SHORT;
 import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -56,7 +57,9 @@ public class JournalpostConsumer {
 				.build();
 	}
 
-	@Retryable(maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
+	@Retryable(retryFor = SkanmotovrigTechnicalException.class,
+			maxAttempts = MAX_RETRIES,
+			backoff = @Backoff(delay = RETRY_DELAY, multiplier = MULTIPLIER_SHORT))
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		try {
 			HttpHeaders headers = createHeaders();
