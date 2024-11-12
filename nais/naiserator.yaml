@@ -54,9 +54,6 @@ spec:
       memory: 6250Mi
     requests:
       memory: 5000Mi
-  accessPolicy:
-    external:
-      - host: slack.com
   vault:
     enabled: true
     paths:
