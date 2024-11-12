@@ -25,6 +25,7 @@ public class AvstemJobbRouteIT extends AbstractIT {
 
 	public static final String AVSTEM = "avstemmappe";
 	public static final String PROCESSED = "processed";
+	private static String AVSTEM_FIL = "04-01-2024_avstemmingsfil_1.txt";
 
 	@Autowired
 	private Path sshdPath;
@@ -45,7 +46,6 @@ public class AvstemJobbRouteIT extends AbstractIT {
 	@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemReferanser() throws IOException {
 		stubJiraOpprettOppgave();
-		final String AVSTEM_FIL = "04.11.2024_avstemmingsfil_1.txt";
 
 		copyFileFromClasspathToAvstem(AVSTEM_FIL);
 
@@ -62,7 +62,7 @@ public class AvstemJobbRouteIT extends AbstractIT {
 				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
 				.collect(Collectors.toList());
 
-		assertThat(processedMappe).containsExactly("04.11.2024_avstemmingsfil_1.txt");
+		assertThat(processedMappe).containsExactly(AVSTEM_FIL);
 
 		verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 		verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
@@ -73,8 +73,6 @@ public class AvstemJobbRouteIT extends AbstractIT {
 	@Test
 	public void shouldThrowExceptionJiraOppgaveForFeilendeAvstemReferanser() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
-
-		final String AVSTEM_FIL = "04.11.2024_avstemmingsfil_1.txt";
 
 		copyFileFromClasspathToAvstem(AVSTEM_FIL);
 
