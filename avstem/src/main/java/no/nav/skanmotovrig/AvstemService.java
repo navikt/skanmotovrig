@@ -6,19 +6,23 @@ import no.nav.skanmotovrig.consumer.journalpost.data.FeilendeAvstemmingReferanse
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Component
-public class AvstemJobbService {
+public class AvstemService {
 	private final JournalpostConsumer journalpostConsumer;
 
-	public AvstemJobbService(JournalpostConsumer journalpostConsumer) {
+	public AvstemService(JournalpostConsumer journalpostConsumer) {
 		this.journalpostConsumer = journalpostConsumer;
 	}
 
 	@Handler
-	public List<String> avstemSkandokument(Set<String> avstemReferenser) {
+	public Set<String> avstemSkannedeDokumenter(Set<String> avstemReferenser) {
+		if (isEmpty(avstemReferenser)) {
+			return Set.of();
+		}
 		FeilendeAvstemmingReferanser feilendeAvstemmingReferanser = journalpostConsumer.avstemReferanser(new AvstemmingReferanser(avstemReferenser));
 		return feilendeAvstemmingReferanser.referanserIkkeFunnet();
 	}

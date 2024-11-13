@@ -1,7 +1,7 @@
 package no.nav.skanmotovrig.itest;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.skanmotovrig.AvstemJobbConfig;
+import no.nav.skanmotovrig.AvstemConfig;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
 import no.nav.skanmotovrig.consumer.sts.STSConsumer;
@@ -33,7 +33,7 @@ import static java.util.Collections.singletonList;
 @EnableAutoConfiguration
 @EnableConfigurationProperties(SkanmotovrigProperties.class)
 @Import({JournalpostConsumer.class, STSConsumer.class, AvstemTestConfig.SshdSftpServerConfig.class,
-		AvstemTestConfig.CamelTestStartupConfig.class, AvstemJobbConfig.class})
+		AvstemTestConfig.CamelTestStartupConfig.class, AvstemConfig.class})
 public class AvstemTestConfig {
 
 	@Configuration
@@ -91,4 +91,6 @@ public class AvstemTestConfig {
 			return sshd;
 		}
 	}
+
+
 }

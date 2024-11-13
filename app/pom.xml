@@ -23,7 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>no.nav.skanmotovrig</groupId>
-			<artifactId>avstemjobb</artifactId>
+			<artifactId>avstem</artifactId>
 		</dependency>
 	</dependencies>
 	

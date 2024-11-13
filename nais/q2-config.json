@@ -1,12 +1,11 @@
 {
   "SRVSKANMOTOVRIG": "/serviceuser/data/dev/srvskanmotovrig",
-  "SRVJIRADOKDISTAVSTEMMING": "/serviceuser/data/dev/srvjiradokdistavstemming",
   "SFTP_KEYS": "kv/preprod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/journalpostapi/v1",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "SKANMOTOVRIG_JIRA_URL": "https://jira-q1.adeo.no",
   "SKANMOTOVRIG_OVRIG_SCHEDULE": "0+*/5+*+*+*+*",
-  "SKANMOTOVRIG_OVRIG_AVSTEMSCHEDULE": "0+0+11+*+*+*",
+  "SKANMOTOVRIG_OVRIG_AVSTEMSCHEDULE": "0+0+11+*+*+MON-FRI",
   "SKANMOTOVRIG_VAULT_BACKEND": "kv/preprod/fss",
   "SKANMOTOVRIG_VAULT_KUBERNETESPATH": "kubernetes/preprod/fss",
   "INGRESSES": [

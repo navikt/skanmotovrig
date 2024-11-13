@@ -25,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
+import static java.lang.String.format;
 import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
 import static no.nav.skanmotovrig.utils.RetryConstants.MULTIPLIER_SHORT;
 import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
@@ -77,10 +78,10 @@ public class JournalpostConsumer {
 					throw new SkanmotovrigFunctionalException("Ikke mulig å konvertere respons ifra dokarkiv.", e);
 				}
 			}
-			throw new SkanmotovrigFunctionalException(String.format("opprettJournalpost feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
+			throw new SkanmotovrigFunctionalException(format("opprettJournalpost feilet funksjonelt med statusKode=%s. Feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new SkanmotovrigTechnicalException(String.format("opprettJournalpost feilet teknisk med statusKode=%s. Feilmelding=%s", e
+			throw new SkanmotovrigTechnicalException(format("opprettJournalpost feilet teknisk med statusKode=%s. Feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
 		}
 	}
@@ -97,9 +98,9 @@ public class JournalpostConsumer {
 			}
 			return null;
 		} catch (HttpClientErrorException e) {
-			throw new SkanmotovrigFunctionalException("avstemReferanser feilet funskjonell med feilmedling)%s");
+			throw new SkanmotovrigFunctionalException(format("avstemReferanser feilet funksjonelt med feilmelding=%s", e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new SkanmotovrigTechnicalException(String.format("avstemReferanser feilet teknisk med statusKode=%s. Feilmelding=%s", e
+			throw new SkanmotovrigTechnicalException(format("avstemReferanser feilet teknisk med statusKode=%s. feilmelding=%s", e
 					.getStatusCode(), e.getMessage()), e);
 		}
 	}

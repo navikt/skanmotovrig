@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.Duration;
@@ -72,6 +73,8 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String avstemschedule;
 
+		private boolean avstemstartup;
+
 		@NotNull
 		private Duration completiontimeout;
 
@@ -108,12 +111,6 @@ public class SkanmotovrigProperties {
 	@Setter
 	@Validated
 	public static class JiraProperties {
-		@NotEmpty
-		private String username;
-
-		@NotEmpty
-		private String password;
-
 		@NotEmpty
 		private String url;
 	}

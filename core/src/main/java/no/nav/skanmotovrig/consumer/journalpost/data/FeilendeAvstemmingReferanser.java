@@ -1,6 +1,6 @@
 package no.nav.skanmotovrig.consumer.journalpost.data;
 
-import java.util.List;
+import java.util.Set;
 
-public record FeilendeAvstemmingReferanser(List<String> referanserIkkeFunnet) {
+public record FeilendeAvstemmingReferanser(Set<String> referanserIkkeFunnet) {
 }
