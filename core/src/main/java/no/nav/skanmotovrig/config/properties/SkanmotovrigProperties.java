@@ -113,6 +113,12 @@ public class SkanmotovrigProperties {
 	public static class JiraProperties {
 		@NotEmpty
 		private String url;
+
+		@NotEmpty
+		private String username;
+
+		@NotEmpty
+		private String password;
 	}
 }
 

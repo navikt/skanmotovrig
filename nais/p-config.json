@@ -1,5 +1,6 @@
 {
   "SRVSKANMOTOVRIG": "/serviceuser/data/prod/srvskanmotovrig",
+  "SRVJIRADOKDISTAVSTEMMING": "/serviceuser/data/prod/srvjiradokdistavstemming",
   "SFTP_KEYS": "kv/prod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_DOKARKIVJOURNALPOSTURL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/journalpostapi/v1",
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",

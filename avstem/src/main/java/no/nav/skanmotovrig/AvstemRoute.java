@@ -42,7 +42,7 @@ public class AvstemRoute extends RouteBuilder {
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
-				"&antInclude=*.txt,*.TXT" +
+				"&antInclude=*.txt" +
 				"&move=processed" +
 				"&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.avstemschedule}}")
 				.routeId("avstem_routeid")

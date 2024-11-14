@@ -20,9 +20,9 @@ public class CoreConfig {
 
 	@Bean
 	public JiraClient jiraClient(SkanmotovrigProperties properties) {
-		SkanmotovrigProperties.ServiceUserProperties serviceUser = properties.getServiceuser();
+		SkanmotovrigProperties.JiraProperties jira = properties.getJira();
 		return new JiraClient(JiraProperties.builder()
-				.jiraServieUser(new JiraProperties.JiraServieUser(serviceUser.getUsername(), serviceUser.getPassword()))
+				.jiraServieUser(new JiraProperties.JiraServieUser(jira.getUsername(), jira.getPassword()))
 				.url(properties.getJira().getUrl())
 				.build());
 	}
