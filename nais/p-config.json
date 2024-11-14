@@ -6,7 +6,6 @@
   "SKANMOTOVRIG_STSURL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "SKANMOTOVRIG_JIRA_URL": "https://jira.adeo.no",
   "SKANMOTOVRIG_OVRIG_SCHEDULE": "0+5/15+*+*+*+*",
-  "SKANMOTOVRIG_OVRIG_AVSTEMSCHEDULE": "0+0+11+*+*+MON-FRI",
   "SKANMOTOVRIG_VAULT_BACKEND": "kv/prod/fss",
   "SKANMOTOVRIG_VAULT_KUBERNETESPATH": "kubernetes/prod/fss",
   "INGRESSES": [
