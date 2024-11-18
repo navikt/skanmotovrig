@@ -1,9 +1,11 @@
 package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server;
+import no.nav.skanmotovrig.azure.AzureProperties;
+import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
-import no.nav.skanmotovrig.consumer.sts.STSConsumer;
 import no.nav.skanmotovrig.metrics.DokCounter;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
@@ -29,11 +31,12 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
 
 @Slf4j
-@Configuration
+@EnableMockOAuth2Server
 @EnableAutoConfiguration
-@EnableConfigurationProperties(SkanmotovrigProperties.class)
-@Import({JournalpostConsumer.class, STSConsumer.class, OvrigTestConfig.SshdSftpServerConfig.class,
-        OvrigTestConfig.CamelTestStartupConfig.class, OvrigConfig.class, DokCounter.class})
+@EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
+@Import({JournalpostConsumer.class, OvrigTestConfig.SshdSftpServerConfig.class,
+        OAuthEnabledWebClientConfig.class, OvrigTestConfig.CamelTestStartupConfig.class,
+        OvrigConfig.class, DokCounter.class})
 public class OvrigTestConfig {
 
     @Configuration
