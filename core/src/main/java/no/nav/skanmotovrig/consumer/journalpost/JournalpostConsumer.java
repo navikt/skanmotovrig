@@ -55,9 +55,8 @@ public class JournalpostConsumer {
 					if (response.statusCode().isError()) {
 						if (response.statusCode().isSameCodeAs(CONFLICT)) {
 							Mono<OpprettJournalpostResponse> journalpostResponse = response.bodyToMono(OpprettJournalpostResponse.class);
-							log.info("Det eksisterer allerede en journalpost i dokarkiv med fil={}. Denne har journalpostId={}. Oppretter ikke ny journalpost.",
-									opprettJournalpostRequest.getEksternReferanseId(),
-									journalpostResponse.map(jp -> jp.getJournalpostId()).block());
+							log.info("Det eksisterer allerede en journalpost i dokarkiv med eksternReferanseId={} og kan ikke opprette ny journalpost.",
+									opprettJournalpostRequest.getEksternReferanseId());
 							return journalpostResponse;
 						}
 						return response.createError();
@@ -74,7 +73,7 @@ public class JournalpostConsumer {
 		return webClient.post()
 				.uri("/avstemReferanser")
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
-				.bodyValue(AvstemmingReferanser.class)
+				.body(Mono.just(avstemmingReferanser), AvstemmingReferanser.class)
 				.retrieve()
 				.bodyToMono(FeilendeAvstemmingReferanser.class)
 				.doOnError(handleError("avstemReferanser"))
