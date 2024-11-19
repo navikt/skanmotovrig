@@ -8,6 +8,7 @@ import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostRequest;
 import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
+import no.nav.skanmotovrig.utils.NavHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+import static reactor.core.publisher.Mono.just;
 
 @Slf4j
 @Component
@@ -49,6 +51,7 @@ public class JournalpostConsumer {
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		return webClient.post()
 				.uri("/journalpost?foersoekFerdigstill=false")
+				.headers(NavHeaders::createNavCustomHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(opprettJournalpostRequest)
 				.exchangeToMono(response -> {
@@ -72,8 +75,9 @@ public class JournalpostConsumer {
 
 		return webClient.post()
 				.uri("/avstemReferanser")
+				.headers(NavHeaders::createNavCustomHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
-				.body(Mono.just(avstemmingReferanser), AvstemmingReferanser.class)
+				.body(just(avstemmingReferanser), AvstemmingReferanser.class)
 				.retrieve()
 				.bodyToMono(FeilendeAvstemmingReferanser.class)
 				.doOnError(handleError("avstemReferanser"))

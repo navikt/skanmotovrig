@@ -15,9 +15,6 @@ import java.time.Duration;
 @Validated
 public class SkanmotovrigProperties {
 
-	@NotNull
-	private String stsurl;
-
 	private final ServiceUserProperties serviceuser = new ServiceUserProperties();
 	private final FilomraadeProperties filomraade = new FilomraadeProperties();
 	private final Ovrig ovrig = new Ovrig();
