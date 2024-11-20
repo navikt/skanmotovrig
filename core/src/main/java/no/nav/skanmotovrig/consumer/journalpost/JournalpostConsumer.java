@@ -9,9 +9,11 @@ import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.utils.NavHeaders;
+import org.springframework.boot.autoconfigure.codec.CodecProperties;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -37,11 +39,16 @@ public class JournalpostConsumer {
 
 	public JournalpostConsumer(
 			WebClient webClient,
-			SkanmotovrigProperties skanmotovrigProperties
+			SkanmotovrigProperties skanmotovrigProperties,
+			CodecProperties codecProperties
 	) {
 		this.webClient = webClient.mutate()
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.baseUrl(skanmotovrigProperties.getEndpoints().getDokarkiv().getUrl())
+				.exchangeStrategies(ExchangeStrategies.builder()
+						.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
+								.maxInMemorySize((int) codecProperties.getMaxInMemorySize().toBytes()))
+						.build())
 				.build();
 	}
 
@@ -84,14 +91,14 @@ public class JournalpostConsumer {
 				.block();
 	}
 
-	private Consumer<Throwable> handleError(String melding) {
+	private Consumer<Throwable> handleError(String tjeneste) {
 		return error -> {
 			if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
-				throw new SkanmotovrigFunctionalException(format("%s feilet funksjonelt med statusKode=%s. Feilmelding=%s", melding,
+				throw new SkanmotovrigFunctionalException(format("%s feilet funksjonelt med statusKode=%s. Feilmelding=%s", tjeneste,
 						webException.getStatusCode(), webException.getMessage()), error);
 
 			}
-			throw new SkanmotovrigTechnicalException(format("%s feilet teknisk med Feilmelding=%s", melding, error.getMessage()), error);
+			throw new SkanmotovrigTechnicalException(format("%s feilet teknisk med Feilmelding=%s", tjeneste, error.getMessage()), error);
 		};
 	}
 }

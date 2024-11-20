@@ -1,7 +1,6 @@
 package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server;
 import no.nav.skanmotovrig.azure.AzureProperties;
 import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
@@ -31,65 +30,65 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
 
 @Slf4j
-@EnableMockOAuth2Server
 @EnableAutoConfiguration
 @EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
 @Import({JournalpostConsumer.class, OvrigTestConfig.SshdSftpServerConfig.class,
-        OAuthEnabledWebClientConfig.class, OvrigTestConfig.CamelTestStartupConfig.class,
-        OvrigConfig.class, DokCounter.class})
+		OAuthEnabledWebClientConfig.class, OvrigTestConfig.CamelTestStartupConfig.class,
+		OvrigConfig.class, DokCounter.class})
 public class OvrigTestConfig {
 
-    @Configuration
-    static class CamelTestStartupConfig {
+	@Configuration
+	static class CamelTestStartupConfig {
 
-        private final AtomicInteger sshServerStartupCounter = new AtomicInteger(0);
-        @Bean
-        CamelContextConfiguration contextConfiguration(SshServer sshServer) {
-            return new CamelContextConfiguration() {
+		private final AtomicInteger sshServerStartupCounter = new AtomicInteger(0);
 
-                @Override
-                public void beforeApplicationStart(CamelContext camelContext) {
-                    while(!sshServer.isStarted() && sshServerStartupCounter.get() <= 5) {
-                        try {
-                            // Busy wait
-                            Thread.sleep(1000);
-                            log.info("Forsøkt å starte sshserver. retry=" + sshServerStartupCounter.getAndIncrement());
-                        } catch (InterruptedException e) {
-                            // noop
-                        }
-                    }
-                }
+		@Bean
+		CamelContextConfiguration contextConfiguration(SshServer sshServer) {
+			return new CamelContextConfiguration() {
 
-                @Override
-                public void afterApplicationStart(CamelContext camelContext) {
+				@Override
+				public void beforeApplicationStart(CamelContext camelContext) {
+					while (!sshServer.isStarted() && sshServerStartupCounter.get() <= 5) {
+						try {
+							// Busy wait
+							Thread.sleep(1000);
+							log.info("Forsøkt å starte sshserver. retry=" + sshServerStartupCounter.getAndIncrement());
+						} catch (InterruptedException e) {
+							// noop
+						}
+					}
+				}
 
-                }
-            };
-        }
-    }
+				@Override
+				public void afterApplicationStart(CamelContext camelContext) {
 
-    @Configuration
-    static class SshdSftpServerConfig {
-        @Bean
-        public Path sshdPath() throws IOException {
-            return Files.createTempDirectory("sshd");
-        }
+				}
+			};
+		}
+	}
 
-        @Bean(initMethod = "start", destroyMethod = "stop")
-        public SshServer sshServer(
-                final Path sshdPath,
-                SkanmotovrigProperties skanmotovrigProperties
-        ) {
-            SshServer sshd = SshServer.setUpDefaultServer();
-            sshd.setPort(parseInt(skanmotovrigProperties.getSftp().getPort()));
-            sshd.setKeyPairProvider(new ClassLoadableResourceKeyPairProvider("sftp/server_id_rsa"));
-            sshd.setCommandFactory(new ScpCommandFactory());
-            sshd.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
-            // aksepterer alle public keys som presenteres, behøver ikke authorized_keys
-            sshd.setPublickeyAuthenticator(AcceptAllPublickeyAuthenticator.INSTANCE);
-            sshd.setUserAuthFactories(singletonList(new UserAuthNoneFactory()));
-            sshd.setFileSystemFactory(new VirtualFileSystemFactory(sshdPath));
-            return sshd;
-        }
-    }
+	@Configuration
+	static class SshdSftpServerConfig {
+		@Bean
+		public Path sshdPath() throws IOException {
+			return Files.createTempDirectory("sshd");
+		}
+
+		@Bean(initMethod = "start", destroyMethod = "stop")
+		public SshServer sshServer(
+				final Path sshdPath,
+				SkanmotovrigProperties skanmotovrigProperties
+		) {
+			SshServer sshd = SshServer.setUpDefaultServer();
+			sshd.setPort(parseInt(skanmotovrigProperties.getSftp().getPort()));
+			sshd.setKeyPairProvider(new ClassLoadableResourceKeyPairProvider("sftp/server_id_rsa"));
+			sshd.setCommandFactory(new ScpCommandFactory());
+			sshd.setSubsystemFactories(singletonList(new SftpSubsystemFactory()));
+			// aksepterer alle public keys som presenteres, behøver ikke authorized_keys
+			sshd.setPublickeyAuthenticator(AcceptAllPublickeyAuthenticator.INSTANCE);
+			sshd.setUserAuthFactories(singletonList(new UserAuthNoneFactory()));
+			sshd.setFileSystemFactory(new VirtualFileSystemFactory(sshdPath));
+			return sshd;
+		}
+	}
 }
