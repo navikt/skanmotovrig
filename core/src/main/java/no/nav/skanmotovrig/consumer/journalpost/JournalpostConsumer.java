@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 import static no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig.CLIENT_REGISTRATION_DOKARKIV;
 import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
-import static no.nav.skanmotovrig.utils.RetryConstants.MULTIPLIER_SHORT;
 import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -53,8 +52,7 @@ public class JournalpostConsumer {
 	}
 
 	@Retryable(retryFor = SkanmotovrigTechnicalException.class,
-			maxAttempts = MAX_RETRIES,
-			backoff = @Backoff(delay = RETRY_DELAY, multiplier = MULTIPLIER_SHORT))
+			maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		return webClient.post()
 				.uri("/journalpost?foersoekFerdigstill=false")
