@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
@@ -25,7 +24,6 @@ import static no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig.CLIENT_REGIS
 import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
 import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 import static reactor.core.publisher.Mono.just;
@@ -59,19 +57,9 @@ public class JournalpostConsumer {
 				.headers(NavHeaders::createNavCustomHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(opprettJournalpostRequest)
-				.exchangeToMono(response -> {
-					if (response.statusCode().isError()) {
-						if (response.statusCode().isSameCodeAs(CONFLICT)) {
-							Mono<OpprettJournalpostResponse> journalpostResponse = response.bodyToMono(OpprettJournalpostResponse.class);
-							log.info("Det eksisterer allerede en journalpost i dokarkiv med eksternReferanseId={} og kan ikke opprette ny journalpost.",
-									opprettJournalpostRequest.getEksternReferanseId());
-							return journalpostResponse;
-						}
-						return response.createError();
-					}
-					return response.bodyToMono(OpprettJournalpostResponse.class);
-				})
-				.doOnError(handleError("opprettJournalpost"))
+				.retrieve()
+				.bodyToMono(OpprettJournalpostResponse.class)
+				.doOnError(handleOpprettJournalpostError(opprettJournalpostRequest.getEksternReferanseId()))
 				.block();
 	}
 
@@ -87,6 +75,24 @@ public class JournalpostConsumer {
 				.bodyToMono(FeilendeAvstemmingReferanser.class)
 				.doOnError(handleError("avstemReferanser"))
 				.block();
+	}
+
+	private Consumer<Throwable> handleOpprettJournalpostError(String eksternReferanseId) {
+		return error -> {
+			if (error instanceof WebClientResponseException webException && webException.getStatusCode().is4xxClientError()) {
+				if (error instanceof WebClientResponseException.Conflict conflict) {
+					OpprettJournalpostResponse opprettJournalpostResponse = conflict.getResponseBodyAs(OpprettJournalpostResponse.class);
+					log.info("Det eksisterer allerede en journalpost i dokarkiv med journalpostId={}, eksternReferanseId={} og kan ikke opprette ny journalpost.",
+							opprettJournalpostResponse.getJournalpostId(), eksternReferanseId);
+					throw new SkanmotovrigFunctionalException(format("Det eksisterer allerede en journalpost i dokarkiv med journalpostId=%s. Feilmelding=%s",
+							opprettJournalpostResponse.getJournalpostId(), webException.getMessage()), error);
+				}
+				throw new SkanmotovrigFunctionalException(format("opprettJournalpost feilet funksjonelt med statusKode=%s. Feilmelding=%s",
+						webException.getStatusCode(), webException.getMessage()), error);
+
+			}
+			throw new SkanmotovrigTechnicalException(format("opprettJournalpost feilet teknisk med Feilmelding=%s", error.getMessage()), error);
+		};
 	}
 
 	private Consumer<Throwable> handleError(String tjeneste) {
