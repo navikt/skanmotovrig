@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AvstemJobbRouteIT extends AbstractIT {
+public class AvstemRouteIT extends AbstractIT {
 
 	public static final String AVSTEM = "avstemmappe";
 	public static final String PROCESSED = "processed";
@@ -53,9 +53,10 @@ public class AvstemJobbRouteIT extends AbstractIT {
 		assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
 
 		Awaitility.await()
-				.atMost(ofSeconds(500))
+				.atMost(ofSeconds(15))
 				.untilAsserted(() -> {
 					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(1);
+					verifyRequest();
 				});
 
 		List<String> processedMappe = Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED))
@@ -63,11 +64,6 @@ public class AvstemJobbRouteIT extends AbstractIT {
 				.collect(Collectors.toList());
 
 		assertThat(processedMappe).containsExactly(AVSTEM_FIL);
-
-		verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
-		verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
-		verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
-
 	}
 
 	@Test
@@ -80,15 +76,17 @@ public class AvstemJobbRouteIT extends AbstractIT {
 		assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
 
 		Awaitility.await()
-				.atMost(ofSeconds(500))
+				.atMost(ofSeconds(15))
 				.untilAsserted(() -> {
 					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(1);
+					verifyRequest();
 				});
+	}
 
+	private void verifyRequest() {
 		verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 		verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
 		verify(1, getRequestedFor(urlMatching(JIRA_PROJECT_URL)));
-
 	}
 
 	private void copyFileFromClasspathToAvstem(final String txtFilename) throws IOException {

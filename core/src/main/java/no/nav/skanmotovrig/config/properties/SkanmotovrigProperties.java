@@ -60,6 +60,11 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String schedule;
 
+		@NotEmpty
+		private String avstemschedule;
+
+		private boolean avstemstartup;
+
 		@NotNull
 		private Duration completiontimeout;
 
@@ -74,22 +79,22 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String host;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String privateKey;
+		@ToString.Exclude
+		@NotEmpty
+		private String privateKey;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String hostKey;
+		@ToString.Exclude
+		@NotEmpty
+		private String hostKey;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String username;
+		@ToString.Exclude
+		@NotEmpty
+		private String username;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String port;
-    }
+		@ToString.Exclude
+		@NotEmpty
+		private String port;
+	}
 
 	@Data
 	@Validated

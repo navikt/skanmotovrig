@@ -6,25 +6,21 @@ import no.nav.skanmotovrig.jira.OpprettJiraService;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.time.LocalDate;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import static org.apache.camel.Exchange.FILE_NAME;
+import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
 @Component
-public class AvstemJobbRoute extends RouteBuilder {
+public class AvstemRoute extends RouteBuilder {
 
-	private final AvstemJobbService avstemJobbService;
+	private final AvstemService avstemService;
 	private final OpprettJiraService opprettJiraService;
 
-	public AvstemJobbRoute(AvstemJobbService avstemJobbService,
-						   OpprettJiraService opprettJiraService) {
-		this.avstemJobbService = avstemJobbService;
+	public AvstemRoute(AvstemService avstemService,
+					   OpprettJiraService opprettJiraService) {
+		this.avstemService = avstemService;
 		this.opprettJiraService = opprettJiraService;
 	}
 
@@ -46,37 +42,25 @@ public class AvstemJobbRoute extends RouteBuilder {
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
-				"&delay=" + TimeUnit.SECONDS.toMillis(60) +
 				"&antInclude=*.txt,*.TXT" +
-				"&initialDelay=1000" +
 				"&move=processed" +
-				"&jailStartingDirectory=false"+
 				"&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.avstemschedule}}")
 				.routeId("avstem_routeid")
+				.autoStartup("{{skanmotovrig.ovrig.avstemstartup}}")
 				.log(INFO, log, "Skanmotovrig starter behandling av avstemfil=${file:name}.")
+				.setProperty(PROPERTY_AVSTEM_FILNAVN, simple("${file:name}"))
 				.process(new MdcSetterProcessor())
 				.split(body().tokenize())
 				.streaming()
-					.aggregationStrategy(new AvstemmingReferanserAggregationStrategy())
+				.aggregationStrategy(new AvstemAggregationStrategy())
 				.convertBodyTo(Set.class)
 				.end()
-				.choice().when(body().isNotNull())
-					.log(INFO, log, "hentet avstemmingReferanser=${body} fra sftp server")
-					.bean(avstemJobbService)
-					.log(INFO, log, "avstemJobb fant ${body.size} feilende avstemmingReferanser: ${body}")
-					.marshal().csv()
-					.setHeader(FILE_NAME, simple("feilende-skanmøtovrig-avstemreferenser-${date:now:yyyyMMddHHmmss}.cvs"))
-					.process(exchange -> {
-						// Skriver marshaled CSV byte stream til et midlertidig fil
-						byte[] csvBytes = exchange.getIn().getBody(byte[].class);
-						File tempFile = File.createTempFile("Skanmotovrig-FeilendeAvstemmingReferanser-" + LocalDate.now(), ".csv");
-						try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-							fos.write(csvBytes);
-						}
-						exchange.getIn().setBody(tempFile);
-					})
-					.bean(opprettJiraService)
-				.endChoice()
+				.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
+				.bean(avstemService)
+				.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
+				.marshal().csv()
+				.bean(opprettJiraService)
+				.process(new RemoveMdcProcessor())
 				.end();
 
 		// @formatter:on
