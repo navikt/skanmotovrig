@@ -34,11 +34,9 @@ public abstract class AbstractIT {
 	public static final String JIRA_OPPRETTE_URL = "/rest/api/2/issue";
 	public static final String JIRA_VEDLEGG_URL = "/rest/api/2/issue/MMA-134/attachments";
 	public static final String JIRA_PROJECT_URL = "/rest/api/2/project/MMA";
-	public static final String STATUS_TRANSITION = "/rest/api/2/issue/MMA-134/transitions";
-	private static final String STS_URL = "/rest/v1/sts/token";
 
 	public void setUpMocks() {
-		stubSts();
+		stubAzureToken();
 		stubPostAvstemJournalpost();
 		stubJiraHentProject();
 		stubJiraPostVedleggDokument();
@@ -54,13 +52,12 @@ public abstract class AbstractIT {
 						.withBodyFile("journalpostapi/avstem.json")));
 	}
 
-	public static void stubSts() {
-		stubFor(post(urlMatching(STS_URL))
+	public static void stubAzureToken() {
+		stubFor(post("/azure_token")
 				.willReturn(aResponse()
-						.withHeader("Content-Type", "application/json")
-						.withHeader("Connection", "close")
-						.withBodyFile("sts/token.json"))
-		);
+						.withStatus(OK.value())
+						.withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("azure/token_response.json")));
 	}
 
 	public static void stubJiraOpprettOppgave() {
@@ -94,7 +91,6 @@ public abstract class AbstractIT {
 		stubFor(post(urlEqualTo(JIRA_VEDLEGG_URL))
 				.willReturn(aResponse().withStatus(NO_CONTENT.value())));
 	}
-
 	public static void stubBadRequestJiraOpprettOppgave() {
 		stubFor(post(urlMatching(JIRA_OPPRETTE_URL))
 				.willReturn(aResponse().withStatus(BAD_REQUEST.value())

@@ -2,9 +2,10 @@ package no.nav.skanmotovrig.itest;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.AvstemConfig;
+import no.nav.skanmotovrig.azure.AzureProperties;
+import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
-import no.nav.skanmotovrig.consumer.sts.STSConsumer;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -29,10 +30,9 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
 
 @Slf4j
-@Configuration
 @EnableAutoConfiguration
-@EnableConfigurationProperties(SkanmotovrigProperties.class)
-@Import({JournalpostConsumer.class, STSConsumer.class, AvstemTestConfig.SshdSftpServerConfig.class,
+@EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
+@Import({JournalpostConsumer.class, OAuthEnabledWebClientConfig.class, AvstemTestConfig.SshdSftpServerConfig.class,
 		AvstemTestConfig.CamelTestStartupConfig.class, AvstemConfig.class})
 public class AvstemTestConfig {
 
@@ -91,6 +91,4 @@ public class AvstemTestConfig {
 			return sshd;
 		}
 	}
-
-
 }
