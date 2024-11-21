@@ -1,102 +1,116 @@
 package no.nav.skanmotovrig.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 
-@Getter
-@Setter
+@Data
 @ToString
 @ConfigurationProperties("skanmotovrig")
 @Validated
 public class SkanmotovrigProperties {
 
-    @NotNull
-    private String dokarkivjournalposturl;
+	private final ServiceUserProperties serviceuser = new ServiceUserProperties();
+	private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	private final Ovrig ovrig = new Ovrig();
+	private final SftpProperties sftp = new SftpProperties();
+	private final Endpoints endpoints = new Endpoints();
 
-    @NotNull
-    private String stsurl;
+	@Data
+	@Validated
+	public static class ServiceUserProperties {
+		@ToString.Exclude
+		@NotEmpty
+		private String username;
 
-    private final ServiceUserProperties serviceuser = new ServiceUserProperties();
-    private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    private final Ovrig ovrig = new Ovrig();
-    private final SftpProperties sftp = new SftpProperties();
+		@ToString.Exclude
+		@NotEmpty
+		private String password;
+	}
 
-    @Getter
-    @Setter
-    @Validated
-    public static class ServiceUserProperties {
-        @ToString.Exclude
-        @NotEmpty
-        private String username;
+	@Data
+	@Validated
+	public static class FilomraadeProperties {
+		@NotEmpty
+		private String inngaaendemappe;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String password;
-    }
+		@NotEmpty
+		private String feilmappe;
+	}
 
-    @Getter
-    @Setter
-    @Validated
-    public static class FilomraadeProperties {
-        @NotEmpty
-        private String inngaaendemappe;
+	@Data
+	@Validated
+	public static class Ovrig {
+		@NotEmpty
+		private String endpointuri;
 
-        @NotEmpty
-        private String feilmappe;
-    }
+		@NotEmpty
+		private String endpointconfig;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class Ovrig {
-        @NotEmpty
-        private String endpointuri;
+		@NotEmpty
+		private String schedule;
 
-        @NotEmpty
-        private String endpointconfig;
+		@NotNull
+		private Duration completiontimeout;
 
-        @NotEmpty
-        private String schedule;
+		@NotNull
+		private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	}
 
-        @NotNull
-        private Duration completiontimeout;
+	@Data
+	@Validated
+	public static class SftpProperties {
+		@ToString.Exclude
+		@NotEmpty
+		private String host;
 
-        @NotNull
-        private final FilomraadeProperties filomraade = new FilomraadeProperties();
-    }
+		@ToString.Exclude
+		@NotEmpty
+		private String privateKey;
 
-    @Getter
-    @Setter
-    @Validated
-    public static class SftpProperties {
-        @ToString.Exclude
-        @NotEmpty
-        private String host;
+		@ToString.Exclude
+		@NotEmpty
+		private String hostKey;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String privateKey;
+		@ToString.Exclude
+		@NotEmpty
+		private String username;
 
-        @ToString.Exclude
-        @NotEmpty
-        private String hostKey;
+		@ToString.Exclude
+		@NotEmpty
+		private String port;
+	}
 
-        @ToString.Exclude
-        @NotEmpty
-        private String username;
+	@Data
+	@Validated
+	public static class Endpoints {
+		/**
+		 * URL til dokarkiv journalpost api.
+		 */
+		@NotNull
+		private AzureEndpoint dokarkiv;
+	}
 
-        @ToString.Exclude
-        @NotEmpty
-        private String port;
-    }
+	@Data
+	@Validated
+	public static class AzureEndpoint {
+		/**
+		 * Url til tjeneste som har azure autorisasjon
+		 */
+		@NotEmpty
+		private String url;
 
+		/**
+		 * Scope til azure client credential flow
+		 */
+		@NotEmpty
+		private String scope;
+	}
 }
 
 

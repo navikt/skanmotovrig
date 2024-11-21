@@ -25,20 +25,19 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AbstractIt {
 
 	public static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
-	private static final String STS_URL = "/rest/v1/sts/token";
 
 	public void setUpMocks() {
-		stubFor(post(urlMatching(STS_URL))
-				.willReturn(aResponse()
-						.withHeader("Content-Type", "application/json")
-						.withHeader("Connection", "close")
-						.withBodyFile("sts/token.json"))
-		);
-
 		stubFor(post(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withHeader("Connection", "close")
 						.withBodyFile("journalpostapi/success.json")));
+
+		stubFor(post("/azure_token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(org.apache.http.HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("azure/token_response.json")));
+
 	}
 }
