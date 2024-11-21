@@ -22,16 +22,13 @@ public class DokCounter {
     public static final String DOMAIN = "domain";
     public static final String CORE = "core";
     public static final String OVRIG = "ovrig";
+    public static final String AVSTEM_JOBB = "avstemjobb";
 
     private static MeterRegistry meterRegistry;
 
     @Autowired
     public DokCounter(MeterRegistry meterRegistry){
         DokCounter.meterRegistry = meterRegistry;
-    }
-
-    public static void incrementCounter(Map<String, String> metadata){
-        metadata.forEach(DokCounter::incrementCounter);
     }
 
     public static void incrementCounter(String key, List<String> tags) {

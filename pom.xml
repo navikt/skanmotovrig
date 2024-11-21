@@ -19,7 +19,8 @@
         <module>app</module>
         <module>core</module>
         <module>ovrig</module>
-    </modules>
+		<module>avstem</module>
+	</modules>
 
     <properties>
         <java.version>21</java.version>
@@ -32,6 +33,7 @@
         <commons-io.version>2.17.0</commons-io.version>
         <context-propagation.version>1.1.2</context-propagation.version>
         <bouncycastle.version>1.79</bouncycastle.version>
+		<jiraapi.version>1.1.0</jiraapi.version>
 
         <!-- test -->
         <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
@@ -53,7 +55,17 @@
                 <artifactId>ovrig</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.skanmotovrig</groupId>
+                <artifactId>avstem</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>no.nav.dok-common</groupId>
+                <artifactId>jiraapi</artifactId>
+                <version>${jiraapi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.camel.springboot</groupId>
                 <artifactId>camel-spring-boot-dependencies</artifactId>
