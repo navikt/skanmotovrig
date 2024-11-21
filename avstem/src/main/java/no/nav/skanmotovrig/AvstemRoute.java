@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
+import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
 import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
@@ -42,7 +44,8 @@ public class AvstemRoute extends RouteBuilder {
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
-				"&antInclude=*.txt,*.TXT" +
+				"&antInclude=*.txt" +
+				"&connectTimeout=15000&timeout=15000" +
 				"&move=processed" +
 				"&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.avstemschedule}}")
 				.routeId("avstem_routeid")
@@ -55,8 +58,10 @@ public class AvstemRoute extends RouteBuilder {
 				.aggregationStrategy(new AvstemAggregationStrategy())
 				.convertBodyTo(Set.class)
 				.end()
+				.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
 				.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
 				.bean(avstemService)
+				.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
 				.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
 				.marshal().csv()
 				.bean(opprettJiraService)
