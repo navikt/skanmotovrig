@@ -38,12 +38,13 @@ public class OpprettJiraService {
 		Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 		Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
 
-		File file = createFile(csvByte);
 		try {
-			if (!file.exists()) {
+			if (csvByte == null) {
 				log.warn("fant ikke feilende avstemmingsfil og kan ikke opprette jira oppgave");
 				return null;
 			}
+			
+			File file = createFile(csvByte);
 			JiraRequest jiraRequest = mapJiraRequest(file, new AvstemtFiler(antallAvstemt, antallFeilet));
 			JiraResponse jiraResponse = jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
 			log.info("opprettet jira oppgave for feilende skanmotovrig avstemmingsreferanser med jira-sak={}", jiraResponse.jiraIssueKey());

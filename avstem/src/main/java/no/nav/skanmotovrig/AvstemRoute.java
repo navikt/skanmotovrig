@@ -4,10 +4,13 @@ import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.jira.OpprettJiraService;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.file.GenericFileOperationFailedException;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Set;
 
+import static java.time.DayOfWeek.MONDAY;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
 import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
@@ -41,6 +44,11 @@ public class AvstemRoute extends RouteBuilder {
 				.useOriginalMessage()
 				.log(WARN, log, "Skanmotøvrig feilet å prossessere avstemReference fil. Exception:${exception};" );
 
+		onException(GenericFileOperationFailedException.class)
+				.handled(true)
+				.process(new MdcSetterProcessor())
+				.log(WARN, log, "Skanmotovrig fant ikke avstemtfil for " + finnDato() + "og kontakter ironmountain. Exception:${exception}");
+
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
@@ -61,13 +69,20 @@ public class AvstemRoute extends RouteBuilder {
 				.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
 				.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
 				.bean(avstemService)
-				.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
-				.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
-				.marshal().csv()
-				.bean(opprettJiraService)
-				.process(new RemoveMdcProcessor())
+				.choice()
+				.when(simple("${body}").isNotNull())
+					.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
+					.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
+					.marshal().csv()
+					.bean(opprettJiraService)
+					.process(new RemoveMdcProcessor())
+				.endChoice()
 				.end();
 
 		// @formatter:on
+	}
+
+	private LocalDate finnDato() {
+		return MONDAY.equals(LocalDate.now().getDayOfWeek()) ? LocalDate.now().minusDays(3) : LocalDate.now().minusDays(1);
 	}
 }

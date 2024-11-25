@@ -83,6 +83,20 @@ public class AvstemRouteIT extends AbstractIT {
 				});
 	}
 
+	@Test
+	public void shouldThrowFileOperationFailedExceptionWhenAvstemtfilIsNull() throws IOException {
+		stubBadRequestJiraOpprettOppgave();
+
+		assertThat(Files.exists(sshdPath.resolve(AVSTEM).resolve(AVSTEM_FIL))).isFalse();
+		assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
+
+		Awaitility.await()
+				.atMost(ofSeconds(15))
+				.untilAsserted(() -> {
+					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
+				});
+	}
+
 	private void verifyRequest() {
 		verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 		verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
