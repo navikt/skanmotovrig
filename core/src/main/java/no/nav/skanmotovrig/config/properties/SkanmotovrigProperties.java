@@ -20,6 +20,8 @@ public class SkanmotovrigProperties {
 	private final Ovrig ovrig = new Ovrig();
 	private final SftpProperties sftp = new SftpProperties();
 	private final Endpoints endpoints = new Endpoints();
+	private final JiraProperties jira = new JiraProperties();
+
 
 	@Data
 	@Validated
@@ -41,6 +43,9 @@ public class SkanmotovrigProperties {
 
 		@NotEmpty
 		private String feilmappe;
+
+		@NotEmpty
+		private String avstemmappe;
 	}
 
 	@Data
@@ -54,6 +59,11 @@ public class SkanmotovrigProperties {
 
 		@NotEmpty
 		private String schedule;
+
+		@NotEmpty
+		private String avstemschedule;
+
+		private boolean avstemstartup;
 
 		@NotNull
 		private Duration completiontimeout;
@@ -86,6 +96,18 @@ public class SkanmotovrigProperties {
 		private String port;
 	}
 
+	@Data
+	@Validated
+	public static class JiraProperties {
+		@NotEmpty
+		private String username;
+
+		@NotEmpty
+		private String password;
+
+		@NotEmpty
+		private String url;
+	}
 	@Data
 	@Validated
 	public static class Endpoints {

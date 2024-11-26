@@ -23,6 +23,8 @@ spec:
       value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
     - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
       value: {{ SKANMOTOVRIG_VAULT_KUBERNETESPATH }}
+    - name: SKANMOTOVRIG_JIRA_URL
+      value: {{ SKANMOTOVRIG_JIRA_URL }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -57,6 +59,8 @@ spec:
         mountPath: /var/run/secrets/nais.io/srvskanmotovrig
       - kvPath: {{ SFTP_KEYS }}
         mountPath: /var/run/secrets/nais.io/keys
+      - kvPath: {{ SRVJIRADOKDISTAVSTEMMING }}
+        mountPath: /var/run/secrets/nais.io/srvjiradokdistavstemming
   azure:
     application:
       enabled: true
