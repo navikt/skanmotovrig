@@ -19,7 +19,7 @@ public class AvstemService {
 	}
 
 	@Handler
-	public Set<String> avstemSkannedeDokumenter(Set<String> avstemReferenser) {
+	public Set<String> avstemmingsReferanser(Set<String> avstemReferenser) {
 		if (isEmpty(avstemReferenser)) {
 			return Set.of();
 		}

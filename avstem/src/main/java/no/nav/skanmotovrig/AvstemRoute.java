@@ -7,13 +7,13 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Set;
 
-import static java.time.DayOfWeek.MONDAY;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
 import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
+import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
+import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
@@ -42,12 +42,12 @@ public class AvstemRoute extends RouteBuilder {
 		onException(AbstractSkanmotovrigFunctionalException.class, JiraClientException.class)
 				.handled(true)
 				.useOriginalMessage()
-				.log(WARN, log, "Skanmotøvrig feilet å prossessere avstemReference fil. Exception:${exception};" );
+				.log(WARN, log, "Skanmotovrig feilet å prossessere avstemReference avstemmingsfil. Exception:${exception};" );
 
 		onException(GenericFileOperationFailedException.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
-				.log(WARN, log, "Skanmotovrig fant ikke avstemtfil for " + finnDato() + "og kontakter ironmountain. Exception:${exception}");
+				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
@@ -77,12 +77,9 @@ public class AvstemRoute extends RouteBuilder {
 					.bean(opprettJiraService)
 					.process(new RemoveMdcProcessor())
 				.endChoice()
+				.log(INFO, log, "Skanmotovrig behandlet ferdig avstemmingsfil: ${file:name}")
 				.end();
 
 		// @formatter:on
-	}
-
-	private LocalDate finnDato() {
-		return MONDAY.equals(LocalDate.now().getDayOfWeek()) ? LocalDate.now().minusDays(3) : LocalDate.now().minusDays(1);
 	}
 }

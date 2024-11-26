@@ -13,25 +13,25 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
 
 @Slf4j
 @Component
 public class OpprettJiraService {
 
-	private static final String DESCRIPTION = "Se vedlegg for en oversikt over manglende avstemmingsreferanser for skannede dokumenter fra skanmotøvrig \n";
-	public static final String SUMMARY = "Skanmotøvrig: Manglende avstemmingsreferanser for skannede dokumenter";
+	private static final String DESCRIPTION = "Se vedlegg for en oversikt over manglende avstemmingsreferanser for skannede dokumenter fra skanmotovrig \n";
+	public static final String SUMMARY = "Skanmotovrig: Manglende avstemmingsreferanser for skannede dokumenter";
 	private static final String SKANMOTOVRIG_JIRA_BRUKER_NAVN = "srvjiradokdistavstemming";
 	public static final String ANTALL_FILER_AVSTEMT = "Antall filer avstemt";
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
+
 	private final JiraService jiraService;
 
 	public OpprettJiraService(JiraService jiraService) {
 		this.jiraService = jiraService;
 	}
-
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
@@ -43,7 +43,7 @@ public class OpprettJiraService {
 				log.warn("fant ikke feilende avstemmingsfil og kan ikke opprette jira oppgave");
 				return null;
 			}
-			
+
 			File file = createFile(csvByte);
 			JiraRequest jiraRequest = mapJiraRequest(file, new AvstemtFiler(antallAvstemt, antallFeilet));
 			JiraResponse jiraResponse = jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
@@ -60,8 +60,7 @@ public class OpprettJiraService {
 
 	private File createFile(byte[] csvByte) {
 		try {
-			DateTimeFormatter dateTimeFormatters = DateTimeFormatter.ISO_LOCAL_DATE;
-			File tempFile = File.createTempFile("skanmotovrig-feilende-avstemming-" + LocalDateTime.now().format(dateTimeFormatters), ".csv");
+			File tempFile = File.createTempFile("skanmotovrig-feilende-avstemming-" + avstemtDato(), ".csv");
 			FileOutputStream fs = new FileOutputStream(tempFile);
 			fs.write(csvByte);
 			return tempFile;

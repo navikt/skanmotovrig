@@ -22,7 +22,7 @@ public class CoreConfig {
 	public JiraClient jiraClient(SkanmotovrigProperties properties) {
 		SkanmotovrigProperties.JiraProperties jira = properties.getJira();
 		return new JiraClient(JiraProperties.builder()
-				.jiraServieUser(new JiraProperties.JiraServieUser(jira.getUsername(), jira.getPassword()))
+				.jiraServiceUser(new JiraProperties.JiraServiceUser(jira.getUsername(), jira.getPassword()))
 				.url(properties.getJira().getUrl())
 				.build());
 	}
