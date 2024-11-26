@@ -77,8 +77,9 @@ public class AvstemRoute extends RouteBuilder {
 					.bean(opprettJiraService)
 					.process(new RemoveMdcProcessor())
 				.endChoice()
+				.end()
 				.log(INFO, log, "Skanmotovrig behandlet ferdig avstemmingsfil: ${file:name}")
-				.end();
+		;
 
 		// @formatter:on
 	}
