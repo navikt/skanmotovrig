@@ -31,6 +31,7 @@ public class AvstemService {
 			log.info(prettifySummary("Skanmotovrig avstemmingsrapport:", avstemReferenser.size(), 0));
 			return null;
 		}
+		log.info("fant {} feilende avstemReferenser", feilendeAvstemmingReferanser.referanserIkkeFunnet());
 		return feilendeAvstemmingReferanser.referanserIkkeFunnet();
 	}
 }
