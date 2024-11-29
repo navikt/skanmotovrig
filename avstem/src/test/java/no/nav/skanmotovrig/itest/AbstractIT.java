@@ -37,19 +37,18 @@ public abstract class AbstractIT {
 
 	public void setUpMocks() {
 		stubAzureToken();
-		stubPostAvstemJournalpost();
 		stubJiraHentProject();
 		stubJiraPostVedleggDokument();
 		jiraHappyUpdateSak();
 		jiraHappyGetIssue();
 	}
 
-	public static void stubPostAvstemJournalpost() {
+	public static void stubPostAvstemJournalpost(String path) {
 		stubFor(post(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withHeader("Connection", "close")
-						.withBodyFile("journalpostapi/avstem.json")));
+						.withBodyFile(path)));
 	}
 
 	public static void stubAzureToken() {
