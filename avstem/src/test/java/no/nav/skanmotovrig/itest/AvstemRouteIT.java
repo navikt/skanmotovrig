@@ -46,6 +46,8 @@ public class AvstemRouteIT extends AbstractIT {
 	@Test
 	public void shouldOpprettJiraOppgaveForFeilendeAvstemReferanser() throws IOException {
 		stubJiraOpprettOppgave();
+		stubPostAvstemJournalpost("journalpostapi/avstem.json");
+
 
 		copyFileFromClasspathToAvstem(AVSTEM_FIL);
 
@@ -67,8 +69,33 @@ public class AvstemRouteIT extends AbstractIT {
 	}
 
 	@Test
+	public void shouldNotOpprettJiraWhenFeilendeAvstemReferanserIsNull() throws IOException {
+		stubPostAvstemJournalpost("journalpostapi/null-avstem.json");
+
+		copyFileFromClasspathToAvstem(AVSTEM_FIL);
+
+		assertThat(Files.exists(sshdPath.resolve(AVSTEM).resolve(AVSTEM_FIL))).isTrue();
+		assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
+
+		Awaitility.await()
+				.atMost(ofSeconds(15))
+				.untilAsserted(() -> {
+					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(1);
+					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+				});
+
+		List<String> processedMappe = Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED))
+				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
+				.collect(Collectors.toList());
+
+		assertThat(processedMappe).containsExactly(AVSTEM_FIL);
+	}
+
+	@Test
 	public void shouldThrowExceptionJiraOppgaveForFeilendeAvstemReferanser() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
+		stubPostAvstemJournalpost("journalpostapi/avstem.json");
+
 
 		copyFileFromClasspathToAvstem(AVSTEM_FIL);
 

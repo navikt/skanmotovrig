@@ -2,6 +2,7 @@ package no.nav.skanmotovrig.utils;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static java.time.DayOfWeek.MONDAY;
 
@@ -17,7 +18,9 @@ public class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
 		return v.toString();
 	}
 
-	public static LocalDate avstemtDato() {
-		return MONDAY.equals(LocalDate.now().getDayOfWeek()) ? LocalDate.now().minusDays(3) : LocalDate.now().minusDays(1);
+	public static String avstemtDato() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		return MONDAY.equals(LocalDate.now().getDayOfWeek()) ? LocalDate.now().minusDays(3).format(formatter) :
+				LocalDate.now().minusDays(1).format(formatter);
 	}
 }

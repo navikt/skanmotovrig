@@ -45,7 +45,7 @@ public class OpprettJiraService {
 			}
 
 			File file = createFile(csvByte);
-			JiraRequest jiraRequest = mapJiraRequest(file, new AvstemtFiler(antallAvstemt, antallFeilet));
+			JiraRequest jiraRequest = mapJiraRequest(file, antallAvstemt, antallFeilet);
 			JiraResponse jiraResponse = jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
 			log.info("opprettet jira oppgave for feilende skanmotovrig avstemmingsreferanser med jira-sak={}", jiraResponse.jiraIssueKey());
 			return JiraResponse.builder()
@@ -69,22 +69,22 @@ public class OpprettJiraService {
 		}
 	}
 
-	private JiraRequest mapJiraRequest(File file, AvstemtFiler avstemtFiler) {
+	private JiraRequest mapJiraRequest(File file, int antallAvstemt, int antallFeilet) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
-				.description(prettifySummary(avstemtFiler))
+				.description(prettifySummary(antallAvstemt, antallFeilet))
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(List.of("skanmotovrig_avvik"))
 				.file(file)
 				.build();
 	}
 
-	private String prettifySummary(AvstemtFiler avstemtFiler) {
+	public static String prettifySummary(int antallAvstemt, int antallFeilet) {
 		StringBuilder builder = new StringBuilder();
 		return builder.append(DESCRIPTION)
-				.append("\nAntall filer avstemt: ").append(avstemtFiler.antallAvstemt())
-				.append("\nAntall filer funnet: ").append(avstemtFiler.antallAvstemt() - avstemtFiler.antallFeilet())
-				.append("\nAntall filer feilet: ").append(avstemtFiler.antallFeilet()).toString();
+				.append("\nAntall filer avstemt: ").append(antallAvstemt)
+				.append("\nAntall filer funnet: ").append(antallAvstemt - antallFeilet)
+				.append("\nAntall filer feilet: ").append(antallFeilet).toString();
 
 	}
 }
