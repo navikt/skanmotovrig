@@ -72,16 +72,16 @@ public class OpprettJiraService {
 	private JiraRequest mapJiraRequest(File file, int antallAvstemt, int antallFeilet) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
-				.description(prettifySummary(antallAvstemt, antallFeilet))
+				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(List.of("skanmotovrig_avvik"))
 				.file(file)
 				.build();
 	}
 
-	public static String prettifySummary(int antallAvstemt, int antallFeilet) {
+	public static String prettifySummary(String melding, int antallAvstemt, int antallFeilet) {
 		StringBuilder builder = new StringBuilder();
-		return builder.append(DESCRIPTION)
+		return builder.append(melding)
 				.append("\nAntall filer avstemt: ").append(antallAvstemt)
 				.append("\nAntall filer funnet: ").append(antallAvstemt - antallFeilet)
 				.append("\nAntall filer feilet: ").append(antallFeilet).toString();
