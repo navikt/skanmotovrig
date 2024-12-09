@@ -54,7 +54,7 @@ public class JournalpostConsumer {
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		return webClient.post()
 				.uri("/journalpost?foersoekFerdigstill=false")
-				.headers(NavHeaders::createNavCustomHeaders)
+				.headers(NavHeaders::setCustomNavHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(opprettJournalpostRequest)
 				.retrieve()
@@ -68,7 +68,7 @@ public class JournalpostConsumer {
 
 		return webClient.post()
 				.uri("/avstemReferanser")
-				.headers(NavHeaders::createNavCustomHeaders)
+				.headers(NavHeaders::setCustomNavHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.body(just(avstemmingReferanser), AvstemmingReferanser.class)
 				.retrieve()

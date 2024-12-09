@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -84,17 +84,16 @@ public class OpprettJournalpostPostboksOvrigRequestMapper {
 				.map(this::mapBruker)
 				.orElse(null);
 
-		List<Tilleggsopplysning> tilleggsopplysninger = List.of(
+		List<Tilleggsopplysning> tilleggsopplysninger = Stream.of(
 				new Tilleggsopplysning(ENDORSERNR, journalpost.getEndorsernr()),
 				new Tilleggsopplysning(FYSISKPOSTBOKS, skanningInfo.getFysiskPostboks()),
 				new Tilleggsopplysning(STREKKODEPOSTBOKS, skanningInfo.getStrekkodePostboks()),
 				new Tilleggsopplysning(ANTALL_SIDER, journalpost.getAntallSider())
-		).stream().filter(tilleggsopplysning -> isNotBlank(tilleggsopplysning.getVerdi())).collect(Collectors.toList());
+		).filter(tilleggsopplysning -> isNotBlank(tilleggsopplysning.getVerdi())).toList();
 
 		String datoMottatt = journalpost.getDatoMottatt() == null
 				? null
 				: journalpost.getDatoMottatt().toString();
-
 
 		return OpprettJournalpostRequest.builder()
 				.journalfoerendeEnhet(journalforendeEnhet)

@@ -28,8 +28,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
-	public static final String INNGAAENDE = "inngaaende";
-	public static final String FEILMAPPE = "feilmappe";
 
 	@Autowired
 	private Path sshdPath;
@@ -166,9 +164,7 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
 
-		await().atMost(15, SECONDS).untilAsserted(() -> {
-			assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
-		});
+		await().atMost(15, SECONDS).untilAsserted(() -> assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp"))));
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

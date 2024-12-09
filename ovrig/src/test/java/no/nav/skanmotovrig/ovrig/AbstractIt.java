@@ -22,8 +22,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 )
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-public class AbstractIt {
-
+public abstract class AbstractIt {
+	public static final String INNGAAENDE = "inngaaende";
+	public static final String FEILMAPPE = "feilmappe";
 	public static final String URL_DOKARKIV_JOURNALPOST_GEN = "/rest/journalpostapi/v1/journalpost\\?foersoekFerdigstill=false";
 
 	public void setUpMocks() {

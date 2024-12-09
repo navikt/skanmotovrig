@@ -23,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AvstemRouteIT extends AbstractIT {
 
-	public static final String AVSTEM = "avstemmappe";
-	public static final String PROCESSED = "processed";
-	private static String AVSTEM_FIL = "04-01-2024_avstemmingsfil_1.txt";
+	private static final String AVSTEM = "avstemmappe";
+	private static final String PROCESSED = "processed";
+	private static final String AVSTEM_FIL = "04-01-2024_avstemmingsfil_1.txt";
 
 	@Autowired
 	private Path sshdPath;
@@ -119,9 +119,7 @@ public class AvstemRouteIT extends AbstractIT {
 
 		Awaitility.await()
 				.atMost(ofSeconds(15))
-				.untilAsserted(() -> {
-					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
-				});
+				.untilAsserted(() -> assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0));
 	}
 
 	private void verifyRequest() {

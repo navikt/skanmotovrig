@@ -6,8 +6,7 @@
 			<brUkertype>PERSON</brUkertype>
 		</Bruker>
 		<tena></tena>
-		<brevKode>
-			<brevkode>
+		<brevKode></brevKode>
 		<journalforendeEnet></journalforendeEnet>
 		<mottsakskanal>SKAN_IM</mottsakskanal>
 		<datoMotatatt>2020-02-22</datoMotatatt>

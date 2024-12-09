@@ -9,7 +9,6 @@ public class MDCConstants {
     public static final String MDC_BATCHNAVN = "batchnavn";
     public static final String PROPERTY_AVSTEM_FILNAVN = "avstemfilnavn";
 
-
     public static final Set<String> ALL_MDC_KEYS = Set.of(MDC_CALL_ID);
 
     private MDCConstants() {

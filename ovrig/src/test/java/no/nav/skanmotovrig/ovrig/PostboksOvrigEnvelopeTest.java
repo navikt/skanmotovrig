@@ -6,7 +6,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -14,23 +13,20 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PostboksOvrigEnvelopeTest {
 
     @Test
     void shouldThrowExceptionWhenValidateNoXml() {
-        Assertions.assertThrows(ForsendelseNotCompleteException.class, () -> {
-            PostboksOvrigEnvelopeTestObjects.createFullEnvelope().xml(null).build()
-                    .validate();
-        }, "Fant ikke filnavn=" + PostboksOvrigEnvelopeTestObjects.FILEBASENAME + ".xml i zip=" + PostboksOvrigEnvelopeTestObjects.ZIPNAME);
+        assertThrows(ForsendelseNotCompleteException.class, () -> PostboksOvrigEnvelopeTestObjects.createFullEnvelope().xml(null).build()
+				.validate(), "Fant ikke filnavn=" + PostboksOvrigEnvelopeTestObjects.FILEBASENAME + ".xml i zip=" + PostboksOvrigEnvelopeTestObjects.ZIPNAME);
     }
 
     @Test
     void shouldThrowExceptionWhenValidateNoPdf() {
-        Assertions.assertThrows(ForsendelseNotCompleteException.class, () -> {
-            PostboksOvrigEnvelopeTestObjects.createFullEnvelope().pdf(null).build()
-                    .validate();
-        }, "Fant ikke filnavn=" + PostboksOvrigEnvelopeTestObjects.FILEBASENAME + ".pdf i zip=" + PostboksOvrigEnvelopeTestObjects.ZIPNAME);
+        assertThrows(ForsendelseNotCompleteException.class, () -> PostboksOvrigEnvelopeTestObjects.createFullEnvelope().pdf(null).build()
+				.validate(), "Fant ikke filnavn=" + PostboksOvrigEnvelopeTestObjects.FILEBASENAME + ".pdf i zip=" + PostboksOvrigEnvelopeTestObjects.ZIPNAME);
     }
 
     @Test

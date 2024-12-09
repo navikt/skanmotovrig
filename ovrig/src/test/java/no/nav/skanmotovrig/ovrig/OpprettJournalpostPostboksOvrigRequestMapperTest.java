@@ -63,7 +63,7 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
 				.containsExactly(tuple(OpprettJournalpostPostboksOvrigRequestMapper.STREKKODEPOSTBOKS, STREKKODE_POSTBOKS));
 		assertThat(request.getDokumenter().size()).isEqualTo(1);
 
-		final Dokument dokument = request.getDokumenter().get(0);
+		final Dokument dokument = request.getDokumenter().getFirst();
 		assertThat(dokument.getBrevkode()).isEqualTo(null);
 		assertThat(dokument.getDokumentKategori()).isEqualTo(DOKUMENTKATEGORI);
 		assertThat(dokument.getTittel()).isEqualTo(null);
@@ -109,7 +109,7 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
 				);
 		assertThat(request.getDokumenter().size()).isEqualTo(1);
 
-		final Dokument dokument = request.getDokumenter().get(0);
+		final Dokument dokument = request.getDokumenter().getFirst();
 		assertThat(dokument.getBrevkode()).isEqualTo(BREVKODE);
 		assertThat(dokument.getDokumentKategori()).isEqualTo(DOKUMENTKATEGORI);
 		assertThat(dokument.getTittel()).isEqualTo(null);
@@ -168,7 +168,7 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
 				.pdf(PDF_FIL)
 				.build();
 		final OpprettJournalpostRequest request = mapper.mapRequest(envelope);
-		final Dokument hoveddokument = request.getDokumenter().get(0);
+		final Dokument hoveddokument = request.getDokumenter().getFirst();
 		assertThat(hoveddokument.getBrevkode()).isNull();
 	}
 
@@ -189,7 +189,7 @@ class OpprettJournalpostPostboksOvrigRequestMapperTest {
 				.pdf(PDF_FIL)
 				.build();
 		final OpprettJournalpostRequest request = mapper.mapRequest(envelope);
-		final Dokument hoveddokument = request.getDokumenter().get(0);
+		final Dokument hoveddokument = request.getDokumenter().getFirst();
 		assertThat(hoveddokument.getBrevkode()).isNull();
 	}
 
