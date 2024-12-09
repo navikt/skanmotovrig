@@ -51,7 +51,7 @@ public class AvstemTestConfig {
 						try {
 							// Busy wait
 							Thread.sleep(1000);
-							log.info("Forsøkt å starte sshserver. retry=" + sshServerStartupCounter.getAndIncrement());
+							log.info("Forsøkt å starte sshserver. retry={}", sshServerStartupCounter.getAndIncrement());
 						} catch (InterruptedException e) {
 							// noop
 						}

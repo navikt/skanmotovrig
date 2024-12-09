@@ -8,7 +8,6 @@ import lombok.Value;
 @Builder
 @AllArgsConstructor
 public class Tilleggsopplysning {
-    private String nokkel;
-
-    private String verdi;
+    String nokkel;
+    String verdi;
 }

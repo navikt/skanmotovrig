@@ -12,7 +12,7 @@ import static no.nav.skanmotovrig.ovrig.PostboksOvrigRoute.PROPERTY_FORSENDELSE_
 public class MdcSetterProcessor implements Processor {
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) {
         final String exchangeId = exchange.getExchangeId();
         if (exchangeId != null) {
             MDC.put(MDCConstants.MDC_CALL_ID, exchangeId);

@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class PostboksOvrigRouteIT extends AbstractIt {
-	public static final String INNGAAENDE = "inngaaende";
-	public static final String FEILMAPPE = "feilmappe";
 
 	@Autowired
 	private Path sshdPath;

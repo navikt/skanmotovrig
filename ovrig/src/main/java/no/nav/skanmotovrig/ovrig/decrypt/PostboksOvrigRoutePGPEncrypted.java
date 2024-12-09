@@ -34,11 +34,11 @@ import static org.apache.camel.LoggingLevel.WARN;
 @Slf4j
 @Component
 public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
-	public static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
-	public static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
-	public static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
-	public static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
-	static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
+	private static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
+	private static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
+	private static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
+	private static final String KEY_LOGGING_INFO = "fil=${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}, batch=${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}";
+	private static final int FORVENTET_ANTALL_PER_FORSENDELSE = 2;
 
 	private final SkanmotovrigProperties skanmotovrigProperties;
 	private final PostboksOvrigService postboksOvrigService;
