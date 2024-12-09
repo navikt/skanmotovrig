@@ -36,7 +36,7 @@
 		<jiraapi.version>1.1.1</jiraapi.version>
 
 		<!-- test -->
-		<spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>
 		<sshd-core.version>2.14.0</sshd-core.version>
 
 		<!-- Plugins -->
