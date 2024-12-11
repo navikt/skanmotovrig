@@ -36,7 +36,6 @@ public class AvstemRoute extends RouteBuilder {
 	public void configure() {
 
 		// @formatter:off
-
 		onException(Exception.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
@@ -53,12 +52,12 @@ public class AvstemRoute extends RouteBuilder {
 				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
 
-		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
+		from("cron:tab?schedule={{skanmotovrig.ovrig.avstemschedule}}")
+				.pollEnrich("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
 				"&antInclude=*.txt" +
-				"&connectTimeout=15000&timeout=15000" +
-				"&move=processed" +
-				"&scheduler=spring&scheduler.cron={{skanmotovrig.ovrig.avstemschedule}}")
+				"&maxMessagesPerPoll=1" +
+				"&move=processed&maxDepth=1&maxMessagesPerPoll=1&repeatCount=1", 1500)
 				.routeId("avstem_routeid")
 				.autoStartup("{{skanmotovrig.ovrig.avstemstartup}}")
 				.choice()
@@ -87,6 +86,13 @@ public class AvstemRoute extends RouteBuilder {
 				.end()
 				.end()
 				.log(INFO, log, "Skanmotovrig behandlet ferdig avstemmingsfil: ${file:name}");
+
+
+		from("direct:avvik_avstem")
+				.routeId("avvik_avstem")
+				.throwException(new FilIkkeFunnetException("Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain."))
+				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}")
+				.end();
 
 		// @formatter:on
 	}

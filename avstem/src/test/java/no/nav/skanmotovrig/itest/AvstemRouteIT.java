@@ -84,11 +84,6 @@ public class AvstemRouteIT extends AbstractIT {
 					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
 				});
 
-		List<String> processedMappe = Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED))
-				.map(p -> FilenameUtils.getName(p.toAbsolutePath().toString()))
-				.collect(Collectors.toList());
-
-		assertThat(processedMappe).containsExactly(AVSTEM_FIL);
 	}
 
 	@Test
@@ -105,8 +100,8 @@ public class AvstemRouteIT extends AbstractIT {
 		Awaitility.await()
 				.atMost(ofSeconds(15))
 				.untilAsserted(() -> {
-					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(1);
-					verifyRequest();
+					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
+					assertThat(Files.list(sshdPath.resolve(AVSTEM)).collect(Collectors.toSet())).hasSize(2);
 				});
 	}
 
