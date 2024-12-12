@@ -42,7 +42,7 @@ public class OpprettJiraService {
 			if (csvByte == null) {
 				String avstemDato = exchange.getProperty(AVSTEM_DATO, String.class);
 				return jiraService.opprettJiraOppgave(JiraRequest.builder()
-						.summary("Skanmotovrig: Manglende avstemmingfil for ".formatted(avstemDato))
+						.summary("Skanmotovrig: Manglende avstemmingfil for %s".formatted(avstemDato))
 						.description("Skanmotovrig fant ikke avstemmingsfil for " +  avstemDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
 						.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 						.labels(LABEL)
