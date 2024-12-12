@@ -44,6 +44,7 @@ public class OpprettJiraService {
 				return jiraService.opprettJiraOppgave(JiraRequest.builder()
 						.summary("Skanmotovrig: Manglende avstemmingfil for ".formatted(avstemDato))
 						.description("Skanmotovrig fant ikke avstemmingsfil for " +  avstemDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+						.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 						.labels(LABEL)
 						.build());
 			}
