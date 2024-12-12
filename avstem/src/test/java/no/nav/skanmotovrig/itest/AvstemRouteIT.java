@@ -106,7 +106,7 @@ public class AvstemRouteIT extends AbstractIT {
 	}
 
 	@Test
-	public void shouldThrowFileOperationFailedExceptionWhenAvstemtfilIsNull() throws IOException {
+	public void shouldOpprettJiraOppgaveWhenAvstemmingsfilIsMissing() throws IOException {
 		stubBadRequestJiraOpprettOppgave();
 
 		assertThat(Files.exists(sshdPath.resolve(AVSTEM).resolve(AVSTEM_FIL))).isFalse();
@@ -114,7 +114,10 @@ public class AvstemRouteIT extends AbstractIT {
 
 		Awaitility.await()
 				.atMost(ofSeconds(15))
-				.untilAsserted(() -> assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0));
+				.untilAsserted(() -> {
+					assertThat(Files.list(sshdPath.resolve(AVSTEM).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
+					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+				});
 	}
 
 	private void verifyRequest() {

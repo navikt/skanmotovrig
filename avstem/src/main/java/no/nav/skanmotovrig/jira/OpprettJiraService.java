@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEM_DATO;
 import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
 
 @Slf4j
@@ -26,6 +27,7 @@ public class OpprettJiraService {
 	private static final String SKANMOTOVRIG_JIRA_BRUKER_NAVN = "srvjiradokdistavstemming";
 	public static final String ANTALL_FILER_AVSTEMT = "Antall filer avstemt";
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
+	private static final List<String> LABEL = List.of("skanmotovrig_avvik");
 
 	private final JiraService jiraService;
 
@@ -35,24 +37,22 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-		Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
-		Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
 
 		try {
 			if (csvByte == null) {
-				log.warn("fant ikke feilende avstemmingsfil og kan ikke opprette jira oppgave");
-				return null;
+				String avstemDato = exchange.getProperty(AVSTEM_DATO, String.class);
+				return jiraService.opprettJiraOppgave(JiraRequest.builder()
+						.summary("Skanmotovrig: Manglende avstemmingfil for ".formatted(avstemDato))
+						.description("Skanmotovrig fant ikke avstemmingsfil for " +  avstemDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+						.labels(LABEL)
+						.build());
 			}
 
-			File file = createFile(csvByte);
-			JiraRequest jiraRequest = mapJiraRequest(file, antallAvstemt, antallFeilet);
-			JiraResponse jiraResponse = jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
-			log.info("opprettet jira oppgave for feilende skanmotovrig avstemmingsreferanser med jira-sak={}", jiraResponse.jiraIssueKey());
-			return JiraResponse.builder()
-					.message(jiraResponse.message())
-					.jiraIssueKey(jiraResponse.jiraIssueKey())
-					.httpStatusCode(jiraResponse.httpStatusCode())
-					.build();
+			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
+			Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
+			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet);
+
+			return jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
 		} catch (JiraClientException e) {
 			throw new SkanmotovrigFunctionalException("kan ikke opprette jira oppgave", e);
 		}
@@ -69,13 +69,13 @@ public class OpprettJiraService {
 		}
 	}
 
-	private JiraRequest mapJiraRequest(File file, int antallAvstemt, int antallFeilet) {
+	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
-				.labels(List.of("skanmotovrig_avvik"))
-				.file(file)
+				.labels(LABEL)
+				.file(createFile(csvByte))
 				.build();
 	}
 

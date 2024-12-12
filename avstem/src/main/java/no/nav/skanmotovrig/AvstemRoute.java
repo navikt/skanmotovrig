@@ -2,9 +2,7 @@ package no.nav.skanmotovrig;
 
 import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotovrig.exceptions.functional.AbstractSkanmotovrigFunctionalException;
-import no.nav.skanmotovrig.exceptions.functional.FilIkkeFunnetException;
 import no.nav.skanmotovrig.jira.OpprettJiraService;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
 import org.springframework.stereotype.Component;
@@ -13,6 +11,7 @@ import java.util.Set;
 
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEM_DATO;
 import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
 import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
 import static org.apache.camel.Exchange.FILE_NAME;
@@ -23,6 +22,7 @@ import static org.apache.camel.LoggingLevel.WARN;
 @Component
 public class AvstemRoute extends RouteBuilder {
 
+	private static final int CONNECTION_TIMEOUT = 1500;
 	private final AvstemService avstemService;
 	private final OpprettJiraService opprettJiraService;
 
@@ -55,18 +55,21 @@ public class AvstemRoute extends RouteBuilder {
 		from("cron:tab?schedule={{skanmotovrig.ovrig.avstemschedule}}")
 				.pollEnrich("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
-				"&antInclude=*.txt" +
-				"&maxMessagesPerPoll=1" +
-				"&move=processed&maxDepth=1&maxMessagesPerPoll=1&repeatCount=1", 1500)
+				"&antInclude=*.txt,*TXT" +
+				"&maxMessagesPerPoll=1&move=processed", CONNECTION_TIMEOUT)
 				.routeId("avstem_routeid")
 				.autoStartup("{{skanmotovrig.ovrig.avstemstartup}}")
+				.log(INFO, log, "Skanmotovrig avstemmmingsskeduler starter ...")
+				.process(new MdcSetterProcessor())
+				.process(exchange -> exchange.setProperty(AVSTEM_DATO, avstemtDato()))
 				.choice()
 					.when(header(FILE_NAME).isNull())
-						.throwException(new FilIkkeFunnetException("Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}"))
+						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+						.bean(opprettJiraService)
+						.log(INFO, log, "Skanmotovrig fant ikke avstemmingsfil og opprettet jira-sak med key=${body.jiraIssueKey}")
 				.otherwise()
 					.log(INFO, log, "Skanmotovrig starter behandling av avstemfil=${file:name}.")
 					.setProperty(PROPERTY_AVSTEM_FILNAVN, simple("${file:name}"))
-					.process(new MdcSetterProcessor())
 					.split(body().tokenize())
 					.streaming()
 					.aggregationStrategy(new AvstemAggregationStrategy())
@@ -76,24 +79,17 @@ public class AvstemRoute extends RouteBuilder {
 					.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
 					.bean(avstemService)
 					.choice()
-					.when(simple("${body}").isNotNull())
-						.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
-						.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
-						.marshal().csv()
-						.bean(opprettJiraService)
-						.process(new RemoveMdcProcessor())
+						.when(simple("${body}").isNotNull())
+							.setProperty(ANTALL_FILER_FEILET, simple("${body.size}"))
+							.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
+							.marshal().csv()
+							.bean(opprettJiraService)
+							.log(INFO, log, "opprettet jira oppgave for feilende skanmotovrig avstemmingsreferanser med jira-sak=${body.jiraIssueKey}")
+							.process(new RemoveMdcProcessor())
 					.endChoice()
-				.end()
+				.endChoice()
 				.end()
 				.log(INFO, log, "Skanmotovrig behandlet ferdig avstemmingsfil: ${file:name}");
-
-
-		from("direct:avvik_avstem")
-				.routeId("avvik_avstem")
-				.throwException(new FilIkkeFunnetException("Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain."))
-				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}")
-				.end();
-
 		// @formatter:on
 	}
 }
