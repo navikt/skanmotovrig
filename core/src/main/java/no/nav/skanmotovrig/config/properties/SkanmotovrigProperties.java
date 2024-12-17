@@ -18,6 +18,7 @@ public class SkanmotovrigProperties {
 	private final ServiceUserProperties serviceuser = new ServiceUserProperties();
 	private final FilomraadeProperties filomraade = new FilomraadeProperties();
 	private final Ovrig ovrig = new Ovrig();
+	private final Avstem avstem = new Avstem();
 	private final SftpProperties sftp = new SftpProperties();
 	private final Endpoints endpoints = new Endpoints();
 	private final JiraProperties jira = new JiraProperties();
@@ -60,16 +61,21 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String schedule;
 
-		@NotEmpty
-		private String avstemschedule;
-
-		private boolean avstemstartup;
-
 		@NotNull
 		private Duration completiontimeout;
 
 		@NotNull
 		private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	}
+
+	@Data
+	@Validated
+	public static class Avstem {
+		@NotEmpty
+		private String schedule;
+
+		private boolean avstemstartup;
+
 	}
 
 	@Data

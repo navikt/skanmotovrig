@@ -33,7 +33,7 @@
 		<commons-io.version>2.18.0</commons-io.version>
 		<context-propagation.version>1.1.2</context-propagation.version>
 		<bouncycastle.version>1.79</bouncycastle.version>
-		<jiraapi.version>1.1.1</jiraapi.version>
+		<jiraapi.version>1.1.2</jiraapi.version>
 
 		<!-- test -->
 		<spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>

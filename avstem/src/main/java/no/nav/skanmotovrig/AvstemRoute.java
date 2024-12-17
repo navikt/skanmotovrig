@@ -11,9 +11,10 @@ import java.util.Set;
 
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
-import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEM_DATO;
-import static no.nav.skanmotovrig.mdc.MDCConstants.PROPERTY_AVSTEM_FILNAVN;
-import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
+import static no.nav.skanmotovrig.jira.OpprettJiraService.avstemmingsfilDato;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_DATO;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_NAVN;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
@@ -49,31 +50,38 @@ public class AvstemRoute extends RouteBuilder {
 		onException(GenericFileOperationFailedException.class)
 				.handled(true)
 				.process(new MdcSetterProcessor())
-				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
+				.log(ERROR, log, "Skanmotovrig fant ikke avstemmingstfil for ${exchangeProperty." + AVSTEMT_DATO + "}. Undersøk tilfellet og evt. kontakt Iron Mountain. Exception:${exception}");
 
 
-		from("cron:tab?schedule={{skanmotovrig.ovrig.avstemschedule}}")
+		from("cron:tab?schedule={{skanmotovrig.avstem.schedule}}")
 				.pollEnrich("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.avstemmappe}}" +
-				"?{{skanmotovrig.ovrig.endpointconfig}}" +
-				"&antInclude=*.txt,*TXT" +
-				"&maxMessagesPerPoll=1&move=processed", CONNECTION_TIMEOUT)
+						"?{{skanmotovrig.ovrig.endpointconfig}}" +
+						"&antInclude=*.txt,*.TXT" +
+						"&maxMessagesPerPoll=1" +
+						"&move=processed", CONNECTION_TIMEOUT)
 				.routeId("avstem_routeid")
-				.autoStartup("{{skanmotovrig.ovrig.avstemstartup}}")
-				.log(INFO, log, "Skanmotovrig avstemmmingsskeduler starter ...")
+				.autoStartup("{{skanmotovrig.avstem.avstemstartup}}")
+				.log(INFO, log, "Skanmotovrig starter cron jobb for å avstemme referanser...")
 				.process(new MdcSetterProcessor())
-				.process(exchange -> exchange.setProperty(AVSTEM_DATO, avstemtDato()))
+				.process(exchange -> {
+					exchange.setProperty(AVSTEMT_DATO, avstemmingsfilDato());
+				})
 				.choice()
 					.when(header(FILE_NAME).isNull())
-						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for " +  avstemtDato() + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for ${exchangeProperty." + AVSTEMT_DATO + "}. Undersøk tilfellet og evt. oppretter Jira-sak.")
 						.bean(opprettJiraService)
-						.log(INFO, log, "Skanmotovrig fant ikke avstemmingsfil og opprettet jira-sak med key=${body.jiraIssueKey}")
+						.log(INFO, log, "Skanmotovrig opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
 				.otherwise()
-					.log(INFO, log, "Skanmotovrig starter behandling av avstemfil=${file:name}.")
-					.setProperty(PROPERTY_AVSTEM_FILNAVN, simple("${file:name}"))
+					.log(INFO, log, "Skanmotovrig starter behandling av avstemmingsfil=${file:name}.")
+					.setProperty(AVSTEMMINGSFIL_NAVN, simple("${file:name}"))
+					.process(exchange -> {
+						String avstemmingsfilDato = exchange.getProperty(AVSTEMMINGSFIL_NAVN,String.class).substring(0,7);
+						exchange.setProperty(AVSTEMMINGSFIL_DATO, avstemmingsfilDato);
+					})
 					.split(body().tokenize())
 					.streaming()
-					.aggregationStrategy(new AvstemAggregationStrategy())
-					.convertBodyTo(Set.class)
+						.aggregationStrategy(new AvstemAggregationStrategy())
+						.convertBodyTo(Set.class)
 					.end()
 					.setProperty(ANTALL_FILER_AVSTEMT, simple("${body.size}"))
 					.log(INFO, log, "hentet ${body.size} avstemmingReferanser fra sftp server")
@@ -84,7 +92,7 @@ public class AvstemRoute extends RouteBuilder {
 							.log(INFO, log, "skanmotovrig fant ${body.size} feilende avstemmingsreferanser")
 							.marshal().csv()
 							.bean(opprettJiraService)
-							.log(INFO, log, "opprettet jira oppgave for feilende skanmotovrig avstemmingsreferanser med jira-sak=${body.jiraIssueKey}")
+							.log(INFO, log, "Har opprettet Jira-sak=${body.jiraIssueKey} for feilende skanmotovrig avstemmingsreferanser")
 							.process(new RemoveMdcProcessor())
 					.endChoice()
 				.endChoice()

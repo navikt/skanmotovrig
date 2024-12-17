@@ -7,9 +7,9 @@ public class MDCConstants {
     public static final String MDC_ZIP_ID = "zipId";
     public static final String MDC_FILENAME = "filename";
     public static final String MDC_BATCHNAVN = "batchnavn";
-    public static final String PROPERTY_AVSTEM_FILNAVN = "avstemfilnavn";
-    public static final String AVSTEM_DATO = "avstemdato";
-
+    public static final String AVSTEMMINGSFIL_NAVN = "avstemmingsfilnavn";
+    public static final String AVSTEMT_DATO = "avstemtdato";
+    public static final String AVSTEMMINGSFIL_DATO = "avstemmingsfildato";
     public static final Set<String> ALL_MDC_KEYS = Set.of(MDC_CALL_ID);
 
     private MDCConstants() {

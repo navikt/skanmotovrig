@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
-import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEM_DATO;
-import static no.nav.skanmotovrig.utils.LocalDateAdapter.avstemtDato;
+import static java.time.DayOfWeek.MONDAY;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_DATO;
 
 @Slf4j
 @Component
@@ -37,31 +39,34 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-
+		LocalDate avstemmingsfilDato = exchange.getProperty(AVSTEMMINGSFIL_DATO, LocalDate.class);
 		try {
 			if (csvByte == null) {
-				String avstemDato = exchange.getProperty(AVSTEM_DATO, String.class);
-				return jiraService.opprettJiraOppgave(JiraRequest.builder()
-						.summary("Skanmotovrig: Manglende avstemmingfil for %s".formatted(avstemDato))
-						.description("Skanmotovrig fant ikke avstemmingsfil for " +  avstemDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
-						.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
-						.labels(LABEL)
-						.build());
+				opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
 			}
 
 			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
 			Integer antallFeilet = exchange.getProperty(ANTALL_FILER_FEILET, Integer.class);
-			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet);
+			JiraRequest jiraRequest = mapJiraRequest(csvByte, antallAvstemt, antallFeilet, avstemmingsfilDato);
 
-			return jiraService.opprettJiraOppgaveVedVedlegg(jiraRequest);
+			return jiraService.opprettJiraOppgaveMedVedlegg(jiraRequest);
 		} catch (JiraClientException e) {
 			throw new SkanmotovrigFunctionalException("kan ikke opprette jira oppgave", e);
 		}
 	}
 
-	private File createFile(byte[] csvByte) {
+	public JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
+		return jiraService.opprettJiraOppgave(JiraRequest.builder()
+				.summary("Skanmotovrig: Avstemmingfil mangler for %s".formatted(avstemmingsfilDato))
+				.description("Skanmotovrig fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
+				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
+				.labels(LABEL)
+				.build());
+	}
+
+	private File createFile(byte[] csvByte, LocalDate avstemmingsfilDato) {
 		try {
-			File tempFile = File.createTempFile("skanmotovrig-feilende-avstemming-" + avstemtDato(), ".csv");
+			File tempFile = File.createTempFile("skanmotovrig-feilende-avstemming-" + avstemmingsfilDato, ".csv");
 			FileOutputStream fs = new FileOutputStream(tempFile);
 			fs.write(csvByte);
 			return tempFile;
@@ -70,13 +75,13 @@ public class OpprettJiraService {
 		}
 	}
 
-	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet) {
+	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet, LocalDate avstemmingsfilDato) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(LABEL)
-				.file(createFile(csvByte))
+				.file(createFile(csvByte, avstemmingsfilDato))
 				.build();
 	}
 
@@ -87,5 +92,11 @@ public class OpprettJiraService {
 				.append("\nAntall filer funnet: ").append(antallAvstemt - antallFeilet)
 				.append("\nAntall filer feilet: ").append(antallFeilet).toString();
 
+	}
+
+	public static LocalDate avstemmingsfilDato() {
+		LocalDate todaysDate = LocalDate.now(ZoneId.of("Europe/Oslo"));
+		return MONDAY.equals(todaysDate.getDayOfWeek()) ? todaysDate.minusDays(3) :
+				todaysDate.minusDays(1);
 	}
 }
