@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AvstemRouteIT extends AbstractIT {
 
-	private static final String AVSTEMMINGSFILMAPPE = "avstemmingsfilmappe";
+	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
 	private static final String AVSTEMMINGSFIL = "04-01-2024_avstemmingsfil_1.txt";
 

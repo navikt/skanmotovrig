@@ -12,7 +12,6 @@ import java.util.Set;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_AVSTEMT;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.ANTALL_FILER_FEILET;
 import static no.nav.skanmotovrig.jira.OpprettJiraService.avstemmingsfilDato;
-import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_DATO;
 import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_NAVN;
 import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME;
@@ -45,7 +44,7 @@ public class AvstemRoute extends RouteBuilder {
 		onException(AbstractSkanmotovrigFunctionalException.class, JiraClientException.class)
 				.handled(true)
 				.useOriginalMessage()
-				.log(WARN, log, "Skanmotovrig feilet å prossessere avstemReference avstemmingsfil. Exception:${exception};" );
+				.log(WARN, log, "Skanmotovrig feilet å prossessere avstemmingsfil. Exception:${exception};" );
 
 		onException(GenericFileOperationFailedException.class)
 				.handled(true)
@@ -63,9 +62,7 @@ public class AvstemRoute extends RouteBuilder {
 				.autoStartup("{{skanmotovrig.avstem.avstemstartup}}")
 				.log(INFO, log, "Skanmotovrig starter cron jobb for å avstemme referanser...")
 				.process(new MdcSetterProcessor())
-				.process(exchange -> {
-					exchange.setProperty(AVSTEMT_DATO, avstemmingsfilDato());
-				})
+				.process(exchange -> exchange.setProperty(AVSTEMT_DATO, avstemmingsfilDato()))
 				.choice()
 					.when(header(FILE_NAME).isNull())
 						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for ${exchangeProperty." + AVSTEMT_DATO + "}. Undersøk tilfellet og evt. oppretter Jira-sak.")
@@ -74,10 +71,6 @@ public class AvstemRoute extends RouteBuilder {
 				.otherwise()
 					.log(INFO, log, "Skanmotovrig starter behandling av avstemmingsfil=${file:name}.")
 					.setProperty(AVSTEMMINGSFIL_NAVN, simple("${file:name}"))
-					.process(exchange -> {
-						String avstemmingsfilDato = exchange.getProperty(AVSTEMMINGSFIL_NAVN,String.class).substring(0,7);
-						exchange.setProperty(AVSTEMMINGSFIL_DATO, avstemmingsfilDato);
-					})
 					.split(body().tokenize())
 					.streaming()
 						.aggregationStrategy(new AvstemAggregationStrategy())

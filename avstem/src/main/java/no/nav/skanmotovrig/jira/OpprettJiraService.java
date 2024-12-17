@@ -18,7 +18,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
-import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMMINGSFIL_DATO;
+import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMT_DATO;
 
 @Slf4j
 @Component
@@ -39,10 +39,10 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-		LocalDate avstemmingsfilDato = exchange.getProperty(AVSTEMMINGSFIL_DATO, LocalDate.class);
+		LocalDate avstemmingsfilDato = exchange.getProperty(AVSTEMT_DATO, LocalDate.class);
 		try {
 			if (csvByte == null) {
-				opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
+				return opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
 			}
 
 			Integer antallAvstemt = exchange.getProperty(ANTALL_FILER_AVSTEMT, Integer.class);
