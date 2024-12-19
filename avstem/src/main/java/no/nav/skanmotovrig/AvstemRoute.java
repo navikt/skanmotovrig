@@ -65,7 +65,7 @@ public class AvstemRoute extends RouteBuilder {
 				.process(exchange -> exchange.setProperty(AVSTEMT_DATO, avstemmingsfilDato()))
 				.choice()
 					.when(header(FILE_NAME).isNull())
-						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for ${exchangeProperty." + AVSTEMT_DATO + "}. Undersøk tilfellet og evt. oppretter Jira-sak.")
+						.log(ERROR, log, "Skanmotovrig fant ikke avstemmingsfil for ${exchangeProperty." + AVSTEMT_DATO + "}. Undersøk tilfellet og evt. ser opprettet Jira-sak.")
 						.bean(opprettJiraService)
 						.log(INFO, log, "Skanmotovrig opprettet jira-sak med key=${body.jiraIssueKey} for manglende avstemmingsfil.")
 				.otherwise()
