@@ -15,10 +15,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
-import static no.nav.skanmotovrig.mdc.MDCConstants.AVSTEMT_DATO;
+import static no.nav.skanmotovrig.mdc.MDCConstants.MDC_AVSTEMT_DATO;
+import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
 @Slf4j
 @Component
@@ -39,7 +41,7 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-		LocalDate avstemmingsfilDato = exchange.getProperty(AVSTEMT_DATO, LocalDate.class);
+		LocalDate avstemmingsfilDato = exchange.getProperty(MDC_AVSTEMT_DATO, LocalDate.class);
 		try {
 			if (csvByte == null) {
 				return opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
@@ -57,7 +59,7 @@ public class OpprettJiraService {
 
 	public JiraResponse opprettJiraForManglendeAvstemmingsfil(LocalDate avstemmingsfilDato) {
 		return jiraService.opprettJiraOppgave(JiraRequest.builder()
-				.summary("Skanmotovrig: Avstemmingfil mangler for %s".formatted(avstemmingsfilDato))
+				.summary("Skanmotovrig: Avstemmingfil mangler for " + avstemmingsfilDato)
 				.description("Skanmotovrig fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(LABEL)
@@ -98,5 +100,10 @@ public class OpprettJiraService {
 		LocalDate todaysDate = LocalDate.now(ZoneId.of("Europe/Oslo"));
 		return MONDAY.equals(todaysDate.getDayOfWeek()) ? todaysDate.minusDays(3) :
 				todaysDate.minusDays(1);
+	}
+
+	public static LocalDate parseDatoFraFilnavn(Exchange exchange) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0,10), formatter);
 	}
 }
