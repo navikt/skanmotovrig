@@ -74,7 +74,7 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String schedule;
 
-		private boolean avstemstartup;
+		private boolean startup;
 
 	}
 
