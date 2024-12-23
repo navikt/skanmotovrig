@@ -11,8 +11,6 @@ spec:
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL }}
     - name: SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE }}
-    - name: SKANMOTOVRIG_OVRIG_SCHEDULE
-      value: {{ SKANMOTOVRIG_OVRIG_SCHEDULE }}
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
       value: /var/run/secrets/nais.io/keys/privatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
