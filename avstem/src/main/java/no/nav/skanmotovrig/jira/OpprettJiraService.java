@@ -103,7 +103,7 @@ public class OpprettJiraService {
 	}
 
 	public static LocalDate parseDatoFraFilnavn(Exchange exchange) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0,10), formatter);
 	}
 }

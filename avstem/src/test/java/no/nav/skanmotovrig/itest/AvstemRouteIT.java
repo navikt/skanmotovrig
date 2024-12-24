@@ -25,7 +25,7 @@ public class AvstemRouteIT extends AbstractIT {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
-	private static final String AVSTEMMINGSFIL = "04-01-2024_avstemmingsfil_1.txt";
+	private static final String AVSTEMMINGSFIL = "04.01.2024_avstemmingsfil_1.txt";
 
 	@Autowired
 	private Path sshdPath;
