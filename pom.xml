@@ -102,7 +102,7 @@
 			<!-- decrypt pgp-->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk18on</artifactId>
+				<artifactId>bcutil-jdk18on</artifactId>
 				<version>${bouncycastle.version}</version>
 			</dependency>
 			<dependency>
