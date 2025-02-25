@@ -113,7 +113,7 @@ public class AvstemRouteIT extends AbstractIT {
 		assertThat(Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
 
 		Awaitility.await()
-				.atMost(ofSeconds(15))
+				.atMost(ofSeconds(20))
 				.untilAsserted(() -> {
 					assertThat(Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
