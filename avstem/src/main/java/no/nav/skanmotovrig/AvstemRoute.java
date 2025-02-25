@@ -23,7 +23,7 @@ import static org.apache.camel.LoggingLevel.WARN;
 @Component
 public class AvstemRoute extends RouteBuilder {
 
-	private static final int CONNECTION_TIMEOUT = 1500;
+	private static final int CONNECTION_TIMEOUT = 15000;
 	private final AvstemService avstemService;
 	private final OpprettJiraService opprettJiraService;
 
