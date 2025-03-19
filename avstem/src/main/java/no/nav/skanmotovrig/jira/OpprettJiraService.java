@@ -10,9 +10,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -66,24 +63,14 @@ public class OpprettJiraService {
 				.build());
 	}
 
-	private File createFile(byte[] csvByte, LocalDate avstemmingsfilDato) {
-		try {
-			File tempFile = File.createTempFile("skanmotovrig-feilende-avstemming-" + avstemmingsfilDato, ".csv");
-			FileOutputStream fs = new FileOutputStream(tempFile);
-			fs.write(csvByte);
-			return tempFile;
-		} catch (IOException ex) {
-			throw new SkanmotovrigFunctionalException("I/O feil med feilmelding=" + ex.getMessage(), ex);
-		}
-	}
-
 	private JiraRequest mapJiraRequest(byte[] csvByte, int antallAvstemt, int antallFeilet, LocalDate avstemmingsfilDato) {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
 				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(LABEL)
-				.file(createFile(csvByte, avstemmingsfilDato))
+				.vedlegg(csvByte)
+				.avstemmingsfilDato(avstemmingsfilDato)
 				.build();
 	}
 
@@ -104,6 +91,6 @@ public class OpprettJiraService {
 
 	public static LocalDate parseDatoFraFilnavn(Exchange exchange) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0,10), formatter);
+		return LocalDate.parse(exchange.getIn().getHeader(FILE_NAME_ONLY, String.class).substring(0, 10), formatter);
 	}
 }
