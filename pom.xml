@@ -33,11 +33,11 @@
 		<commons-io.version>2.18.0</commons-io.version>
 		<context-propagation.version>1.1.2</context-propagation.version>
 		<bouncycastle.version>1.80</bouncycastle.version>
-		<jiraapi.version>1.1.2</jiraapi.version>
+		<jiraapi.version>1.1.4</jiraapi.version>
 
 		<!-- test -->
 		<spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>
-		<sshd-core.version>2.14.0</sshd-core.version>
+		<sshd-core.version>2.15.0</sshd-core.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
