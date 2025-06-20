@@ -25,15 +25,16 @@
 	<properties>
 		<java.version>21</java.version>
 
+		<jiraapi.version>1.1.4</jiraapi.version>
+
 		<camel.version>4.9.0</camel.version>
 		<spring-cloud-starter-vault-config.version>4.2.0</spring-cloud-starter-vault-config.version>
-
 		<logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
 		<commons-compress.version>1.27.1</commons-compress.version>
 		<commons-io.version>2.18.0</commons-io.version>
 		<context-propagation.version>1.1.2</context-propagation.version>
 		<bouncycastle.version>1.80</bouncycastle.version>
-		<jiraapi.version>1.1.4</jiraapi.version>
+		<slack-api-client.version>1.45.3</slack-api-client.version>
 
 		<!-- test -->
 		<spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>
@@ -97,6 +98,11 @@
 				<groupId>io.micrometer</groupId>
 				<artifactId>context-propagation</artifactId>
 				<version>${context-propagation.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slack.api</groupId>
+				<artifactId>slack-api-client</artifactId>
+				<version>${slack-api-client.version}</version>
 			</dependency>
 
 			<!-- decrypt pgp-->

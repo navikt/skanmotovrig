@@ -1,6 +1,9 @@
 package no.nav.skanmotovrig.ovrig;
 
+import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.CoreConfig;
 import no.nav.skanmotovrig.azure.AzureProperties;
 import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
@@ -15,11 +18,13 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
 import org.apache.sshd.server.auth.pubkey.AcceptAllPublickeyAuthenticator;
 import org.apache.sshd.sftp.server.SftpSubsystemFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,10 +37,24 @@ import static java.util.Collections.singletonList;
 @Slf4j
 @EnableAutoConfiguration
 @EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
-@Import({JournalpostConsumer.class, OvrigTestConfig.SshdSftpServerConfig.class,
-		OAuthEnabledWebClientConfig.class, OvrigTestConfig.CamelTestStartupConfig.class,
-		OvrigConfig.class, DokCounter.class})
+@Import({JournalpostConsumer.class,
+		OvrigTestConfig.SshdSftpServerConfig.class,
+		OAuthEnabledWebClientConfig.class,
+		OvrigTestConfig.CamelTestStartupConfig.class,
+		CoreConfig.class,
+		DokCounter.class})
 public class OvrigTestConfig {
+
+	@Value("${skanmotovrig.slack.url}")
+	private String slackUrl;
+
+	@Bean
+	@Primary
+	MethodsClient slackClient(SkanmotovrigProperties skanmotovrigProperties) {
+		var slackClient = Slack.getInstance().methods(skanmotovrigProperties.getSlack().getToken());
+		slackClient.setEndpointUrlPrefix(slackUrl);
+		return slackClient;
+	}
 
 	@Configuration
 	static class CamelTestStartupConfig {

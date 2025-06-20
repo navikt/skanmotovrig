@@ -22,7 +22,7 @@ public class SkanmotovrigProperties {
 	private final SftpProperties sftp = new SftpProperties();
 	private final Endpoints endpoints = new Endpoints();
 	private final JiraProperties jira = new JiraProperties();
-
+	private final SlackProperties slack = new SlackProperties();
 
 	@Data
 	@Validated
@@ -114,6 +114,18 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String url;
 	}
+
+	@Data
+	@Validated
+	public static class SlackProperties {
+		@NotEmpty
+		@ToString.Exclude
+		private String token;
+		@NotEmpty
+		private String channel;
+		private boolean enabled;
+	}
+
 	@Data
 	@Validated
 	public static class Endpoints {

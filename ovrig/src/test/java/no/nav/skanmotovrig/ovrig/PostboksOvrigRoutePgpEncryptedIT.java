@@ -15,16 +15,17 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 
 @Slf4j
 public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
@@ -72,6 +73,12 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 						.collect(Collectors.toList())).hasSize(3);
+
+				verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -84,7 +91,6 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				"OVRIG-20200529-4-4.zip",
 				"OVRIG-20200529-4-5.zip",
 				"OVRIG-20200529-4-6.zip");
-		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 	@Test
@@ -104,6 +110,12 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 						.collect(Collectors.toList())).hasSize(3);
+
+				verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -116,7 +128,6 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				"OVRIG.20200529-4-4.zip",
 				"OVRIG.20200529-4-5.zip",
 				"OVRIG.20200529-4-6.zip");
-		verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 	@Test
@@ -139,6 +150,12 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 			try {
 				assertThat(Files.list(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION))
 						.collect(Collectors.toList())).hasSize(3);
+
+				verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
+				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -151,7 +168,6 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 				"OVRIG-XML-ORDERED-FIRST-1-04.zip",
 				"OVRIG-XML-ORDERED-FIRST-1-05.zip",
 				"OVRIG-XML-ORDERED-FIRST-1-06.zip");
-		verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
 	}
 
 
@@ -164,7 +180,12 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 		assertTrue(Files.exists(sshdPath.resolve(INNGAAENDE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
 
-		await().atMost(15, SECONDS).untilAsserted(() -> assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp"))));
+		await().atMost(15, SECONDS).untilAsserted(() -> {
+			assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+
+			verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
+					.withRequestBody(containing("org.bouncycastle.openpgp.PGPException")));
+		});
 	}
 
 	private void copyFileFromClasspathToInngaaende(final String zipfilename) throws IOException {

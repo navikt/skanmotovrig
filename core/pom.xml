@@ -78,6 +78,11 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.slack.api</groupId>
+            <artifactId>slack-api-client</artifactId>
+        </dependency>
+
         <!-- Decrypt PGP -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
