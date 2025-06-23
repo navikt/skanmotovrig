@@ -63,3 +63,5 @@ spec:
     application:
       enabled: true
   webproxy: true
+  envFrom:
+    - secret: slack-alerts
