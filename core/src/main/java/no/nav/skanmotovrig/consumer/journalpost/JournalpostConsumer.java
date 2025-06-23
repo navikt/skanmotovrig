@@ -9,7 +9,7 @@ import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.utils.NavHeaders;
-import org.springframework.boot.autoconfigure.codec.CodecProperties;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -37,14 +37,14 @@ public class JournalpostConsumer {
 	public JournalpostConsumer(
 			WebClient webClient,
 			SkanmotovrigProperties skanmotovrigProperties,
-			CodecProperties codecProperties
+			HttpCodecsProperties httpCodecsProperties
 	) {
 		this.webClient = webClient.mutate()
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.baseUrl(skanmotovrigProperties.getEndpoints().getDokarkiv().getUrl())
 				.exchangeStrategies(ExchangeStrategies.builder()
 						.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
-								.maxInMemorySize((int) codecProperties.getMaxInMemorySize().toBytes()))
+								.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 						.build())
 				.build();
 	}

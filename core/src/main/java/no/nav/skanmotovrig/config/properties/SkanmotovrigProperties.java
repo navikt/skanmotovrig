@@ -21,7 +21,7 @@ public class SkanmotovrigProperties {
 	private final Avstem avstem = new Avstem();
 	private final SftpProperties sftp = new SftpProperties();
 	private final Endpoints endpoints = new Endpoints();
-	private final JiraProperties jira = new JiraProperties();
+	private final JiraConfigProperties jira = new JiraConfigProperties();
 	private final SlackProperties slack = new SlackProperties();
 
 	@Data
@@ -104,7 +104,7 @@ public class SkanmotovrigProperties {
 
 	@Data
 	@Validated
-	public static class JiraProperties {
+	public static class JiraConfigProperties {
 		@NotEmpty
 		private String username;
 
