@@ -1,12 +1,8 @@
 {
-  "SRVSKANMOTOVRIG": "/serviceuser/data/dev/srvskanmotovrig",
-  "SRVJIRADOKDISTAVSTEMMING": "/serviceuser/data/dev/srvjiradokdistavstemming",
-  "SFTP_KEYS": "kv/preprod/fss/skanmotovrig/keys",
   "SKANMOTOVRIG_JIRA_URL": "https://jira-q1.adeo.no",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/journalpostapi/v1",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv/.default",
-  "SKANMOTOVRIG_VAULT_BACKEND": "kv/preprod/fss",
-  "SKANMOTOVRIG_VAULT_KUBERNETESPATH": "kubernetes/preprod/fss",
+  "SKANMOTOVRIG_SECRET": "skanmotovrig-q2",
   "INGRESSES": [
     "https://skanmotovrig.dev.intern.nav.no"
   ]

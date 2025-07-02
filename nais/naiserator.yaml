@@ -11,16 +11,6 @@ spec:
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL }}
     - name: SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE }}
-    - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/keys/privatekey
-    - name: SKANMOTOVRIG_SFTP_HOSTKEY
-      value: /var/run/secrets/nais.io/keys/hostkey
-    - name: SKANMOTOVRIG_PGP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/keys/pgpprivatekey
-    - name: SKANMOTOVRIG_VAULT_BACKEND
-      value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
-    - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
-      value: {{ SKANMOTOVRIG_VAULT_KUBERNETESPATH }}
     - name: SKANMOTOVRIG_JIRA_URL
       value: {{ SKANMOTOVRIG_JIRA_URL }}
   image: {{ image }}
@@ -50,18 +40,14 @@ spec:
       memory: 6250Mi
     requests:
       memory: 5000Mi
-  vault:
-    enabled: true
-    paths:
-      - kvPath: {{ SRVSKANMOTOVRIG }}
-        mountPath: /var/run/secrets/nais.io/srvskanmotovrig
-      - kvPath: {{ SFTP_KEYS }}
-        mountPath: /var/run/secrets/nais.io/keys
-      - kvPath: {{ SRVJIRADOKDISTAVSTEMMING }}
-        mountPath: /var/run/secrets/nais.io/srvjiradokdistavstemming
   azure:
     application:
       enabled: true
   webproxy: true
   envFrom:
-    - secret: slack-alerts
+    - secret: {{ SKANMOTOVRIG_SECRET }}
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki

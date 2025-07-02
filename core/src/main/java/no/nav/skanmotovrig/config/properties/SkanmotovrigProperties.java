@@ -15,7 +15,6 @@ import java.time.Duration;
 @Validated
 public class SkanmotovrigProperties {
 
-	private final ServiceUserProperties serviceuser = new ServiceUserProperties();
 	private final FilomraadeProperties filomraade = new FilomraadeProperties();
 	private final Ovrig ovrig = new Ovrig();
 	private final Avstem avstem = new Avstem();
@@ -23,18 +22,6 @@ public class SkanmotovrigProperties {
 	private final Endpoints endpoints = new Endpoints();
 	private final JiraConfigProperties jira = new JiraConfigProperties();
 	private final SlackProperties slack = new SlackProperties();
-
-	@Data
-	@Validated
-	public static class ServiceUserProperties {
-		@ToString.Exclude
-		@NotEmpty
-		private String username;
-
-		@ToString.Exclude
-		@NotEmpty
-		private String password;
-	}
 
 	@Data
 	@Validated

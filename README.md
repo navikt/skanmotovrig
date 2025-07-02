@@ -26,7 +26,7 @@ To måtar som er nyttige, der dette er måte nr. 1:
 Måte nr. 2:
 
 * Få tilgang til mappa /inbound/skanmotovrig på sftpserveren sftp-irmo-q.nav.no (devmiljøet).
-* Legg inn noverande dev-public key for appen i pgp-mappa i /resources som du finn i skanmotovrig/keys i vault. Denne
+* Legg inn noverande dev-public key for appen i pgp-mappa i /resources som du finn i skanmotovrig i nais-secret. Denne
   har namnet pgppublickey.
 * I getPublicKey()-metoda i PGPManualTest-testklassa kan du vise til fila over.
 * Krypter ei .zip-mappe i skanmotovrig-prosjektet frå /resources-mappa ved å bruke generateEncryptedFile() i
