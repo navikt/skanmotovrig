@@ -22,6 +22,7 @@ public class SkanmotovrigProperties {
 	private final Endpoints endpoints = new Endpoints();
 	private final JiraConfigProperties jira = new JiraConfigProperties();
 	private final SlackProperties slack = new SlackProperties();
+	private final Pgp pgp = new Pgp();
 
 	@Data
 	@Validated
@@ -137,6 +138,22 @@ public class SkanmotovrigProperties {
 		 */
 		@NotEmpty
 		private String scope;
+	}
+
+	@Data
+	@Validated
+	public static class Pgp {
+		/**
+		 * passphrase for PGP-tjeneste
+		 */
+		@NotEmpty
+		private String passphrase;
+
+		/**
+		 * privateKey for PGP-tjeneste
+		 */
+		@NotEmpty
+		private String privateKey;
 	}
 }
 
