@@ -44,8 +44,9 @@ spec:
     application:
       enabled: true
   webproxy: true
-  envFrom:
-    - secret: {{ SKANMOTOVRIG_SECRET }}
+  filesFrom:
+    - mountPath: /var/run/secrets/nais.io/skanmotovrig
+      secret: {{ SKANMOTOVRIG_SECRET }}
   observability:
     logging:
       destinations:
