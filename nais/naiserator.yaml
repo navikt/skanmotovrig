@@ -55,6 +55,7 @@ spec:
       secret: {{ SKANMOTOVRIG_SECRET_FILES }}
   envFrom:
     - secret: {{ SKANMOTOVRIG_SECRET }}
+    - secret: slack-alerts
   observability:
     logging:
       destinations:

@@ -147,6 +147,7 @@ public class SkanmotovrigProperties {
 		 * passphrase for PGP-tjeneste
 		 */
 		@NotEmpty
+		@ToString.Exclude
 		private String passphrase;
 
 		/**
