@@ -3,6 +3,7 @@
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/journalpostapi/v1",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE": "api://dev-fss.teamdokumenthandtering.dokarkiv/.default",
   "SKANMOTOVRIG_SECRET": "skanmotovrig-q2",
+  "SKANMOTOVRIG_SECRET_FILES": "skanmotapper-secret-keys",
   "INGRESSES": [
     "https://skanmotovrig.dev.intern.nav.no"
   ]

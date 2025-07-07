@@ -13,6 +13,12 @@ spec:
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE }}
     - name: SKANMOTOVRIG_JIRA_URL
       value: {{ SKANMOTOVRIG_JIRA_URL }}
+    - name: SKANMOTOVRIG_PGP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/pgpprivatekey
+    - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/sftpprivatekey
+    - name: SKANMOTOVRIG_SFTP_HOSTKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/hostkey
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -46,7 +52,7 @@ spec:
   webproxy: true
   filesFrom:
     - mountPath: /var/run/secrets/nais.io/skanmotovrig
-      secret: {{ SKANMOTOVRIG_SECRET }}
+      secret: {{ SKANMOTOVRIG_SECRET_FILES }}
   envFrom:
     - secret: {{ SKANMOTOVRIG_SECRET }}
   observability:
