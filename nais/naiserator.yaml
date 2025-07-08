@@ -52,7 +52,7 @@ spec:
   webproxy: true
   filesFrom:
     - mountPath: /var/run/secrets/nais.io/skanmotovrig
-      secret: {{ SKANMOTOVRIG_SECRET_FILES }}
+      secret: skanmotapper-sftp-pgp-keys
   envFrom:
     - secret: {{ SKANMOTOVRIG_SECRET }}
     - secret: slack-alerts
