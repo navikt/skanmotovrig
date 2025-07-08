@@ -14,11 +14,11 @@ spec:
     - name: SKANMOTOVRIG_JIRA_URL
       value: {{ SKANMOTOVRIG_JIRA_URL }}
     - name: SKANMOTOVRIG_PGP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/skanmotovrig/pgpprivatekey
+      value: /var/run/secrets/nais.io/skanmotovrig/pgp/pgpprivatekey
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/skanmotovrig/sftpprivatekey
+      value: /var/run/secrets/nais.io/skanmotovrig/sftp/sftpprivatekey
     - name: SKANMOTOVRIG_SFTP_HOSTKEY
-      value: /var/run/secrets/nais.io/skanmotovrig/hostkey
+      value: /var/run/secrets/nais.io/skanmotovrig/sftp/hostkey
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -51,8 +51,10 @@ spec:
       enabled: true
   webproxy: true
   filesFrom:
-    - mountPath: /var/run/secrets/nais.io/skanmotovrig
-      secret: skanmotapper-sftp-pgp-keys
+    - mountPath: /var/run/secrets/nais.io/skanmotovrig/pgp
+      secret: skanmot-pgp-keys
+    - mountPath: /var/run/secrets/nais.io/skanmotovrig/sftp
+      secret: skanmot-sftp-keys
   envFrom:
     - secret: {{ SKANMOTOVRIG_SECRET }}
     - secret: slack-alerts
