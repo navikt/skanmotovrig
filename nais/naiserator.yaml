@@ -11,18 +11,14 @@ spec:
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL }}
     - name: SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE }}
-    - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/keys/privatekey
-    - name: SKANMOTOVRIG_SFTP_HOSTKEY
-      value: /var/run/secrets/nais.io/keys/hostkey
-    - name: SKANMOTOVRIG_PGP_PRIVATEKEY
-      value: /var/run/secrets/nais.io/keys/pgpprivatekey
-    - name: SKANMOTOVRIG_VAULT_BACKEND
-      value: {{ SKANMOTOVRIG_VAULT_BACKEND }}
-    - name: SKANMOTOVRIG_VAULT_KUBERNETESPATH
-      value: {{ SKANMOTOVRIG_VAULT_KUBERNETESPATH }}
     - name: SKANMOTOVRIG_JIRA_URL
       value: {{ SKANMOTOVRIG_JIRA_URL }}
+    - name: SKANMOTOVRIG_PGP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/pgp/pgpprivatekey
+    - name: SKANMOTOVRIG_SFTP_PRIVATEKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/sftp/sftpprivatekey
+    - name: SKANMOTOVRIG_SFTP_HOSTKEY
+      value: /var/run/secrets/nais.io/skanmotovrig/sftp/hostkey
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -50,18 +46,21 @@ spec:
       memory: 6250Mi
     requests:
       memory: 5000Mi
-  vault:
-    enabled: true
-    paths:
-      - kvPath: {{ SRVSKANMOTOVRIG }}
-        mountPath: /var/run/secrets/nais.io/srvskanmotovrig
-      - kvPath: {{ SFTP_KEYS }}
-        mountPath: /var/run/secrets/nais.io/keys
-      - kvPath: {{ SRVJIRADOKDISTAVSTEMMING }}
-        mountPath: /var/run/secrets/nais.io/srvjiradokdistavstemming
   azure:
     application:
       enabled: true
   webproxy: true
+  filesFrom:
+    - mountPath: /var/run/secrets/nais.io/skanmotovrig/pgp
+      secret: skanmot-pgp-keys
+    - mountPath: /var/run/secrets/nais.io/skanmotovrig/sftp
+      secret: skanmot-sftp-keys
   envFrom:
+    - secret: {{ SKANMOTOVRIG_SECRET }}
     - secret: slack-alerts
+    - secret: jira-service-user
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
