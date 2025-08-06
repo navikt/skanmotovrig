@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
+import no.nav.dok.validators.Exists;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -73,12 +74,12 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String host;
 
-		@ToString.Exclude
 		@NotEmpty
+		@Exists
 		private String privateKey;
 
-		@ToString.Exclude
 		@NotEmpty
+		@Exists
 		private String hostKey;
 
 		@ToString.Exclude
@@ -154,6 +155,7 @@ public class SkanmotovrigProperties {
 		 * privateKey for PGP-tjeneste
 		 */
 		@NotEmpty
+		@Exists
 		private String privateKey;
 	}
 }
