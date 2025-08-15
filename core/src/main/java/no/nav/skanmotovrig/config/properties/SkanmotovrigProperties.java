@@ -1,9 +1,11 @@
 package no.nav.skanmotovrig.config.properties;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
+import no.nav.dok.validators.Exists;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -16,12 +18,19 @@ import java.time.Duration;
 public class SkanmotovrigProperties {
 
 	private final FilomraadeProperties filomraade = new FilomraadeProperties();
+	@Valid
 	private final Ovrig ovrig = new Ovrig();
+	@Valid
 	private final Avstem avstem = new Avstem();
+	@Valid
 	private final SftpProperties sftp = new SftpProperties();
+	@Valid
 	private final Endpoints endpoints = new Endpoints();
+	@Valid
 	private final JiraConfigProperties jira = new JiraConfigProperties();
+	@Valid
 	private final SlackProperties slack = new SlackProperties();
+	@Valid
 	private final Pgp pgp = new Pgp();
 
 	@Data
@@ -73,12 +82,12 @@ public class SkanmotovrigProperties {
 		@NotEmpty
 		private String host;
 
-		@ToString.Exclude
 		@NotEmpty
+		@Exists
 		private String privateKey;
 
-		@ToString.Exclude
 		@NotEmpty
+		@Exists
 		private String hostKey;
 
 		@ToString.Exclude
@@ -154,6 +163,7 @@ public class SkanmotovrigProperties {
 		 * privateKey for PGP-tjeneste
 		 */
 		@NotEmpty
+		@Exists
 		private String privateKey;
 	}
 }
