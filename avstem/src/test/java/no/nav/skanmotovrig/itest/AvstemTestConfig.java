@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.AvstemConfig;
 import no.nav.skanmotovrig.azure.AzureProperties;
 import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
+import no.nav.skanmotovrig.config.properties.JiraAuthProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
+import no.nav.skanmotovrig.config.properties.SlackProperties;
 import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
@@ -31,9 +33,19 @@ import static java.util.Collections.singletonList;
 
 @Slf4j
 @EnableAutoConfiguration
-@EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
-@Import({JournalpostConsumer.class, OAuthEnabledWebClientConfig.class, AvstemTestConfig.SshdSftpServerConfig.class,
-		AvstemTestConfig.CamelTestStartupConfig.class, AvstemConfig.class})
+@EnableConfigurationProperties({
+		SkanmotovrigProperties.class,
+		SlackProperties.class,
+		JiraAuthProperties.class,
+		AzureProperties.class
+})
+@Import({
+		JournalpostConsumer.class,
+		OAuthEnabledWebClientConfig.class,
+		AvstemTestConfig.SshdSftpServerConfig.class,
+		AvstemTestConfig.CamelTestStartupConfig.class,
+		AvstemConfig.class
+})
 public class AvstemTestConfig {
 
 	@Configuration
