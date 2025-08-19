@@ -19,7 +19,7 @@ public class SlackService {
 	private final MethodsClient slackClient;
 	private final SlackProperties slackProperties;
 
-	SlackService(no.nav.skanmotovrig.config.properties.SlackProperties skanmotovrigProperties,
+	SlackService(SlackProperties skanmotovrigProperties,
 				 MethodsClient slackClient) {
 		this.slackProperties = skanmotovrigProperties;
 		this.slackClient = slackClient;

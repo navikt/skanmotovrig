@@ -7,7 +7,6 @@ import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.JiraAuthProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.config.properties.SlackProperties;
-import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -40,7 +39,6 @@ import static java.util.Collections.singletonList;
 		AzureProperties.class
 })
 @Import({
-		JournalpostConsumer.class,
 		OAuthEnabledWebClientConfig.class,
 		AvstemTestConfig.SshdSftpServerConfig.class,
 		AvstemTestConfig.CamelTestStartupConfig.class,
