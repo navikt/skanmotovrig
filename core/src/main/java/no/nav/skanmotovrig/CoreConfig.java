@@ -6,8 +6,10 @@ import no.nav.dok.jiraapi.JiraProperties;
 import no.nav.dok.jiraapi.JiraProperties.JiraServiceUser;
 import no.nav.dok.jiraapi.JiraService;
 import no.nav.dok.jiraapi.client.JiraClient;
+import no.nav.skanmotovrig.config.properties.JiraAuthProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties.JiraConfigProperties;
+import no.nav.skanmotovrig.config.properties.SlackProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
 public class CoreConfig {
 
 	@Bean
-	public MethodsClient slackClient(SkanmotovrigProperties skanmotovrigProperties) {
-		return Slack.getInstance().methods(skanmotovrigProperties.getSlack().getToken());
+	public MethodsClient slackClient(SlackProperties slackProperties) {
+		return Slack.getInstance().methods(slackProperties.token());
 	}
 
 	@Bean
@@ -27,11 +29,11 @@ public class CoreConfig {
 	}
 
 	@Bean
-	public JiraClient jiraClient(SkanmotovrigProperties properties) {
+	public JiraClient jiraClient(SkanmotovrigProperties properties, JiraAuthProperties jiraAuthProperties) {
 		JiraConfigProperties jira = properties.getJira();
 
 		return new JiraClient(JiraProperties.builder()
-				.jiraServiceUser(new JiraServiceUser(jira.getUsername(), jira.getPassword()))
+				.jiraServiceUser(new JiraServiceUser(jiraAuthProperties.username(), jiraAuthProperties.password()))
 				.url(properties.getJira().getUrl())
 				.build());
 	}

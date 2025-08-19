@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.CoreConfig;
 import no.nav.skanmotovrig.azure.AzureProperties;
 import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
+import no.nav.skanmotovrig.config.properties.JiraAuthProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
-import no.nav.skanmotovrig.consumer.journalpost.JournalpostConsumer;
-import no.nav.skanmotovrig.metrics.DokCounter;
+import no.nav.skanmotovrig.config.properties.SlackProperties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
@@ -36,13 +36,18 @@ import static java.util.Collections.singletonList;
 
 @Slf4j
 @EnableAutoConfiguration
-@EnableConfigurationProperties({SkanmotovrigProperties.class, AzureProperties.class})
-@Import({JournalpostConsumer.class,
+@EnableConfigurationProperties({
+		SkanmotovrigProperties.class,
+		SlackProperties.class,
+		JiraAuthProperties.class,
+		AzureProperties.class
+})
+@Import({
 		OvrigTestConfig.SshdSftpServerConfig.class,
 		OAuthEnabledWebClientConfig.class,
 		OvrigTestConfig.CamelTestStartupConfig.class,
-		CoreConfig.class,
-		DokCounter.class})
+		CoreConfig.class
+})
 public class OvrigTestConfig {
 
 	@Value("${skanmotovrig.slack.url}")
@@ -50,8 +55,8 @@ public class OvrigTestConfig {
 
 	@Bean
 	@Primary
-	MethodsClient slackClient(SkanmotovrigProperties skanmotovrigProperties) {
-		var slackClient = Slack.getInstance().methods(skanmotovrigProperties.getSlack().getToken());
+	MethodsClient slackClient(SlackProperties slackProperties) {
+		var slackClient = Slack.getInstance().methods(slackProperties.token());
 		slackClient.setEndpointUrlPrefix(slackUrl);
 		return slackClient;
 	}
