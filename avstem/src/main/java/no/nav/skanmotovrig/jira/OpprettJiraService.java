@@ -10,13 +10,13 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.time.DayOfWeek.MONDAY;
-import static no.nav.skanmotovrig.mdc.MDCConstants.MDC_AVSTEMT_DATO;
+import static no.nav.skanmotovrig.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
 @Slf4j
@@ -38,7 +38,7 @@ public class OpprettJiraService {
 
 	@Handler
 	public JiraResponse opprettAvstemJiraOppgave(byte[] csvByte, Exchange exchange) {
-		LocalDate avstemmingsfilDato = exchange.getProperty(MDC_AVSTEMT_DATO, LocalDate.class);
+		LocalDate avstemmingsfilDato = exchange.getProperty(EXCHANGE_AVSTEMT_DATO, LocalDate.class);
 		try {
 			if (csvByte == null) {
 				return opprettJiraForManglendeAvstemmingsfil(avstemmingsfilDato);
@@ -83,8 +83,8 @@ public class OpprettJiraService {
 
 	}
 
-	public static LocalDate avstemmingsfilDato() {
-		LocalDate todaysDate = LocalDate.now(ZoneId.of("Europe/Oslo"));
+	public static LocalDate finnForrigeVirkedag(Clock clock) {
+		LocalDate todaysDate = LocalDate.now(clock);
 		return MONDAY.equals(todaysDate.getDayOfWeek()) ? todaysDate.minusDays(3) :
 				todaysDate.minusDays(1);
 	}

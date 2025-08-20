@@ -21,14 +21,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
+import static no.nav.skanmotovrig.CoreConfig.DEFAULT_ZONE_ID;
 
 @Slf4j
 @EnableAutoConfiguration
@@ -39,40 +44,29 @@ import static java.util.Collections.singletonList;
 		AzureProperties.class
 })
 @Import({
+		AvstemTestConfig.Config.class,
 		OAuthEnabledWebClientConfig.class,
 		AvstemTestConfig.SshdSftpServerConfig.class,
-		AvstemTestConfig.CamelTestStartupConfig.class,
 		AvstemConfig.class
 })
 public class AvstemTestConfig {
 
 	@Configuration
-	static class CamelTestStartupConfig {
-
-		private final AtomicInteger sshServerStartupCounter = new AtomicInteger(0);
+	static class Config {
+		@Bean
+		@Primary
+		@Profile("virkedag")
+		Clock forrigeDagVirkedagClock() {
+			Instant fixedInstant = Instant.parse("2025-08-01T10:00:00Z");
+			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
+		}
 
 		@Bean
-		CamelContextConfiguration contextConfiguration(SshServer sshServer) {
-			return new CamelContextConfiguration() {
-
-				@Override
-				public void beforeApplicationStart(CamelContext camelContext) {
-					while (!sshServer.isStarted() && sshServerStartupCounter.get() <= 5) {
-						try {
-							// Busy wait
-							Thread.sleep(1000);
-							log.info("Forsøkt å starte sshserver. retry={}", sshServerStartupCounter.getAndIncrement());
-						} catch (InterruptedException e) {
-							// noop
-						}
-					}
-				}
-
-				@Override
-				public void afterApplicationStart(CamelContext camelContext) {
-
-				}
-			};
+		@Primary
+		@Profile("fridag")
+		Clock forrigeDagFridagClock() {
+			Instant fixedInstant = Instant.parse("2025-05-18T10:00:00Z");
+			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
 		}
 	}
 

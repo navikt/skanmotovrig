@@ -4,7 +4,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -27,8 +26,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 		webEnvironment = RANDOM_PORT
 )
 @AutoConfigureWireMock(port = 0)
-@ActiveProfiles("itest")
-public abstract class AbstractIT {
+public abstract class AbstractItest {
 
 	public static final String URL_DOKARKIV_AVSTEMREFERANSER = "/rest/journalpostapi/v1/avstemReferanser";
 	public static final String JIRA_OPPRETTE_URL = "/rest/api/2/issue";
