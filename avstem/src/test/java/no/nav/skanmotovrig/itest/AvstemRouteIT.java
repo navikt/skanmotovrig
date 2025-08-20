@@ -2,11 +2,14 @@ package no.nav.skanmotovrig.itest;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +24,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AvstemRouteIT extends AbstractIT {
+@ActiveProfiles({"itest", "virkedag"})
+public class AvstemRouteIT extends AbstractItest {
 
 	private static final String AVSTEMMINGSFILMAPPE = "avstemmappe";
 	private static final String PROCESSED = "processed";
@@ -29,6 +33,11 @@ public class AvstemRouteIT extends AbstractIT {
 
 	@Autowired
 	private Path sshdPath;
+
+	@BeforeAll
+	public static void beforeTestClass() {
+		System.setProperty("skanmotovrig.sftp.port", String.valueOf(RandomUtils.secure().randomInt(2000, 65000)));
+	}
 
 	@BeforeEach
 	void beforeEach() {
