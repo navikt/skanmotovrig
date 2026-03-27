@@ -2,13 +2,12 @@ package no.nav.skanmotovrig.itest;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.skanmotovrig.AvstemConfig;
+import no.nav.skanmotovrig.CoreConfig;
 import no.nav.skanmotovrig.azure.AzureProperties;
 import no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig;
 import no.nav.skanmotovrig.config.properties.JiraAuthProperties;
 import no.nav.skanmotovrig.config.properties.SkanmotovrigProperties;
 import no.nav.skanmotovrig.config.properties.SlackProperties;
-import org.apache.camel.CamelContext;
-import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.ClassLoadableResourceKeyPairProvider;
 import org.apache.sshd.scp.server.ScpCommandFactory;
@@ -29,11 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
-import static no.nav.skanmotovrig.CoreConfig.DEFAULT_ZONE_ID;
 
 @Slf4j
 @EnableAutoConfiguration
@@ -58,7 +55,7 @@ public class AvstemTestConfig {
 		@Profile("virkedag")
 		Clock forrigeDagVirkedagClock() {
 			Instant fixedInstant = Instant.parse("2025-08-01T10:00:00Z");
-			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
+			return Clock.fixed(fixedInstant, CoreConfig.NORGE_ZONE);
 		}
 
 		@Bean
@@ -66,7 +63,7 @@ public class AvstemTestConfig {
 		@Profile("fridag")
 		Clock forrigeDagFridagClock() {
 			Instant fixedInstant = Instant.parse("2025-05-18T10:00:00Z");
-			return Clock.fixed(fixedInstant, DEFAULT_ZONE_ID);
+			return Clock.fixed(fixedInstant, CoreConfig.NORGE_ZONE);
 		}
 	}
 

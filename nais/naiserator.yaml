@@ -19,6 +19,8 @@ spec:
       value: {{ SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE }}
     - name: SKANMOTOVRIG_JIRA_URL
       value: {{ SKANMOTOVRIG_JIRA_URL }}
+    - name: SKANMOTOVRIG_SLACK_VARSEL_CRON
+      value: "{{ SKANMOTOVRIG_SLACK_VARSEL_CRON }}"
     - name: SKANMOTOVRIG_PGP_PRIVATEKEY
       value: /var/run/secrets/nais.io/skanmotovrig/pgp/pgpprivatekey
     - name: SKANMOTOVRIG_SFTP_PRIVATEKEY

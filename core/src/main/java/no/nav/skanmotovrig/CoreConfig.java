@@ -16,14 +16,12 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
 import java.time.ZoneId;
-import java.util.TimeZone;
 
 @ComponentScan
 @Configuration
 public class CoreConfig {
 
-	public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("Europe/Oslo");
-	public static final ZoneId DEFAULT_ZONE_ID = DEFAULT_TIME_ZONE.toZoneId();
+	public static final ZoneId NORGE_ZONE = ZoneId.of("Europe/Oslo");
 
 	@Bean
 	public MethodsClient slackClient(SlackProperties slackProperties) {
@@ -37,7 +35,7 @@ public class CoreConfig {
 
 	@Bean
 	Clock clock() {
-		return Clock.system(DEFAULT_ZONE_ID);
+		return Clock.system(NORGE_ZONE);
 	}
 
 	@Bean
