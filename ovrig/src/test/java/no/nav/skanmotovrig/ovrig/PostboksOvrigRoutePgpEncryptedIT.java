@@ -1,6 +1,7 @@
 package no.nav.skanmotovrig.ovrig;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.skanmotovrig.slack.ExceptionMessageBatchingService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,8 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 	@Autowired
 	private Path sshdPath;
+	@Autowired
+	private ExceptionMessageBatchingService exceptionMessageBatchingService;
 
 	@BeforeEach
 	void beforeEach() {
@@ -75,10 +78,11 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 						.collect(Collectors.toList())).hasSize(3);
 
 				verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				exceptionMessageBatchingService.sendMeldinger();
+
 				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException%3A%202")
+							.and(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException%3A%201"))));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -112,10 +116,11 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 						.collect(Collectors.toList())).hasSize(3);
 
 				verify(exactly(3), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				exceptionMessageBatchingService.sendMeldinger();
+
 				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException%3A%202")
+							.and(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException%3A%201"))));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -152,10 +157,11 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 						.collect(Collectors.toList())).hasSize(3);
 
 				verify(exactly(56), postRequestedFor(urlMatching(URL_DOKARKIV_JOURNALPOST_GEN)));
-				verify(exactly(2), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException")));
+				exceptionMessageBatchingService.sendMeldinger();
+
 				verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
-						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException")));
+						.withRequestBody(containing("no.nav.skanmotovrig.exceptions.functional.ForsendelseNotCompleteException%3A%202")
+							.and(containing("no.nav.skanmotovrig.exceptions.functional.SkanningmetadataValidationException%3A%201"))));
 			} catch (NoSuchFileException e) {
 				fail();
 			}
@@ -182,6 +188,7 @@ public class PostboksOvrigRoutePgpEncryptedIT extends AbstractIt {
 
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			assertTrue(Files.exists(sshdPath.resolve(FEILMAPPE).resolve(ZIP_FILE_NAME_NO_EXTENSION + ".zip.pgp")));
+			exceptionMessageBatchingService.sendMeldinger();
 
 			verify(exactly(1), postRequestedFor(urlPathEqualTo(SLACK_POST_MESSAGE_PATH))
 					.withRequestBody(containing("org.bouncycastle.openpgp.PGPException")));

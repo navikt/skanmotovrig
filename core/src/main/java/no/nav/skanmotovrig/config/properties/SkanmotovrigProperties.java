@@ -1,7 +1,7 @@
 package no.nav.skanmotovrig.config.properties;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
@@ -16,6 +16,9 @@ import java.time.Duration;
 @ConfigurationProperties("skanmotovrig")
 @Validated
 public class SkanmotovrigProperties {
+
+	@NotBlank
+	String slackVarselCron;
 
 	private final FilomraadeProperties filomraade = new FilomraadeProperties();
 	@Valid
@@ -34,26 +37,26 @@ public class SkanmotovrigProperties {
 	@Data
 	@Validated
 	public static class FilomraadeProperties {
-		@NotEmpty
+		@NotBlank
 		private String inngaaendemappe;
 
-		@NotEmpty
+		@NotBlank
 		private String feilmappe;
 
-		@NotEmpty
+		@NotBlank
 		private String avstemmappe;
 	}
 
 	@Data
 	@Validated
 	public static class Ovrig {
-		@NotEmpty
+		@NotBlank
 		private String endpointuri;
 
-		@NotEmpty
+		@NotBlank
 		private String endpointconfig;
 
-		@NotEmpty
+		@NotBlank
 		private String schedule;
 
 		@NotNull
@@ -66,7 +69,7 @@ public class SkanmotovrigProperties {
 	@Data
 	@Validated
 	public static class Avstem {
-		@NotEmpty
+		@NotBlank
 		private String schedule;
 
 		private boolean startup;
@@ -77,30 +80,30 @@ public class SkanmotovrigProperties {
 	@Validated
 	public static class SftpProperties {
 		@ToString.Exclude
-		@NotEmpty
+		@NotBlank
 		private String host;
 
-		@NotEmpty
+		@NotBlank
 		@Exists
 		private String privateKey;
 
-		@NotEmpty
+		@NotBlank
 		@Exists
 		private String hostKey;
 
 		@ToString.Exclude
-		@NotEmpty
+		@NotBlank
 		private String username;
 
 		@ToString.Exclude
-		@NotEmpty
+		@NotBlank
 		private String port;
 	}
 
 	@Data
 	@Validated
 	public static class JiraConfigProperties {
-		@NotEmpty
+		@NotBlank
 		private String url;
 	}
 
@@ -120,13 +123,13 @@ public class SkanmotovrigProperties {
 		/**
 		 * Url til tjeneste som har azure autorisasjon
 		 */
-		@NotEmpty
+		@NotBlank
 		private String url;
 
 		/**
 		 * Scope til azure client credential flow
 		 */
-		@NotEmpty
+		@NotBlank
 		private String scope;
 	}
 
@@ -136,14 +139,14 @@ public class SkanmotovrigProperties {
 		/**
 		 * passphrase for PGP-tjeneste
 		 */
-		@NotEmpty
+		@NotBlank
 		@ToString.Exclude
 		private String passphrase;
 
 		/**
 		 * privateKey for PGP-tjeneste
 		 */
-		@NotEmpty
+		@NotBlank
 		@Exists
 		private String privateKey;
 	}
