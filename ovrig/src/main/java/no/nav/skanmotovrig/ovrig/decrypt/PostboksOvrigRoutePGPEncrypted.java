@@ -20,6 +20,8 @@ import org.apache.camel.dataformat.zipfile.ZipSplitter;
 import org.bouncycastle.openpgp.PGPException;
 import org.springframework.stereotype.Component;
 
+import static org.apache.camel.Exchange.EXCEPTION_CAUGHT;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +39,6 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 
 	private static final String PGP_AVVIK = "direct:pgp_encrypted_avvik_ovrig";
 	private static final String PROCESS_PGP_ENCRYPTED = "direct:pgp_encrypted_process_ovrig";
-	private static final String SEND_SLACKMELDING_RUTE = "direct:sendSlackmelding";
 	private static final String PROPERTY_FORSENDELSE_ZIPNAME = "ForsendelseZipname";
 	private static final String PROPERTY_FORSENDELSE_BATCHNAVN = "ForsendelseBatchNavn";
 	private static final String PROPERTY_FORSENDELSE_FILEBASENAME = "ForsendelseFileBasename";
@@ -68,11 +69,14 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
 				.log(ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
+				.process(exchange -> {
+					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
+					exceptionMessageBatchingService.saveMeldingForBatchedSend(
+							"Innlesing av fil feilet teknisk med exception=" + ex.getClass().getName());
+				})
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
 				.to(PGP_AVVIK)
-				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
-				.setBody(simple("Innlesing av fil feilet teknisk med exception=${exception.getClass().getName()}"))
-				.to(SEND_SLACKMELDING_RUTE);
+				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
 
 		// Får ikke dekryptert .pgp.zip - mest sannsynlig mismatch mellom private key og public key
@@ -81,14 +85,17 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
 				.log(ERROR, log, "Skanmotovrig feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
+				.process(exchange -> {
+					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
+					exceptionMessageBatchingService.saveMeldingForBatchedSend(
+							"Innlesing av fil feilet dekryptering med exception=" + ex.getClass().getName());
+				})
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
 				.to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
 						"?{{skanmotovrig.ovrig.endpointconfig}}")
 				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
 				.end()
-				.process(new MdcRemoverProcessor())
-				.setBody(simple("Innlesing av fil feilet dekryptering med exception=${exception.getClass().getName()}"))
-				.to(SEND_SLACKMELDING_RUTE);
+				.process(new MdcRemoverProcessor());
 
 		// Kjente funksjonelle feil
 		onException(AbstractSkanmotovrigFunctionalException.class)
@@ -96,14 +103,14 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
 				.log(WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
+				.process(exchange -> {
+					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
+					exceptionMessageBatchingService.saveMeldingForBatchedSend(
+							"Innlesing av fil feilet funksjonelt med exception=" + ex.getClass().getName());
+				})
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
 				.to(PGP_AVVIK)
-				.log(WARN, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".")
-				.setBody(simple("Innlesing av fil feilet funksjonelt med exception=${exception.getClass().getName()}"))
-				.to(SEND_SLACKMELDING_RUTE);
-
-		from(SEND_SLACKMELDING_RUTE)
-				.bean(exceptionMessageBatchingService, "saveMeldingForBatchedSend(${body})");
+				.log(WARN, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
 
 		from("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.inngaaendemappe}}" +
 				"?{{skanmotovrig.ovrig.endpointconfig}}" +
