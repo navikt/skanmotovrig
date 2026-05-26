@@ -9,11 +9,9 @@ import no.nav.skanmotovrig.consumer.journalpost.data.OpprettJournalpostResponse;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import no.nav.skanmotovrig.exceptions.technical.SkanmotovrigTechnicalException;
 import no.nav.skanmotovrig.utils.NavHeaders;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -21,8 +19,6 @@ import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig.CLIENT_REGISTRATION_DOKARKIV;
-import static no.nav.skanmotovrig.utils.RetryConstants.MAX_RETRIES;
-import static no.nav.skanmotovrig.utils.RetryConstants.RETRY_DELAY;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
@@ -42,15 +38,12 @@ public class JournalpostConsumer {
 		this.webClient = webClient.mutate()
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.baseUrl(skanmotovrigProperties.getEndpoints().getDokarkiv().getUrl())
-				.exchangeStrategies(ExchangeStrategies.builder()
-						.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
-								.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
-						.build())
+				.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
+						.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 				.build();
 	}
 
-	@Retryable(retryFor = SkanmotovrigTechnicalException.class,
-			maxAttempts = MAX_RETRIES, backoff = @Backoff(delay = RETRY_DELAY))
+	@Retryable(includes = SkanmotovrigTechnicalException.class)
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		return webClient.post()
 				.uri("/journalpost?foersoekFerdigstill=false")
@@ -63,7 +56,7 @@ public class JournalpostConsumer {
 				.block();
 	}
 
-	@Retryable(retryFor = SkanmotovrigTechnicalException.class, backoff = @Backoff(delay = RETRY_DELAY))
+	@Retryable(includes = SkanmotovrigTechnicalException.class)
 	public FeilendeAvstemmingReferanser avstemReferanser(AvstemmingReferanser avstemmingReferanser) {
 
 		return webClient.post()
