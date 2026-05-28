@@ -7,7 +7,6 @@ import no.nav.skanmotovrig.config.properties.SlackProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.resilience.annotation.EnableResilientMethods;
 
 @ComponentScan
 @EnableConfigurationProperties({
@@ -16,7 +15,6 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 		JiraAuthProperties.class,
 		AzureProperties.class
 })
-@EnableResilientMethods
 @Configuration
 public class ApplicationConfig {
 
