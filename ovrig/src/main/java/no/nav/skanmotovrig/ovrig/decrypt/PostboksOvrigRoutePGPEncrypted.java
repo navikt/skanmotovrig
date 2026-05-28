@@ -66,9 +66,10 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 		// @formatter:off
 		onException(Exception.class)
 				.handled(true)
+				.logStackTrace(true)
 				.process(new MdcSetterProcessor())
 				.process(new ErrorMetricsProcessor())
-				.log(ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}")
+				.log(ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}: ${exception.message}")
 				.process(exchange -> {
 					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
 					exceptionMessageBatchingService.saveMeldingForBatchedSend(
