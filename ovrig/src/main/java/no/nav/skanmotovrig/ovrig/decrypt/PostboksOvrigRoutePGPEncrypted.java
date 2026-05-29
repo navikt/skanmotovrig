@@ -63,23 +63,26 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 
 	@Override
 	public void configure() {
-		// @formatter:off
-		onException(Exception.class)
-				.handled(true)
+		errorHandler(deadLetterChannel(PGP_AVVIK)
 				.logStackTrace(true)
-				.process(new MdcSetterProcessor())
-				.process(new ErrorMetricsProcessor())
-				.log(ERROR, log, "Skanmotovrig feilet teknisk for " + KEY_LOGGING_INFO + ". ${exception}: ${exception.message}")
-				.process(exchange -> {
-					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
+				.logExhausted(true)
+				.onExceptionOccurred(exchange -> {
+					new MdcSetterProcessor().process(exchange);
+					new ErrorMetricsProcessor().process(exchange);
+					Throwable exception = exchange.getProperty(EXCEPTION_CAUGHT, Throwable.class);
+					if (exception != null) {
+						log.error("Teknisk feil i pgp-rute. exchangeId={}", exchange.getExchangeId(), exception);
+					}
 					exceptionMessageBatchingService.saveMeldingForBatchedSend(
-							"Innlesing av fil feilet teknisk med exception=" + ex.getClass().getName());
+							"Innlesing av fil feilet teknisk med exception=" + exceptionName(exchange));
 				})
-				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}-teknisk.zip"))
-				.to(PGP_AVVIK)
-				.log(ERROR, log, "Skanmotovrig skrev feiletzip=${header." + FILE_NAME_PRODUCED + "} til feilmappe. " + KEY_LOGGING_INFO + ".");
+				.onPrepareFailure(exchange -> {
+					String batchnavn = exchange.getProperty(PROPERTY_FORSENDELSE_BATCHNAVN, String.class);
+					String filebasename = exchange.getProperty(PROPERTY_FORSENDELSE_FILEBASENAME, String.class);
+					exchange.getIn().setHeader(FILE_NAME, batchnavn + "/" + filebasename + "-teknisk.zip");
+				}));
 
-
+		// @formatter:off
 		// Får ikke dekryptert .pgp.zip - mest sannsynlig mismatch mellom private key og public key
 		onException(PGPException.class)
 				.handled(true)
@@ -87,9 +90,8 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new ErrorMetricsProcessor())
 				.log(ERROR, log, "Skanmotovrig feilet i dekryptering av .zip.pgp for " + KEY_LOGGING_INFO + ". ${exception}")
 				.process(exchange -> {
-					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
 					exceptionMessageBatchingService.saveMeldingForBatchedSend(
-							"Innlesing av fil feilet dekryptering med exception=" + ex.getClass().getName());
+							"Innlesing av fil feilet dekryptering med exception=" + exceptionName(exchange));
 				})
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip.pgp"))
 				.to("{{skanmotovrig.ovrig.endpointuri}}/{{skanmotovrig.ovrig.filomraade.feilmappe}}" +
@@ -105,9 +107,8 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 				.process(new ErrorMetricsProcessor())
 				.log(WARN, log, "Skanmotovrig feilet funksjonelt for " + KEY_LOGGING_INFO + ". ${exception}")
 				.process(exchange -> {
-					var ex = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
 					exceptionMessageBatchingService.saveMeldingForBatchedSend(
-							"Innlesing av fil feilet funksjonelt med exception=" + ex.getClass().getName());
+							"Innlesing av fil feilet funksjonelt med exception=" + exceptionName(exchange));
 				})
 				.setHeader(FILE_NAME, simple("${exchangeProperty." + PROPERTY_FORSENDELSE_BATCHNAVN + "}/${exchangeProperty." + PROPERTY_FORSENDELSE_FILEBASENAME + "}.zip"))
 				.to(PGP_AVVIK)
@@ -174,5 +175,10 @@ public class PostboksOvrigRoutePGPEncrypted extends RouteBuilder {
 			return stringRepresentation.replace(".zip", "");
 		}
 		return stringRepresentation;
+	}
+
+	static String exceptionName(Exchange exchange) {
+		Throwable exception = exchange.getProperty(EXCEPTION_CAUGHT, Throwable.class);
+		return exception != null ? exception.getClass().getName() : "ukjent";
 	}
 }

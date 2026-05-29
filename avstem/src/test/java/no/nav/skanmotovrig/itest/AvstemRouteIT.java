@@ -18,11 +18,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ActiveProfiles({"itest", "virkedag"})
 public class AvstemRouteIT extends AbstractItest {
@@ -126,6 +130,22 @@ public class AvstemRouteIT extends AbstractItest {
 				.untilAsserted(() -> {
 					assertThat(Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(0);
 					verify(1, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+				});
+	}
+
+	@Test
+	public void shouldHandleTechnicalFailureWhenAvstemReferanserCallFails() throws IOException {
+		stubFor(post(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER))
+				.willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR.value())));
+
+		copyFileFromClasspathToAvstem(AVSTEMMINGSFIL);
+
+		Awaitility.await()
+				.atMost(ofSeconds(15))
+				.untilAsserted(() -> {
+					verify(1, postRequestedFor(urlMatching(URL_DOKARKIV_AVSTEMREFERANSER)));
+					verify(0, postRequestedFor(urlMatching(JIRA_OPPRETTE_URL)));
+					assertThat(Files.list(sshdPath.resolve(AVSTEMMINGSFILMAPPE).resolve(PROCESSED)).collect(Collectors.toSet())).hasSize(1);
 				});
 	}
 
