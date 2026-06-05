@@ -21,7 +21,7 @@ import static java.lang.String.format;
 import static no.nav.skanmotovrig.azure.OAuthEnabledWebClientConfig.CLIENT_REGISTRATION_DOKARKIV;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 import static reactor.core.publisher.Mono.just;
 
 @Slf4j
