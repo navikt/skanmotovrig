@@ -46,7 +46,7 @@ public class JournalpostConsumer {
 	@Retryable(includes = SkanmotovrigTechnicalException.class)
 	public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest opprettJournalpostRequest) {
 		return webClient.post()
-				.uri("/journalpost?foersoekFerdigstill=false")
+				.uri("/journalpostapi/v1/journalpost?foersoekFerdigstill=false")
 				.headers(NavHeaders::setCustomNavHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.bodyValue(opprettJournalpostRequest)
@@ -60,7 +60,7 @@ public class JournalpostConsumer {
 	public FeilendeAvstemmingReferanser avstemReferanser(AvstemmingReferanser avstemmingReferanser) {
 
 		return webClient.post()
-				.uri("/avstemReferanser")
+				.uri("/internal/avstemReferanser")
 				.headers(NavHeaders::setCustomNavHeaders)
 				.attributes(clientRegistrationId(CLIENT_REGISTRATION_DOKARKIV))
 				.body(just(avstemmingReferanser), AvstemmingReferanser.class)

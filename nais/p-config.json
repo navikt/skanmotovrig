@@ -1,6 +1,6 @@
 {
   "SKANMOTOVRIG_JIRA_URL": "https://jira.adeo.no",
-  "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest/journalpostapi/v1",
+  "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
   "SKANMOTOVRIG_SECRET": "skanmotovrig",
   "SKANMOTOVRIG_SLACK_VARSEL_CRON": "0 45 10 * * MON-FRI",
