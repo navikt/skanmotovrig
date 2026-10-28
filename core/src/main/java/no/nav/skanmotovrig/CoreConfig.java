@@ -43,7 +43,7 @@ public class CoreConfig {
 		JiraConfigProperties jira = properties.getJira();
 
 		return new JiraClient(JiraProperties.builder()
-				.jiraServiceUser(new JiraServiceUser(jiraAuthProperties.username(), jiraAuthProperties.password()))
+				.jiraServiceUser(new JiraServiceUser(jiraAuthProperties.accessToken()))
 				.url(jira.getUrl())
 				.build());
 	}

@@ -8,7 +8,7 @@ import no.nav.dok.jiracore.exception.JiraClientException;
 import no.nav.skanmotovrig.exceptions.functional.SkanmotovrigFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -20,12 +20,11 @@ import static no.nav.skanmotovrig.mdc.MDCConstants.EXCHANGE_AVSTEMT_DATO;
 import static org.apache.camel.Exchange.FILE_NAME_ONLY;
 
 @Slf4j
-@Component
+@Service
 public class OpprettJiraService {
 
 	private static final String DESCRIPTION = "Se vedlegg for en oversikt over manglende avstemmingsreferanser for skannede dokumenter fra skanmotovrig \n";
 	public static final String SUMMARY = "Skanmotovrig: Manglende avstemmingsreferanser for skannede dokumenter";
-	private static final String SKANMOTOVRIG_JIRA_BRUKER_NAVN = "srvjiradokdistavstemming";
 	public static final String ANTALL_FILER_AVSTEMT = "Antall filer avstemt";
 	public static final String ANTALL_FILER_FEILET = "Antall filer feilet";
 	private static final List<String> LABEL = List.of("skanmotovrig_avvik");
@@ -58,7 +57,6 @@ public class OpprettJiraService {
 		return jiraService.opprettJiraMMAOppgave(JiraRequest.builder()
 				.summary("Skanmotovrig: Avstemmingfil mangler for " + avstemmingsfilDato)
 				.description("Skanmotovrig fant ikke avstemmingsfil for " + avstemmingsfilDato + ". Undersøk tilfellet og evt. kontakt Iron Mountain.")
-				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(LABEL)
 				.build());
 	}
@@ -67,7 +65,6 @@ public class OpprettJiraService {
 		return JiraRequest.builder()
 				.summary(SUMMARY)
 				.description(prettifySummary(DESCRIPTION, antallAvstemt, antallFeilet))
-				.reporterName(SKANMOTOVRIG_JIRA_BRUKER_NAVN)
 				.labels(LABEL)
 				.vedlegg(csvByte)
 				.avstemmingsfilDato(avstemmingsfilDato)

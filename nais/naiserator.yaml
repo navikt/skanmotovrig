@@ -68,7 +68,7 @@ spec:
   envFrom:
     - secret: {{ SKANMOTOVRIG_SECRET }}
     - secret: slack-alerts
-    - secret: jira-service-user
+    - secret: jira-cloud
     - configmap: skanmotovrig
   observability:
     logging:

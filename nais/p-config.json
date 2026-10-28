@@ -1,5 +1,5 @@
 {
-  "SKANMOTOVRIG_JIRA_URL": "https://jira.adeo.no",
+  "SKANMOTOVRIG_JIRA_URL": "https://api.atlassian.com/ex/jira/7d29ce94-ede7-477f-8778-47676cd6d42f",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_URL": "http://dokarkiv.teamdokumenthandtering.svc.nais.local/rest",
   "SKANMOTOVRIG_ENDPOINTS_DOKARKIV_SCOPE": "api://prod-fss.teamdokumenthandtering.dokarkiv/.default",
   "SKANMOTOVRIG_SECRET": "skanmotovrig",

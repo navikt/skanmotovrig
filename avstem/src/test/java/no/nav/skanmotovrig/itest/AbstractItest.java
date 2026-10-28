@@ -1,9 +1,7 @@
 package no.nav.skanmotovrig.itest;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.wiremock.spring.EnableWireMock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -20,7 +18,6 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(
 		classes = {AvstemTestConfig.class},
 		webEnvironment = RANDOM_PORT
@@ -29,9 +26,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public abstract class AbstractItest {
 
 	public static final String URL_DOKARKIV_AVSTEMREFERANSER = "/rest/internal/avstemReferanser";
-	public static final String JIRA_OPPRETTE_URL = "/rest/api/2/issue";
-	public static final String JIRA_VEDLEGG_URL = "/rest/api/2/issue/MMA-134/attachments";
-	public static final String JIRA_PROJECT_URL = "/rest/api/2/project/MMA";
+	public static final String JIRA_OPPRETTE_URL = "/rest/api/3/issue";
+	public static final String JIRA_VEDLEGG_URL = "/rest/api/3/issue/MMA-134/attachments";
+	public static final String JIRA_PROJECT_URL = "/rest/api/3/project/MMA";
 
 	public void setUpMocks() {
 		stubAzureToken();
